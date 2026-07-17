@@ -61,7 +61,13 @@ export default function MemoryArc({
   const [reduced, setReduced] = useState(false);
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    // Touch devices (phones/tablets) get the calm static grid instead of the
+    // per-frame scroll choreography — same photos, none of the main-thread cost
+    // that makes the animated version stutter on mobile GPUs.
+    const wantsStatic =
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      window.matchMedia("(pointer: coarse)").matches;
+    if (wantsStatic) {
       // async so the state swap lands a frame after mount (lint: no sync setState)
       const raf = requestAnimationFrame(() => setReduced(true));
       return () => cancelAnimationFrame(raf);

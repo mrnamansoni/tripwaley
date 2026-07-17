@@ -12,6 +12,11 @@ import { gsap, ScrollTrigger } from "@/lib/gsap";
 export default function SmoothScroll({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // On touch devices, native momentum scrolling is smoother and offloaded to
+    // the compositor. Running Lenis on top of it just adds a per-frame rAF and
+    // fights the browser — so skip it on mobile. ScrollTrigger still drives all
+    // the scroll animations off the native scroll position.
+    if (window.matchMedia("(pointer: coarse)").matches) return;
 
     const lenis = new Lenis({ lerp: 0.115, wheelMultiplier: 1 });
     lenis.on("scroll", ScrollTrigger.update);
