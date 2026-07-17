@@ -149,15 +149,13 @@ export default function OpeningShot({
                   {markSub}
                 </text>
               </mask>
-              <filter id="os-glow-l" x="-15%" y="-15%" width="130%" height="130%">
-                <feGaussianBlur stdDeviation="2" />
-              </filter>
             </defs>
             <g id="os-zoom-l">
               <rect x="-3000" y="-3000" width="7000" height="7000" fill="#16130f" mask="url(#os-cut-l)" />
               <line x1="330" y1="330" x2="670" y2="330" stroke="#f5a31a" strokeWidth="1.5" strokeOpacity="0.7" />
-              {/* faint red rim tracing the letter edges */}
-              <g filter="url(#os-glow-l)" opacity="0.5" aria-hidden="true">
+              {/* faint red rim tracing the letter edges — a plain stroke (no blur
+                  filter) so it costs nothing to rescale through the zoom */}
+              <g opacity="0.55" aria-hidden="true">
                 <text x="500" y="255" textAnchor="middle" dominantBaseline="central" fill="none" stroke="#e23b2b" strokeWidth="2" fontSize="196" fontWeight="800" letterSpacing="-6" style={{ fontFamily: "var(--font-display), sans-serif" }}>
                   {markWord}
                 </text>
@@ -179,15 +177,12 @@ export default function OpeningShot({
                   {markSub}
                 </text>
               </mask>
-              <filter id="os-glow-p" x="-15%" y="-15%" width="130%" height="130%">
-                <feGaussianBlur stdDeviation="1.4" />
-              </filter>
             </defs>
             <g id="os-zoom-p">
               <rect x="-3000" y="-3000" width="7000" height="7000" fill="#16130f" mask="url(#os-cut-p)" />
               <line x1="150" y1="478" x2="413" y2="478" stroke="#f5a31a" strokeWidth="1.2" strokeOpacity="0.7" />
-              {/* faint red rim tracing the letter edges */}
-              <g filter="url(#os-glow-p)" opacity="0.5" aria-hidden="true">
+              {/* faint red rim tracing the letter edges (plain stroke, no filter) */}
+              <g opacity="0.55" aria-hidden="true">
                 <text x="281" y="430" textAnchor="middle" dominantBaseline="central" fill="none" stroke="#e23b2b" strokeWidth="1.6" fontSize="116" fontWeight="800" letterSpacing="-3" style={{ fontFamily: "var(--font-display), sans-serif" }}>
                   {markWord}
                 </text>

@@ -88,7 +88,7 @@ export default function DepartureBoard({
       </div>
 
       {/* the rail */}
-      <div data-db-rail className="relative z-10 mt-9 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-6 [scrollbar-width:none] sm:px-8 [&::-webkit-scrollbar]:hidden">
+      <div data-db-rail className="relative z-10 mt-9 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-9 pt-2 [scrollbar-width:none] sm:px-8 [&::-webkit-scrollbar]:hidden">
         {stubs.map((r) => {
           const mine = r.citySlugs.includes(city.slug);
           const price = r.fromPrices[city.slug] ?? Object.values(r.fromPrices)[0];
@@ -97,7 +97,7 @@ export default function DepartureBoard({
               key={r.packageSlug}
               href={`/trips/${r.packageSlug}`}
               data-db-stub
-              className="group flex w-[19.5rem] shrink-0 snap-center overflow-hidden rounded-2xl bg-[#f7f2e4] opacity-0 shadow-card-lg transition-transform duration-500 hover:-translate-y-1.5 sm:w-[24rem] sm:snap-start"
+              className="group flex min-h-[13rem] w-[20.5rem] shrink-0 snap-center overflow-hidden rounded-2xl bg-[#f7f2e4] opacity-0 shadow-card-lg transition-transform duration-500 hover:-translate-y-1.5 sm:min-h-[14.5rem] sm:w-[25rem] sm:snap-start"
             >
               {/* photo edge */}
               <span className="relative w-[34%] shrink-0">
