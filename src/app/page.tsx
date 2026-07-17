@@ -1,65 +1,166 @@
-import Image from "next/image";
+import Navbar from "@/components/sections/Navbar";
+import TripMoments from "@/components/sections/TripMoments";
+import MemoryArc from "@/components/sections/MemoryArc";
+import CityProvider from "@/components/site/CityProvider";
+import OpeningShot from "@/components/site/OpeningShot";
+import DepartureBoard, { type BoardRow } from "@/components/site/DepartureBoard";
+import DeckDestinations, { type DeckCard } from "@/components/site/DeckDestinations";
+import PileUp, { type PileCard } from "@/components/site/PileUp";
+import MomentumBreak from "@/components/site/MomentumBreak";
+import DrumReviews from "@/components/site/DrumReviews";
+import MagnetChant from "@/components/site/MagnetChant";
+import CurtainFooter from "@/components/site/CurtainFooter";
+import {
+  getCities,
+  getSettings,
+  getLivePackages,
+  getRichPackages,
+  getPricedCities,
+  getReviews,
+  getGalleryPhotos,
+  getMoments,
+  text,
+  upcomingDepartures,
+  fromPrice,
+  packageImages,
+  nightsLabel,
+  shortDate,
+  slot,
+  slotOne,
+} from "@/lib/catalog";
+
+/* pull a short scarcity chip out of the ops note, only if it actually reads scarce */
+function scarcityChip(note: string): string {
+  const first = note.split(/[\n.]/)[0]?.trim() ?? "";
+  return /seat|limit|fill|few|last|book fast/i.test(first) ? first.slice(0, 34) : "";
+}
 
 export default function Home() {
+  const settings = getSettings();
+  const cities = getCities();
+  const pricedCities = getPricedCities();
+  const live = getLivePackages();
+  const rich = getRichPackages();
+
+  /* package → city → lowest seat price */
+  const pricesByPkg: Record<string, Record<string, number>> = {};
+  for (const p of live) {
+    pricesByPkg[p.slug] = {};
+    for (const c of pricedCities) {
+      const v = fromPrice(p.slug, c.slug);
+      if (v) pricesByPkg[p.slug][c.slug] = v;
+    }
+  }
+  /* city → package → price (for the hero) */
+  const pricesByCity: Record<string, Record<string, number>> = {};
+  for (const c of pricedCities) {
+    pricesByCity[c.slug] = {};
+    for (const p of live) {
+      const v = pricesByPkg[p.slug][c.slug];
+      if (v) pricesByCity[c.slug][p.slug] = v;
+    }
+  }
+  /* city → next departures (for the hero's live panel) */
+  const depsByCity: Record<string, { date: string; name: string; slug: string }[]> = {};
+  for (const c of cities) {
+    depsByCity[c.slug] = upcomingDepartures({ citySlug: c.slug, limit: 3 }).map((d) => ({
+      date: d.date,
+      name: d.package.name,
+      slug: d.package.slug,
+    }));
+  }
+
+  /* the departure board */
+  const boardRows: BoardRow[] = upcomingDepartures({ limit: 120 }).map((d) => ({
+    date: d.date,
+    packageSlug: d.package.slug,
+    packageName: d.package.name,
+    nightsLabel: nightsLabel(d.package),
+    scarcity: scarcityChip(d.package.scarcityNote),
+    citySlugs: d.cities.map((c) => c.slug),
+    fromPrices: pricesByPkg[d.package.slug] ?? {},
+    image: packageImages(d.package)[0],
+  }));
+
+  /* the deck — every sellable package */
+  const deckCards: DeckCard[] = live
+    .filter((p) => Object.keys(pricesByPkg[p.slug]).length > 0)
+    .slice(0, 9)
+    .map((p) => ({
+      slug: p.slug,
+      name: p.name,
+      destination: p.destination,
+      nightsLabel: nightsLabel(p),
+      image: packageImages(p)[0],
+      fromPrices: pricesByPkg[p.slug],
+    }));
+
+  /* the pile-up — four richest flagships */
+  const pileCards: PileCard[] = rich.slice(0, 4).map((p) => {
+    const next = upcomingDepartures({ packageSlug: p.slug, limit: 1 })[0];
+    const line = (p.socialProof.split(/[\n!.]/)[0] || p.route || p.destination).trim().slice(0, 52);
+    return {
+      slug: p.slug,
+      name: p.name,
+      line: line.toLowerCase(),
+      nightsLabel: nightsLabel(p),
+      image: packageImages(p)[0],
+      fromPrices: pricesByPkg[p.slug],
+      nextDate: next ? shortDate(next.date) : undefined,
+    };
+  });
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <CityProvider cities={cities} defaultCity={settings.defaultCity}>
+      <Navbar overDarkHero />
+      <main>
+        <OpeningShot
+          departures={depsByCity}
+          fromPrices={pricesByCity}
+          heroBg={slotOne("hero.bg")}
+          heroFilm={slot("hero.film")}
+          heroBlinds={slotOne("hero.blinds")}
+          eyebrow={text("hero.eyebrow")}
+          headline={text("hero.headline")}
+          headlineAccent={text("hero.headlineAccent")}
+          scrollCue={text("hero.scrollCue")}
+          markWord={text("hero.markWord")}
+          markSub={text("hero.markSub")}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+        <DepartureBoard
+          rows={boardRows}
+          whatsappLink={settings.whatsappLink}
+          hook={text("rack.hook")}
+          footnote={text("rack.footnote")}
+        />
+        <DeckDestinations cards={deckCards} eyebrow={text("deck.eyebrow")} />
+        <PileUp cards={pileCards} />
+        <MomentumBreak />
+        <TripMoments moments={getMoments()} />
+        <MemoryArc
+          photos={getGalleryPhotos()}
+          eyebrow={text("gallery.eyebrow")}
+          headline={text("gallery.headline")}
+          sub={text("gallery.sub")}
+        />
+        <section id="reviews">
+          <DrumReviews
+            reviews={getReviews()}
+            eyebrow={text("drum.eyebrow")}
+            headline={text("drum.headline")}
+            headlineAccent={text("drum.headlineAccent")}
+          />
+        </section>
+        <MagnetChant whatsappLink={settings.whatsappLink} />
       </main>
-    </div>
+      <CurtainFooter
+        whatsappLink={settings.whatsappLink}
+        announcement={settings.announcement}
+        eyebrow={text("footer.eyebrow")}
+        headline={text("footer.headline")}
+        sub={text("footer.sub")}
+        cue={text("footer.cue")}
+      />
+    </CityProvider>
   );
 }

@@ -1,0 +1,13 @@
+node_modules
+.next
+.git
+.claude
+*.md
+.env*
+Dockerfile
+.dockerignore
+# runtime-written dirs (recreated from the seed / persisted via volumes)
+/data
+/public/uploads
+# raw photo originals (converted copies already live in public/images)
+/Tripwaley group pictures/
