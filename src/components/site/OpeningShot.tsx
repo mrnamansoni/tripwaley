@@ -93,12 +93,12 @@ export default function OpeningShot({
       });
 
       tl.to("[data-os-intro]", { autoAlpha: 0, y: -30, duration: 0.08 }, 0.06)
-        /* ACT I — vector zoom through the letter counter. The <g> inside
-           each SVG scales (landscape & portrait get their own origin). */
-        .to("#os-zoom-l", { scale: 2.2, ease: "power1.in", duration: 0.14, svgOrigin: "512 252" }, 0)
-        .to("#os-zoom-p", { scale: 2.2, ease: "power1.in", duration: 0.14, svgOrigin: "296 428" }, 0)
-        .to("#os-zoom-l", { scale: 26, ease: "power2.in", duration: 0.12, svgOrigin: "512 252" }, 0.14)
-        .to("#os-zoom-p", { scale: 26, ease: "power2.in", duration: 0.12, svgOrigin: "296 428" }, 0.14)
+        /* ACT I — vector zoom through the letter counter. GPU-composited CSS
+           scale on the wrapper divs (transform-origin set per composition). */
+        .to("[data-os-zoom-l]", { scale: 2.2, ease: "power1.in", duration: 0.14, force3D: true }, 0)
+        .to("[data-os-zoom-p]", { scale: 2.2, ease: "power1.in", duration: 0.14, force3D: true }, 0)
+        .to("[data-os-zoom-l]", { scale: 26, ease: "power2.in", duration: 0.12, force3D: true }, 0.14)
+        .to("[data-os-zoom-p]", { scale: 26, ease: "power2.in", duration: 0.12, force3D: true }, 0.14)
         .to("[data-os-type]", { autoAlpha: 0, duration: 0.07 }, 0.19)
         /* ACT II — the one-take */
         .to("[data-os-film]", { autoAlpha: 1, duration: 0.06 }, 0.25)
@@ -136,62 +136,47 @@ export default function OpeningShot({
           </p>
         </div>
 
-        {/* the slab — landscape composition */}
+        {/* the slab. The zoom scales each wrapper DIV (a GPU-composited CSS
+            transform) rather than the SVG <g> — the mask rasterizes once and the
+            compositor scales that layer, so the fly-through stays smooth on
+            mobile instead of re-rasterizing the mask every frame. */}
         <div data-os-type className="absolute inset-0 z-20">
-          <svg className="hidden h-full w-full sm:block" viewBox="0 0 1000 563" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-            <defs>
-              <mask id="os-cut-l">
-                <rect x="-3000" y="-3000" width="7000" height="7000" fill="white" />
-                <text x="500" y="255" textAnchor="middle" dominantBaseline="central" fill="black" fontSize="196" fontWeight="800" letterSpacing="-6" style={{ fontFamily: "var(--font-display), sans-serif" }}>
-                  {markWord}
-                </text>
-                <text x="500" y="420" textAnchor="middle" dominantBaseline="central" fill="black" fontSize="60" fontWeight="800" letterSpacing="18" style={{ fontFamily: "var(--font-display), sans-serif" }}>
-                  {markSub}
-                </text>
-              </mask>
-            </defs>
-            <g id="os-zoom-l">
+          {/* landscape composition */}
+          <div data-os-zoom-l className="hidden h-full w-full will-change-transform [backface-visibility:hidden] sm:block" style={{ transformOrigin: "51.2% 44.8%" }}>
+            <svg className="h-full w-full" viewBox="0 0 1000 563" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <defs>
+                <mask id="os-cut-l">
+                  <rect x="-3000" y="-3000" width="7000" height="7000" fill="white" />
+                  <text x="500" y="255" textAnchor="middle" dominantBaseline="central" fill="black" fontSize="196" fontWeight="800" letterSpacing="-6" style={{ fontFamily: "var(--font-display), sans-serif" }}>
+                    {markWord}
+                  </text>
+                  <text x="500" y="420" textAnchor="middle" dominantBaseline="central" fill="black" fontSize="60" fontWeight="800" letterSpacing="18" style={{ fontFamily: "var(--font-display), sans-serif" }}>
+                    {markSub}
+                  </text>
+                </mask>
+              </defs>
               <rect x="-3000" y="-3000" width="7000" height="7000" fill="#16130f" mask="url(#os-cut-l)" />
               <line x1="330" y1="330" x2="670" y2="330" stroke="#f5a31a" strokeWidth="1.5" strokeOpacity="0.7" />
-              {/* faint red rim tracing the letter edges — a plain stroke (no blur
-                  filter) so it costs nothing to rescale through the zoom */}
-              <g opacity="0.55" aria-hidden="true">
-                <text x="500" y="255" textAnchor="middle" dominantBaseline="central" fill="none" stroke="#e23b2b" strokeWidth="2" fontSize="196" fontWeight="800" letterSpacing="-6" style={{ fontFamily: "var(--font-display), sans-serif" }}>
-                  {markWord}
-                </text>
-                <text x="500" y="420" textAnchor="middle" dominantBaseline="central" fill="none" stroke="#e23b2b" strokeWidth="1.7" fontSize="60" fontWeight="800" letterSpacing="18" style={{ fontFamily: "var(--font-display), sans-serif" }}>
-                  {markSub}
-                </text>
-              </g>
-            </g>
-          </svg>
+            </svg>
+          </div>
           {/* portrait composition */}
-          <svg className="h-full w-full sm:hidden" viewBox="0 0 563 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-            <defs>
-              <mask id="os-cut-p">
-                <rect x="-3000" y="-3000" width="7000" height="7000" fill="white" />
-                <text x="281" y="430" textAnchor="middle" dominantBaseline="central" fill="black" fontSize="116" fontWeight="800" letterSpacing="-3" style={{ fontFamily: "var(--font-display), sans-serif" }}>
-                  {markWord}
-                </text>
-                <text x="281" y="530" textAnchor="middle" dominantBaseline="central" fill="black" fontSize="38" fontWeight="800" letterSpacing="10" style={{ fontFamily: "var(--font-display), sans-serif" }}>
-                  {markSub}
-                </text>
-              </mask>
-            </defs>
-            <g id="os-zoom-p">
+          <div data-os-zoom-p className="h-full w-full will-change-transform [backface-visibility:hidden] sm:hidden" style={{ transformOrigin: "52.6% 42.8%" }}>
+            <svg className="h-full w-full" viewBox="0 0 563 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <defs>
+                <mask id="os-cut-p">
+                  <rect x="-3000" y="-3000" width="7000" height="7000" fill="white" />
+                  <text x="281" y="430" textAnchor="middle" dominantBaseline="central" fill="black" fontSize="116" fontWeight="800" letterSpacing="-3" style={{ fontFamily: "var(--font-display), sans-serif" }}>
+                    {markWord}
+                  </text>
+                  <text x="281" y="530" textAnchor="middle" dominantBaseline="central" fill="black" fontSize="38" fontWeight="800" letterSpacing="10" style={{ fontFamily: "var(--font-display), sans-serif" }}>
+                    {markSub}
+                  </text>
+                </mask>
+              </defs>
               <rect x="-3000" y="-3000" width="7000" height="7000" fill="#16130f" mask="url(#os-cut-p)" />
               <line x1="150" y1="478" x2="413" y2="478" stroke="#f5a31a" strokeWidth="1.2" strokeOpacity="0.7" />
-              {/* faint red rim tracing the letter edges (plain stroke, no filter) */}
-              <g opacity="0.55" aria-hidden="true">
-                <text x="281" y="430" textAnchor="middle" dominantBaseline="central" fill="none" stroke="#e23b2b" strokeWidth="1.6" fontSize="116" fontWeight="800" letterSpacing="-3" style={{ fontFamily: "var(--font-display), sans-serif" }}>
-                  {markWord}
-                </text>
-                <text x="281" y="530" textAnchor="middle" dominantBaseline="central" fill="none" stroke="#e23b2b" strokeWidth="1.3" fontSize="38" fontWeight="800" letterSpacing="10" style={{ fontFamily: "var(--font-display), sans-serif" }}>
-                  {markSub}
-                </text>
-              </g>
-            </g>
-          </svg>
+            </svg>
+          </div>
         </div>
         <p className="absolute bottom-6 left-1/2 z-30 -translate-x-1/2 text-[0.56rem] font-bold uppercase tracking-[0.35em] text-white/50 sm:text-[0.6rem]">
           {scrollCue}

@@ -5,28 +5,45 @@ import Lenis from "lenis";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 
 /**
- * Lenis smooth scrolling wired into GSAP's ticker so ScrollTrigger and Lenis
- * share one rAF loop (avoids double-driving scroll updates).
+ * Scroll layer, split by input type:
+ *  - Desktop (fine pointer): Lenis smooths the wheel and keeps ScrollTrigger in sync.
+ *  - Touch (coarse pointer): NO Lenis. Instead ScrollTrigger.normalizeScroll() takes
+ *    over touch input so every scrub (hero zoom, deck, gallery, curtain) tracks the
+ *    finger smoothly and reliably — this is GSAP's recommended setup for scrub-heavy
+ *    mobile sites and fixes the "gallery blank / curtain won't lift" activation bugs.
+ *    ignoreMobileResize stops the address-bar show/hide from jolting the animations.
  * Disabled entirely for users who prefer reduced motion.
  */
 export default function SmoothScroll({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    // Lenis smooths wheel on desktop; on touch it defers to native scrolling
-    // (syncTouch stays off) but still keeps ScrollTrigger in sync — which the
-    // curtain-footer and hero scrubs rely on to move with the finger.
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
+
+    /* ---------------- touch devices ---------------- */
+    if (coarse) {
+      ScrollTrigger.config({ ignoreMobileResize: true });
+      ScrollTrigger.normalizeScroll(true);
+      // recalc once layout + fonts + first images settle (fixes stale positions)
+      const onLoad = () => ScrollTrigger.refresh();
+      window.addEventListener("load", onLoad);
+      const t = setTimeout(() => ScrollTrigger.refresh(), 600);
+      return () => {
+        window.removeEventListener("load", onLoad);
+        clearTimeout(t);
+        ScrollTrigger.normalizeScroll(false);
+      };
+    }
+
+    /* ---------------- desktop (wheel) ---------------- */
     const lenis = new Lenis({ lerp: 0.115, wheelMultiplier: 1 });
     lenis.on("scroll", ScrollTrigger.update);
-    // handy for QA + lets anchor clicks route through Lenis
     (window as Window & { __lenis?: Lenis }).__lenis = lenis;
 
-    // Lenis expects milliseconds; gsap ticker gives seconds.
     const raf = (time: number) => lenis.raf(time * 1000);
     gsap.ticker.add(raf);
     gsap.ticker.lagSmoothing(0);
 
-    // Glide to in-page anchors via Lenis (CSS smooth-behavior would fight it).
     const onAnchorClick = (e: MouseEvent) => {
       const link = (e.target as HTMLElement).closest?.('a[href^="#"]');
       if (!(link instanceof HTMLAnchorElement)) return;

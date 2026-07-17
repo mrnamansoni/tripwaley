@@ -31,9 +31,12 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 # writable runtime dirs for the file-based CMS: the admin panel saves catalog/
 # reviews/bookings JSON to /app/data and uploads photos to /app/public/uploads.
+# /app/.next/cache/images holds Next's optimized (WebP) images — persisting it
+# means each photo is encoded once, not re-encoded after every redeploy.
 # Mount persistent volumes here in Dokploy — an empty named volume inherits this
 # ownership, so the unprivileged user can write and the data survives redeploys.
-RUN mkdir -p /app/data /app/public/uploads && chown -R nextjs:nodejs /app/data /app/public/uploads
+RUN mkdir -p /app/data /app/public/uploads /app/.next/cache/images \
+  && chown -R nextjs:nodejs /app/data /app/public/uploads /app/.next/cache
 
 USER nextjs
 EXPOSE 3000

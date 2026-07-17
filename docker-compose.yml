@@ -25,9 +25,11 @@ services:
     volumes:
       - tripwaley_data:/app/data # catalog / reviews / bookings JSON (all admin edits)
       - tripwaley_uploads:/app/public/uploads # photos uploaded via the admin panel
+      - tripwaley_imgcache:/app/.next/cache/images # optimized WebP cache (encode once)
     expose:
       - "3000" # documents the container port; not published to the host
 
 volumes:
   tripwaley_data:
   tripwaley_uploads:
+  tripwaley_imgcache:

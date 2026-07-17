@@ -1,9 +1,9 @@
 "use client";
 
 /* THE DECK — destination showcase (their L09 pick, wired to real data).
-   Desktop: scroll flicks through the live catalog in a 3D coverflow.
-   Touch: a native horizontal snap-carousel — smooth (compositor-driven, no
-   per-frame JS) with the reflection intact. Same cards either way. */
+   Scroll flicks through the live catalog in a 3D coverflow; the centered
+   card announces itself with the visitor's ex-city price. On touch,
+   ScrollTrigger.normalizeScroll (see SmoothScroll) drives this smoothly. */
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
@@ -24,15 +24,9 @@ export interface DeckCard {
 export default function DeckDestinations({ cards, eyebrow = "somewhere in here is your next trip" }: { cards: DeckCard[]; eyebrow?: string }) {
   const ref = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
-  const [isTouch, setIsTouch] = useState(false);
   const { city } = useCity();
 
   useEffect(() => {
-    setIsTouch(window.matchMedia("(pointer: coarse)").matches);
-  }, []);
-
-  useEffect(() => {
-    if (isTouch) return; // touch devices use the native carousel — no ScrollTrigger
     const ctx = gsap.context(() => {
       const els = gsap.utils.toArray<HTMLElement>("[data-deck-card]");
       const n = els.length;
@@ -48,7 +42,10 @@ export default function DeckDestinations({ cards, eyebrow = "somewhere in here i
               const side = Math.sign(d);
               card.style.transform = `translateX(${d * 46}%) translateZ(${-Math.min(a, 3) * 190}px) rotateY(${-side * Math.min(a * 42, 55)}deg) scale(${1 - Math.min(a * 0.06, 0.2)})`;
               card.style.zIndex = String(100 - Math.round(a * 10));
-              card.style.filter = `brightness(${1 - Math.min(a * 0.28, 0.62)})`;
+              // opacity (compositor-cheap) instead of filter:brightness (repaints
+              // every frame) — distant cards fade into the near-black backdrop,
+              // reading the same as dimming but without the mobile jank.
+              card.style.opacity = String(1 - Math.min(a * 0.34, 0.72));
             });
             const idx = Math.round(f);
             if (idx !== cur) { cur = idx; setActive(idx); }
@@ -57,59 +54,13 @@ export default function DeckDestinations({ cards, eyebrow = "somewhere in here i
       });
     }, ref);
     return () => ctx.revert();
-  }, [cards.length, isTouch]);
+  }, [cards.length]);
 
   const activeCard = cards[active];
   const price = activeCard?.fromPrices[city.slug];
 
-  /* ---------- touch: native horizontal snap-carousel ---------- */
-  if (isTouch) {
-    return (
-      <section className="bg-[#101012] py-[8vh]">
-        <div className="mx-auto w-full max-w-7xl px-5">
-          <p className="text-[0.6rem] font-bold uppercase tracking-[0.4em] text-gold">{eyebrow}</p>
-          <h2 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-white">
-            Your next trip&apos;s <span className="text-gold">in here.</span>
-          </h2>
-        </div>
-        <div className="mt-7 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {cards.map((c) => {
-            const p = c.fromPrices[city.slug] ?? Object.values(c.fromPrices)[0];
-            return (
-              <Link key={c.slug} href={`/trips/${c.slug}`} className="w-[64vw] max-w-[17rem] shrink-0 snap-center">
-                <span className="relative block aspect-[3/4] overflow-hidden rounded-2xl border border-white/10 shadow-card-lg">
-                  <Image src={c.image} alt={c.name} fill sizes="64vw" className="object-cover" />
-                  <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/90 via-ink/25 to-transparent p-3.5 pt-12">
-                    <span className="block truncate font-display text-lg font-extrabold text-white">{c.name}</span>
-                    <span className="text-[0.58rem] font-bold uppercase tracking-widest text-gold">
-                      {c.nightsLabel}{p ? ` · from ${inr(p)}` : ""}
-                    </span>
-                  </span>
-                </span>
-                {/* reflection */}
-                <span
-                  aria-hidden="true"
-                  className="relative mt-1.5 block h-16 overflow-hidden rounded-b-xl opacity-30"
-                  style={{
-                    transform: "scaleY(-1)",
-                    WebkitMaskImage: "linear-gradient(to top, black, transparent)",
-                    maskImage: "linear-gradient(to top, black, transparent)",
-                  }}
-                >
-                  <Image src={c.image} alt="" fill sizes="64vw" className="object-cover object-bottom" />
-                </span>
-              </Link>
-            );
-          })}
-        </div>
-        <p className="mt-3 px-5 text-[0.58rem] font-bold uppercase tracking-[0.3em] text-white/30">swipe →</p>
-      </section>
-    );
-  }
-
-  /* ---------- desktop: 3D coverflow ---------- */
   return (
-    <section ref={ref} className="relative bg-[#101012]" style={{ height: `${Math.max(260, cards.length * 36)}vh` }}>
+    <section ref={ref} className="relative bg-[#101012]" style={{ height: `${Math.max(260, cards.length * 34)}vh` }}>
       <div className="sticky top-0 flex h-screen flex-col justify-center overflow-hidden">
         <div className="mb-6 px-5 text-center">
           <p className="text-[0.62rem] font-bold uppercase tracking-[0.5em] text-gold">{eyebrow}</p>
@@ -139,7 +90,7 @@ export default function DeckDestinations({ cards, eyebrow = "somewhere in here i
                 tabIndex={i === active ? 0 : -1}
               >
                 <span className="relative block h-full w-full overflow-hidden rounded-xl border border-white/10 shadow-card-lg">
-                  <Image src={c.image} alt={c.name} fill sizes="32vh" className="object-cover" />
+                  <Image src={c.image} alt={c.name} fill sizes="(max-width:640px) 46vh, 32vh" className="object-cover" />
                   <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/85 to-transparent p-3 pt-8">
                     <span className="block truncate font-display text-sm font-extrabold text-white">{c.name}</span>
                     <span className="text-[0.58rem] font-bold uppercase tracking-widest text-gold">{c.nightsLabel}</span>
@@ -151,7 +102,7 @@ export default function DeckDestinations({ cards, eyebrow = "somewhere in here i
                   className="absolute left-0 top-full mt-2 block h-full w-full scale-y-[-1] overflow-hidden rounded-xl opacity-25"
                   style={{ WebkitMaskImage: "linear-gradient(to top, transparent 60%, black 100%)", maskImage: "linear-gradient(to top, transparent 60%, black 100%)" }}
                 >
-                  <Image src={c.image} alt="" fill sizes="32vh" className="object-cover" />
+                  <Image src={c.image} alt="" fill sizes="(max-width:640px) 46vh, 32vh" className="object-cover" />
                 </span>
               </Link>
             ))}
