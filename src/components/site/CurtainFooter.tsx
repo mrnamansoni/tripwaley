@@ -46,7 +46,7 @@ export default function CurtainFooter({
   }, []);
 
   return (
-    <footer ref={ref} className="relative h-[200vh]">
+    <footer ref={ref} className="relative h-[160vh] sm:h-[200vh]">
       <div className="sticky top-0 h-screen overflow-hidden bg-[#12100d]">
         {/* the credits, underneath all along — compact 2-col on phones so it
             always fits one screen */}

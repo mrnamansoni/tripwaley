@@ -14,6 +14,8 @@ export default function SpinCarousel({
   children,
   radius = 260,
   autoDegPerSec = 9,
+  perspective = 1100,
+  tiltDeg = 0,
   className = "",
   cardClassName = "",
   onFrontChange,
@@ -21,6 +23,10 @@ export default function SpinCarousel({
   children: ReactNode[];
   radius?: number;
   autoDegPerSec?: number;
+  /** lower = you feel closer to the ring ("standing inside the carousel") */
+  perspective?: number;
+  /** slight rotateX on the whole ring, like looking across a real carousel */
+  tiltDeg?: number;
   className?: string;
   cardClassName?: string;
   onFrontChange?: (index: number) => void;
@@ -54,7 +60,7 @@ export default function SpinCarousel({
         const target = velocity < 0 ? -autoDegPerSec : autoDegPerSec;
         velocity += (target - velocity) * Math.min(1, (deltaMs / 1000) * 2.2);
         rotation += velocity * (deltaMs / 1000);
-        ring.style.transform = `rotateY(${rotation}deg)`;
+        ring.style.transform = `rotateX(${tiltDeg}deg) rotateY(${rotation}deg)`;
       }
       const front = ((Math.round(-rotation / step) % n) + n) % n;
       if (front !== frontRef.current) {
@@ -77,7 +83,7 @@ export default function SpinCarousel({
       const now = performance.now();
       moved += Math.abs(dx);
       rotation += dx * 0.35; // drag sensitivity (deg per px)
-      ring.style.transform = `rotateY(${rotation}deg)`;
+      ring.style.transform = `rotateX(${tiltDeg}deg) rotateY(${rotation}deg)`;
       if (now - lastT > 0) velocity = gsap.utils.clamp(-240, 240, (dx * 0.35) / ((now - lastT) / 1000));
       lastX = e.clientX;
       lastT = now;
@@ -103,13 +109,14 @@ export default function SpinCarousel({
       wrap.removeEventListener("pointercancel", onUp);
       wrap.removeEventListener("click", onClick, true);
     };
-  }, [n, step, autoDegPerSec, onFrontChange]);
+  }, [n, step, autoDegPerSec, tiltDeg, onFrontChange]);
 
   return (
     <div
       ref={wrapRef}
+      data-lenis-prevent
       className={`relative select-none ${className}`}
-      style={{ perspective: "1100px", touchAction: "pan-y" }}
+      style={{ perspective: `${perspective}px`, touchAction: "pan-y" }}
     >
       <div
         ref={ringRef}

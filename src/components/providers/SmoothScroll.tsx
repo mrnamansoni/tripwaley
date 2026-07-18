@@ -5,13 +5,15 @@ import Lenis from "lenis";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 
 /**
- * Scroll layer, split by input type:
- *  - Desktop (fine pointer): Lenis smooths the wheel and keeps ScrollTrigger in sync.
- *  - Touch (coarse pointer): NO Lenis. Instead ScrollTrigger.normalizeScroll() takes
- *    over touch input so every scrub (hero zoom, deck, gallery, curtain) tracks the
- *    finger smoothly and reliably — this is GSAP's recommended setup for scrub-heavy
- *    mobile sites and fixes the "gallery blank / curtain won't lift" activation bugs.
- *    ignoreMobileResize stops the address-bar show/hide from jolting the animations.
+ * ONE scroll engine for the whole site: Lenis.
+ *  - Desktop: smooths the wheel (lerp).
+ *  - Touch: syncTouch — Lenis owns touch scrolling too, so the entire page
+ *    shares a single, uniform momentum curve and every ScrollTrigger scrub
+ *    (hero, gallery, drum, curtain) tracks the finger 1:1. This replaced
+ *    ScrollTrigger.normalizeScroll, whose synthesized tap-clicks caused the
+ *    ticket-rack "auto-click while swiping" bug.
+ *  - Elements that scroll themselves (horizontal rails, dropdowns, the spin
+ *    carousel) opt out with data-lenis-prevent so their gestures stay native.
  * Disabled entirely for users who prefer reduced motion.
  */
 export default function SmoothScroll({ children }: { children: ReactNode }) {
@@ -19,34 +21,29 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const coarse = window.matchMedia("(pointer: coarse)").matches;
+    ScrollTrigger.config({ ignoreMobileResize: true });
 
-    /* ---------------- touch devices ---------------- */
-    if (coarse) {
-      ScrollTrigger.config({ ignoreMobileResize: true });
-      // allowNestedScroll: elements with their own overflow-x/y (the ticket
-      // rack's horizontal rail, any modal, etc.) keep handling their own touch
-      // scroll instead of the page normalizer swallowing the gesture.
-      ScrollTrigger.normalizeScroll({ allowNestedScroll: true });
-      // recalc once layout + fonts + first images settle (fixes stale positions)
-      const onLoad = () => ScrollTrigger.refresh();
-      window.addEventListener("load", onLoad);
-      const t = setTimeout(() => ScrollTrigger.refresh(), 600);
-      return () => {
-        window.removeEventListener("load", onLoad);
-        clearTimeout(t);
-        ScrollTrigger.normalizeScroll(false);
-      };
-    }
-
-    /* ---------------- desktop (wheel) ---------------- */
-    const lenis = new Lenis({ lerp: 0.115, wheelMultiplier: 1 });
+    const lenis = new Lenis({
+      lerp: 0.115,
+      wheelMultiplier: 1,
+      syncTouch: coarse, // unified momentum on phones; wheel-only on desktop
+      syncTouchLerp: 0.08, // slightly heavier glide so flicks feel weighty, not twitchy
+      touchMultiplier: 1.4,
+    });
     lenis.on("scroll", ScrollTrigger.update);
     (window as Window & { __lenis?: Lenis }).__lenis = lenis;
 
+    // Lenis expects milliseconds; gsap ticker gives seconds.
     const raf = (time: number) => lenis.raf(time * 1000);
     gsap.ticker.add(raf);
     gsap.ticker.lagSmoothing(0);
 
+    // positions settle late on mobile (fonts/images/address bar) — recalc once
+    const onLoad = () => ScrollTrigger.refresh();
+    window.addEventListener("load", onLoad);
+    const t = setTimeout(() => ScrollTrigger.refresh(), 600);
+
+    // Glide to in-page anchors via Lenis (CSS smooth-behavior would fight it).
     const onAnchorClick = (e: MouseEvent) => {
       const link = (e.target as HTMLElement).closest?.('a[href^="#"]');
       if (!(link instanceof HTMLAnchorElement)) return;
@@ -59,6 +56,8 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
 
     return () => {
       document.removeEventListener("click", onAnchorClick);
+      window.removeEventListener("load", onLoad);
+      clearTimeout(t);
       gsap.ticker.remove(raf);
       lenis.destroy();
     };

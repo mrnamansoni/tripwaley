@@ -65,7 +65,7 @@ export default function DestinationsPage() {
                   </div>
                 </div>
                 {/* its packages — swipeable rail on phones, grid from sm: up */}
-                <div className="-mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:content-start sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0">
+                <div data-lenis-prevent className="-mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:content-start sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0">
                   {g.packages.slice(0, 4).map((p) => {
                     const price = fromPrice(p.slug);
                     return (

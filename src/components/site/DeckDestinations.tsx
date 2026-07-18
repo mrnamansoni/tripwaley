@@ -108,11 +108,16 @@ export default function DeckDestinations({ cards, eyebrow = "somewhere in here i
           </p>
         </div>
 
+        {/* low perspective + large radius = the camera stands INSIDE the ring
+            (their lab orbit-gallery feel): the front card looms close, the
+            side cards sweep past the screen edges as it turns */}
         <SpinCarousel
-          className="mx-auto mt-6 h-[46vh] max-h-[24rem] w-full"
-          radius={Math.round(Math.max(210, cards.length * 26))}
-          autoDegPerSec={8}
-          cardClassName="h-[34vh] max-h-[18rem] w-[24vw] min-w-[9.5rem]"
+          className="mx-auto mt-6 h-[48vh] max-h-[26rem] w-full"
+          radius={Math.round(Math.max(300, cards.length * 30))}
+          perspective={780}
+          tiltDeg={-4}
+          autoDegPerSec={7}
+          cardClassName="h-[32vh] max-h-[17rem] w-[38vw] min-w-[8.5rem] max-w-[11rem]"
           onFrontChange={onFront}
         >
           {cards.map((c) => (

@@ -88,7 +88,7 @@ export default function DepartureBoard({
       </div>
 
       {/* the rail */}
-      <div data-db-rail className="relative z-10 mt-9 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-9 pt-2 [scrollbar-width:none] sm:px-8 [&::-webkit-scrollbar]:hidden">
+      <div data-db-rail data-lenis-prevent className="relative z-10 mt-9 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-9 pt-2 [scrollbar-width:none] sm:px-8 [&::-webkit-scrollbar]:hidden">
         {stubs.map((r) => {
           const mine = r.citySlugs.includes(city.slug);
           const price = r.fromPrices[city.slug] ?? Object.values(r.fromPrices)[0];

@@ -114,7 +114,7 @@ export default function OpeningShot({
   const cityPrices = fromPrices[city.slug] ?? {};
 
   return (
-    <section ref={ref} className="relative h-[380vh] bg-ink">
+    <section ref={ref} className="relative h-[300vh] bg-ink sm:h-[380vh]">
       <div className="sticky top-0 h-screen overflow-hidden">
         {/* footage living inside the letters */}
         <div className="absolute inset-0 z-10">

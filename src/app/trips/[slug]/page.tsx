@@ -10,6 +10,7 @@ import FilmStrip from "@/components/site/FilmStrip";
 import CaptainFeed from "@/components/site/CaptainFeed";
 import WeatherNow from "@/components/site/WeatherNow";
 import BookingBar, { type BarDeparture, type BarPrices } from "@/components/site/BookingBar";
+import MoreTrips from "@/components/site/MoreTrips";
 import {
   getCities,
   getSettings,
@@ -17,6 +18,7 @@ import {
   getPackage,
   citiesPricedFor,
   upcomingDepartures,
+  fromPrice,
   packageImages,
   nightsLabel,
   inr,
@@ -308,6 +310,20 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
             ← All departures
           </Link>
         </section>
+
+        {/* other live trips on a 3D ring (lab orbit-gallery pattern) */}
+        <MoreTrips
+          trips={getLivePackages()
+            .filter((p) => p.slug !== pkg.slug)
+            .slice(0, 10)
+            .map((p) => ({
+              slug: p.slug,
+              name: p.name,
+              nightsLabel: nightsLabel(p),
+              image: packageImages(p)[0],
+              price: fromPrice(p.slug),
+            }))}
+        />
       </main>
 
       <BookingBar

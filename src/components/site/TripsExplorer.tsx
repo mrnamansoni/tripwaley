@@ -68,7 +68,7 @@ export default function TripsExplorer({ packages, departures }: { packages: Expl
             <CitySwitcher tone="dark" />
           </div>
         </div>
-        <div className="mt-8 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-4 sm:px-8">
+        <div data-lenis-prevent className="mt-8 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-4 sm:px-8">
           {stubs.map((s) => {
             const price = s.fromPrices[city.slug] ?? Object.values(s.fromPrices)[0];
             return (

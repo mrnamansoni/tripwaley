@@ -35,11 +35,15 @@ export default function DrumReviews({
     return () => mq.removeEventListener("change", set);
   }, []);
 
-  // Perspective projection scales a card at translateZ(R) by P/(P−R).
-  // Desktop: 1500/(1500−360) ≈ 1.32× on a 94%-wide card → fine in a 32rem well.
-  // Phones: that same math pushed cards past the viewport edges (the cutoff),
-  // so shrink the drum radius and card width until the projected card fits.
-  const RADIUS = isMobile ? 220 : 360;
+  // Two constraints pick the radius:
+  // 1. Fit: perspective projection scales a card at translateZ(R) by P/(P−R),
+  //    so R must stay small enough that the projected card fits the well.
+  // 2. Gap: adjacent cards sit 2·R·sin(step/2) apart along the cylinder — R
+  //    must be LARGE enough that neighbouring cards clear each other's height
+  //    (this was the "cards overlapping" bug: R too small for the card size).
+  const estCardH = isMobile ? 240 : 250;
+  const minGapRadius = Math.ceil((estCardH * 1.12) / (2 * Math.sin(Math.PI / Math.max(3, reviews.length))));
+  const RADIUS = Math.max(isMobile ? 260 : 360, minGapRadius);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -60,7 +64,7 @@ export default function DrumReviews({
   }, [STEP, reviews.length]);
 
   return (
-    <section ref={ref} className="relative h-[400vh] bg-[#0f0e11]">
+    <section ref={ref} className="relative h-[260vh] bg-[#0f0e11] sm:h-[400vh]">
       <div className="sticky top-0 flex h-screen flex-col items-center justify-center overflow-hidden px-4 sm:px-5">
         {/* headline stays on top — the drum lives in its own clipped well below */}
         <div className="relative z-10 text-center">
@@ -84,10 +88,10 @@ export default function DrumReviews({
             {reviews.map((r, i) => (
               <div
                 key={r.name}
-                className={`absolute left-1/2 top-1/2 w-[80%] max-w-lg transition-opacity duration-300 sm:w-full ${i === active ? "opacity-100" : "opacity-20"}`}
+                className={`absolute left-1/2 top-1/2 w-[72%] max-w-lg transition-opacity duration-300 sm:w-full ${i === active ? "opacity-100" : "opacity-20"}`}
                 style={{ transform: `translate(-50%, -50%) rotateX(${-i * STEP}deg) translateZ(${RADIUS}px)` }}
               >
-                <blockquote className="rounded-3xl border border-white/12 bg-[#191821] p-5 shadow-card-lg sm:p-8">
+                <blockquote className="rounded-3xl border border-white/12 bg-[#191821] p-4 shadow-card-lg sm:p-8">
                   <div className="flex items-center justify-between">
                     <div className="flex gap-0.5 text-gold" aria-label={`${r.rating} stars`}>
                       {"★★★★★".slice(0, r.rating)}

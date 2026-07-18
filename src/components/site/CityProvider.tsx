@@ -93,7 +93,7 @@ export function CitySwitcher({ tone = "dark" }: { tone?: "dark" | "light" }) {
         <span className={`text-[0.6rem] transition-transform ${open ? "rotate-180" : ""}`} aria-hidden="true">▾</span>
       </button>
       {open && (
-        <div className={`absolute right-0 top-[110%] z-50 max-h-72 w-56 overflow-auto rounded-2xl border p-2 shadow-card-lg backdrop-blur-xl ${
+        <div data-lenis-prevent className={`absolute right-0 top-[110%] z-50 max-h-72 w-56 overflow-auto rounded-2xl border p-2 shadow-card-lg backdrop-blur-xl ${
           tone === "dark" ? "border-white/15 bg-ink/95" : "border-line bg-card"
         }`}>
           {cities.map((c) => (

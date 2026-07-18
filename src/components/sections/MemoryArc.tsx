@@ -207,7 +207,7 @@ export default function MemoryArc({
   }
 
   return (
-    <section ref={sectionRef} id="gallery" className="relative h-[280vh] bg-blush" aria-label="Photo gallery from Tripwaley batches">
+    <section ref={sectionRef} id="gallery" className="relative h-[220vh] bg-blush sm:h-[280vh]" aria-label="Photo gallery from Tripwaley batches">
       <p className="sr-only">
         A gallery of real trip photos: {photos.map((p) => p.label).filter(Boolean).join(", ")}.
       </p>
