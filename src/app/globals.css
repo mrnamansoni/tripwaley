@@ -363,3 +363,15 @@ body {
     -webkit-backdrop-filter: blur(6px) !important;
   }
 }
+
+/* ---- iOS zoom guard ---------------------------------------------------
+   Mobile Safari force-zooms into any text field whose font-size is under
+   16px and never zooms back out. Guarantee every text control is ≥16px on
+   touch devices (pinch-zoom stays available; the viewport isn't locked). */
+@media (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}

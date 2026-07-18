@@ -115,13 +115,13 @@ export default function BookingBar({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Naman"
-                className="mt-1.5 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-white outline-none transition-colors focus:border-gold"
+                className="mt-1.5 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-base text-white outline-none transition-colors focus:border-gold"
               />
             </label>
             <label className="mt-4 block text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white/45">
               Mobile number <span className="text-brand-bright">*</span>
               <div className="mt-1.5 flex items-center rounded-xl border border-white/15 bg-black/30 px-4 focus-within:border-gold">
-                <span className="text-white/50">+91</span>
+                <span className="text-base text-white/50">+91</span>
                 <input
                   value={phone}
                   onChange={(e) => { setPhone(e.target.value); setErr(""); }}
@@ -129,8 +129,7 @@ export default function BookingBar({
                   inputMode="numeric"
                   autoComplete="tel"
                   placeholder="98765 43210"
-                  autoFocus
-                  className="w-full bg-transparent px-2 py-3 text-white outline-none"
+                  className="w-full bg-transparent px-2 py-3 text-base text-white outline-none"
                 />
               </div>
             </label>
