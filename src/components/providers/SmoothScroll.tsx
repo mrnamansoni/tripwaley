@@ -23,7 +23,10 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
     /* ---------------- touch devices ---------------- */
     if (coarse) {
       ScrollTrigger.config({ ignoreMobileResize: true });
-      ScrollTrigger.normalizeScroll(true);
+      // allowNestedScroll: elements with their own overflow-x/y (the ticket
+      // rack's horizontal rail, any modal, etc.) keep handling their own touch
+      // scroll instead of the page normalizer swallowing the gesture.
+      ScrollTrigger.normalizeScroll({ allowNestedScroll: true });
       // recalc once layout + fonts + first images settle (fixes stale positions)
       const onLoad = () => ScrollTrigger.refresh();
       window.addEventListener("load", onLoad);

@@ -25,18 +25,27 @@ export default function Navbar({ overDarkHero = false }: { overDarkHero?: boolea
     };
   }, [menuOpen]);
 
+  // Keep the header solid whenever the mobile menu is open — otherwise, on a
+  // dark-hero page (home, destinations, about…) opened before scrolling, the
+  // nav row stays see-through right above the opaque cream menu panel: a
+  // jarring seam, and the hamburger bars (see below) would be unreadable.
+  const opaque = scrolled || menuOpen;
+  // Only invert to white/gold when floating transparently over a dark hero —
+  // once the header is opaque (scrolled, or the menu is open) it reads dark.
+  const overDark = overDarkHero && !opaque;
+
   return (
     <header
       style={{ top: "var(--ann-h, 0px)" }}
       className={`fixed inset-x-0 z-50 transition-all duration-500 ${
-        scrolled
+        opaque
           ? "border-b border-line/80 bg-cream/85 shadow-card backdrop-blur-xl"
           : "border-b border-transparent bg-transparent"
       }`}
     >
       <nav className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between px-5 sm:px-8" aria-label="Main">
         <a href="/" aria-label="Tripwaley — home" className="rounded-lg">
-          <LogoLockup inverted={overDarkHero && !scrolled} />
+          <LogoLockup inverted={overDark} />
         </a>
 
         <ul className="hidden items-center gap-9 lg:flex">
@@ -76,9 +85,9 @@ export default function Navbar({ overDarkHero = false }: { overDarkHero?: boolea
           aria-label={menuOpen ? "Close menu" : "Open menu"}
           className="flex h-11 w-11 flex-col items-center justify-center gap-[5px] rounded-full lg:hidden"
         >
-          <span className={`h-0.5 w-6 rounded bg-ink transition-transform duration-300 ${menuOpen ? "translate-y-[7px] rotate-45" : ""}`} />
-          <span className={`h-0.5 w-6 rounded bg-ink transition-opacity duration-300 ${menuOpen ? "opacity-0" : ""}`} />
-          <span className={`h-0.5 w-6 rounded bg-ink transition-transform duration-300 ${menuOpen ? "-translate-y-[7px] -rotate-45" : ""}`} />
+          <span className={`h-0.5 w-6 rounded transition-transform duration-300 ${overDark ? "bg-white" : "bg-ink"} ${menuOpen ? "translate-y-[7px] rotate-45" : ""}`} />
+          <span className={`h-0.5 w-6 rounded transition-opacity duration-300 ${overDark ? "bg-white" : "bg-ink"} ${menuOpen ? "opacity-0" : ""}`} />
+          <span className={`h-0.5 w-6 rounded transition-transform duration-300 ${overDark ? "bg-white" : "bg-ink"} ${menuOpen ? "-translate-y-[7px] -rotate-45" : ""}`} />
         </button>
       </nav>
 
