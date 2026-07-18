@@ -38,9 +38,15 @@ export default function Navbar({ overDarkHero = false }: { overDarkHero?: boolea
     <header
       style={{ top: "var(--ann-h, 0px)" }}
       className={`fixed inset-x-0 z-50 transition-all duration-500 ${
-        opaque
-          ? "border-b border-line/80 bg-cream/85 shadow-card backdrop-blur-xl"
-          : "border-b border-transparent bg-transparent"
+        menuOpen
+          ? // SOLID (no backdrop-blur) while the menu is open: backdrop-filter
+            // creates a CSS containing block that would trap the fixed menu
+            // panel inside this 4.5rem-tall header — the bug that made the
+            // menu render transparent over the page content.
+            "border-b border-line/80 bg-cream shadow-card"
+          : opaque
+            ? "border-b border-line/80 bg-cream/85 shadow-card backdrop-blur-xl"
+            : "border-b border-transparent bg-transparent"
       }`}
     >
       <nav className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between px-5 sm:px-8" aria-label="Main">
@@ -91,47 +97,57 @@ export default function Navbar({ overDarkHero = false }: { overDarkHero?: boolea
         </button>
       </nav>
 
-      {/* Mobile full-screen menu */}
+      {/* Mobile menu — a compact dropdown card, not a full-screen takeover.
+          Dim backdrop closes it; the card is solid cream with its own shadow. */}
+      {menuOpen && (
+        <button
+          aria-label="Close menu"
+          onClick={() => setMenuOpen(false)}
+          className="fixed inset-0 z-30 cursor-default bg-ink/40 lg:hidden"
+        />
+      )}
       <div
-        className={`fixed inset-0 top-[4.5rem] z-40 bg-cream transition-all duration-400 lg:hidden ${
-          menuOpen ? "visible opacity-100" : "invisible opacity-0"
+        className={`fixed inset-x-3 z-40 origin-top rounded-3xl border border-line bg-cream shadow-card-lg transition-all duration-300 lg:hidden ${
+          menuOpen ? "visible scale-100 opacity-100" : "invisible scale-[0.97] opacity-0"
         }`}
+        style={{ top: "calc(var(--ann-h, 0px) + 5rem)" }}
       >
-        <nav aria-label="Mobile" className="flex h-full flex-col justify-between px-6 pb-10 pt-8">
-          <ul className="space-y-2">
+        <nav aria-label="Mobile" className="max-h-[calc(100dvh-7rem)] overflow-y-auto p-3">
+          <ul className="divide-y divide-line/70">
             {navLinks.map((l, i) => (
               <li
                 key={l.href}
-                className={`transition-all duration-500 ${menuOpen ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"}`}
-                style={{ transitionDelay: menuOpen ? `${80 + i * 60}ms` : "0ms" }}
+                className={`transition-all duration-300 ${menuOpen ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}
+                style={{ transitionDelay: menuOpen ? `${40 + i * 35}ms` : "0ms" }}
               >
                 <a
                   href={l.href}
                   onClick={() => setMenuOpen(false)}
-                  className="block py-3 font-display text-4xl font-extrabold tracking-tight text-ink transition-colors hover:text-brand"
+                  className="flex items-center justify-between px-3 py-3.5 font-display text-lg font-extrabold tracking-tight text-ink transition-colors hover:text-brand"
                 >
                   {l.label}
+                  <span aria-hidden="true" className="text-sm text-ink/25">→</span>
                 </a>
               </li>
             ))}
           </ul>
-          <div className="space-y-3">
+          <div className="mt-3 grid grid-cols-2 gap-2.5 border-t border-line/70 pt-3">
             <button
               onClick={() => {
                 setMenuOpen(false);
                 open("hold");
               }}
-              className="w-full rounded-full bg-brand px-6 py-4 text-base font-bold text-white shadow-red"
+              className="rounded-full bg-brand px-4 py-3 text-sm font-bold text-white shadow-red"
             >
-              Hold a seat — free for 24h
+              Hold a seat
             </button>
             <a
               href={waLink("Hi Tripwaley! Tell me about upcoming departures ✈️")}
               target="_blank"
               rel="noopener noreferrer"
-              className="block w-full rounded-full border border-line bg-card px-6 py-4 text-center text-base font-bold text-ink"
+              className="rounded-full border border-line bg-card px-4 py-3 text-center text-sm font-bold text-ink"
             >
-              Chat on WhatsApp
+              WhatsApp
             </a>
           </div>
         </nav>

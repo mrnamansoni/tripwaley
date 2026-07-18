@@ -348,3 +348,18 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ---- mobile GPU relief ------------------------------------------------
+   backdrop-filter blurs are among the most expensive things a phone GPU
+   composites, and this site uses them liberally (navbar, chips, modals).
+   On coarse-pointer devices, cap every blur at 6px — visually near-identical
+   at phone sizes, dramatically cheaper to render while scrolling. */
+@media (pointer: coarse) {
+  .backdrop-blur-xl,
+  .backdrop-blur-lg,
+  .backdrop-blur-md,
+  .backdrop-blur-sm {
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+  }
+}

@@ -64,15 +64,15 @@ export default function DestinationsPage() {
                     </p>
                   </div>
                 </div>
-                {/* its packages */}
-                <div className="grid content-start gap-4 sm:grid-cols-2">
+                {/* its packages — swipeable rail on phones, grid from sm: up */}
+                <div className="-mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:content-start sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0">
                   {g.packages.slice(0, 4).map((p) => {
                     const price = fromPrice(p.slug);
                     return (
                       <Link
                         key={p.slug}
                         href={`/trips/${p.slug}`}
-                        className="group relative overflow-hidden rounded-2xl border border-line bg-card p-5 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-gold/60 hover:shadow-card-lg"
+                        className="group relative w-[74vw] shrink-0 snap-center overflow-hidden rounded-2xl border border-line bg-card p-5 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-gold/60 hover:shadow-card-lg sm:w-auto sm:shrink"
                       >
                         <p className="text-[0.6rem] font-bold uppercase tracking-[0.25em] text-ink/40">{nightsLabel(p)}</p>
                         <h3 className="mt-1.5 font-display text-xl font-extrabold leading-tight text-ink group-hover:text-brand">{p.name}</h3>

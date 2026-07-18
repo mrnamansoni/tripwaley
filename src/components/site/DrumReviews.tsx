@@ -8,7 +8,6 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "@/lib/gsap";
 import type { Review } from "@/lib/types";
 
-const RADIUS = 360;
 const HUES = [340, 205, 155, 25, 275, 105, 185, 315];
 
 export default function DrumReviews({
@@ -26,6 +25,21 @@ export default function DrumReviews({
   const ref = useRef<HTMLElement>(null);
   const drumRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    const set = () => setIsMobile(mq.matches);
+    set();
+    mq.addEventListener("change", set);
+    return () => mq.removeEventListener("change", set);
+  }, []);
+
+  // Perspective projection scales a card at translateZ(R) by P/(P−R).
+  // Desktop: 1500/(1500−360) ≈ 1.32× on a 94%-wide card → fine in a 32rem well.
+  // Phones: that same math pushed cards past the viewport edges (the cutoff),
+  // so shrink the drum radius and card width until the projected card fits.
+  const RADIUS = isMobile ? 220 : 360;
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -70,7 +84,7 @@ export default function DrumReviews({
             {reviews.map((r, i) => (
               <div
                 key={r.name}
-                className={`absolute left-1/2 top-1/2 w-[94%] max-w-lg transition-opacity duration-300 sm:w-full ${i === active ? "opacity-100" : "opacity-20"}`}
+                className={`absolute left-1/2 top-1/2 w-[80%] max-w-lg transition-opacity duration-300 sm:w-full ${i === active ? "opacity-100" : "opacity-20"}`}
                 style={{ transform: `translate(-50%, -50%) rotateX(${-i * STEP}deg) translateZ(${RADIUS}px)` }}
               >
                 <blockquote className="rounded-3xl border border-white/12 bg-[#191821] p-5 shadow-card-lg sm:p-8">
