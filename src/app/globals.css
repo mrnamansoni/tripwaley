@@ -1,0 +1,377 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   TRIPWALEY DESIGN TOKENS — single source of truth.
+   Brand colors are locked from the logo; do not introduce new hues.
+--------------------------------------------------------------------------- */
+@theme {
+  /* Brand */
+  --color-brand: #c91b20; /* primary red */
+  --color-brand-bright: #e82028; /* hover / bright red */
+  --color-gold: #f5a31a; /* accent gold / sun */
+  --color-ink: #1a1614; /* ink black */
+
+  /* Light warm theme */
+  --color-cream: #fffcf8; /* page base */
+  --color-blush: #fef5f0; /* soft warm section tint */
+  --color-card: #ffffff; /* cards */
+  --color-line: #eae4dd; /* warm borders */
+
+  /* Support */
+  --color-success: #1ab76a;
+  --color-trust: #2f6fed;
+
+  /* Dark footer */
+  --color-coal: #111111;
+
+  /* Typography (wired to next/font variables in layout.tsx) */
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
+  --font-script: var(--font-caveat), "Comic Sans MS", cursive;
+
+  /* Motion */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Shadows tuned warm (never pure black) */
+  --shadow-card: 0 1px 2px rgba(26, 22, 20, 0.05), 0 8px 24px -8px rgba(26, 22, 20, 0.12);
+  --shadow-card-lg: 0 2px 4px rgba(26, 22, 20, 0.06), 0 24px 48px -16px rgba(26, 22, 20, 0.22);
+  --shadow-red: 0 8px 28px -8px rgba(201, 27, 32, 0.45);
+}
+
+/* NOTE: no `scroll-behavior: smooth` here — Lenis drives scrolling by writing
+   scrollTop every frame, and CSS smooth-behavior would animate each write,
+   making the two fight. Lenis provides the smoothness (incl. anchor links). */
+html {
+  scroll-padding-top: 6rem;
+}
+
+body {
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--color-brand);
+  color: var(--color-cream);
+}
+
+/* Accessible, on-brand focus ring everywhere */
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ---------------------------------------------------------------------------
+   Utilities
+--------------------------------------------------------------------------- */
+
+/* Film-grain overlay: apply to a `relative` container */
+.noise::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Infinite marquee — track content must be duplicated once for a seamless loop */
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee var(--marquee-duration, 42s) linear infinite;
+}
+.marquee-reverse {
+  animation-direction: reverse;
+}
+.marquee-paused:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* Slow float for decorative elements (transform-only) */
+@keyframes floaty {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--float-rot, 0deg));
+  }
+  50% {
+    transform: translateY(-12px) rotate(var(--float-rot, 0deg));
+  }
+}
+.animate-floaty {
+  animation: floaty 6s ease-in-out infinite;
+}
+
+/* Pulsing live dot for urgency chips */
+@keyframes live-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.8);
+  }
+}
+.animate-live {
+  animation: live-pulse 1.6s ease-in-out infinite;
+}
+
+/* ---------------------------------------------------------------------------
+   Luxury hero-lab utilities (batch 3)
+--------------------------------------------------------------------------- */
+
+/* slow Ken Burns drift for full-bleed environment photography */
+@keyframes maisonDrift {
+  0% {
+    transform: scale(1.08) translateX(0.6%);
+  }
+  100% {
+    transform: scale(1) translateX(-0.6%);
+  }
+}
+
+/* light sweep across bg-clip text */
+@keyframes lux-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* rotating gold shine border — wrap content in a p-px rounded container */
+@keyframes lux-border-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.lux-shine-border {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.lux-shine-border::before {
+  content: "";
+  position: absolute;
+  inset: -150%;
+  z-index: -1;
+  background: conic-gradient(
+    from 0deg,
+    rgba(245, 163, 26, 0) 0deg,
+    rgba(245, 163, 26, 0.9) 60deg,
+    rgba(232, 32, 40, 0.55) 120deg,
+    rgba(245, 163, 26, 0) 180deg
+  );
+  animation: lux-border-spin 4.5s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .lux-shine-border::before {
+    animation: none;
+  }
+}
+
+/* lab2: weather cards — rain streaks and drifting snow */
+@keyframes l46rain {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: -60px 120px;
+  }
+}
+@keyframes l46snow {
+  0% {
+    transform: translateY(-12px) translateX(0);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(220px) translateX(24px);
+    opacity: 0;
+  }
+}
+
+/* lab2: horizon footer — lane dashes streaming toward the viewer */
+@keyframes l40road {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(150px);
+  }
+}
+
+/* lab2: topo footer — contour weather drift + summit ping */
+@keyframes l38drift {
+  from {
+    transform: rotate(-2.5deg) scale(0.98);
+  }
+  to {
+    transform: rotate(2.5deg) scale(1.03);
+  }
+}
+@keyframes l38ping {
+  0% {
+    box-shadow: 0 0 0 0 rgba(245, 163, 26, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 26px rgba(245, 163, 26, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(245, 163, 26, 0);
+  }
+}
+
+/* lab2: orbit wheel — parent spins, thumbs counter-spin to stay upright */
+@keyframes l13spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes l13counter {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+/* lab2: swap-in for live labels (coverflow title, counters) */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* holographic foil sheen for the gold ticket */
+@keyframes lux-foil {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Footer wordmark — a bright sheen travels across the letters and each one
+   pops up as the wave passes through it, looping forever. Each letter keeps
+   its own brand colour (red "trip" / white "waley"); the wave just brightens
+   and lifts it, so the shine reads in the logo palette, not gold. */
+@keyframes cfLetterWave {
+  35% {
+    transform: translateY(-0.11em);
+    filter: brightness(1.3);
+    text-shadow: 0 0.015em 0.16em rgba(255, 255, 255, 0.5);
+  }
+}
+.cf-letter {
+  display: inline-block;
+  will-change: transform, filter;
+  animation: cfLetterWave 3s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cf-letter {
+    animation: none;
+  }
+}
+
+/* 3D flip cards in the photo-dump arc gallery */
+.arc-flip {
+  transform-style: preserve-3d;
+  transition: transform 0.55s var(--ease-out-soft);
+}
+@media (hover: hover) {
+  .arc-card:hover .arc-flip {
+    transform: rotateY(180deg);
+  }
+}
+.arc-card[data-flipped="true"] .arc-flip {
+  transform: rotateY(180deg);
+}
+
+/* Underline sweep for nav links */
+.link-sweep {
+  position: relative;
+}
+.link-sweep::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--color-brand);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s var(--ease-out-soft);
+}
+.link-sweep:hover::after,
+.link-sweep:focus-visible::after {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .marquee-track,
+  .animate-floaty,
+  .animate-live {
+    animation: none;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---- mobile GPU relief ------------------------------------------------
+   backdrop-filter blurs are among the most expensive things a phone GPU
+   composites, and this site uses them liberally (navbar, chips, modals).
+   On coarse-pointer devices, cap every blur at 6px — visually near-identical
+   at phone sizes, dramatically cheaper to render while scrolling. */
+@media (pointer: coarse) {
+  .backdrop-blur-xl,
+  .backdrop-blur-lg,
+  .backdrop-blur-md,
+  .backdrop-blur-sm {
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+  }
+}
+
+/* ---- iOS zoom guard ---------------------------------------------------
+   Mobile Safari force-zooms into any text field whose font-size is under
+   16px and never zooms back out. Guarantee every text control is ≥16px on
+   touch devices (pinch-zoom stays available; the viewport isn't locked). */
+@media (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}

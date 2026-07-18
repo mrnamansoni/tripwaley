@@ -1,0 +1,71 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getPackage, getCity, priceFor, getSettings } from "@/lib/catalog";
+
+/**
+ * Booking intent capture. Every submit is validated, priced server-side,
+ * given an id, and forwarded to the ops webhook (n8n → Twenty CRM).
+ * If the webhook is down the client still gets its WhatsApp handoff —
+ * no lead is ever silently lost on the visitor's side.
+ *
+ * env: TW_BOOKING_WEBHOOK — n8n webhook URL (optional in dev)
+ */
+
+export async function POST(req: NextRequest) {
+  let body: Record<string, unknown>;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ ok: false, error: "bad json" }, { status: 400 });
+  }
+
+  const packageSlug = String(body.packageSlug ?? "");
+  const citySlug = String(body.citySlug ?? "");
+  const date = String(body.date ?? "");
+  const occupancy = String(body.occupancy ?? "triple") as "triple" | "double";
+  const pax = Math.min(20, Math.max(1, Number(body.pax ?? 1)));
+  const name = String(body.name ?? "").slice(0, 80);
+  const phone = String(body.phone ?? "").slice(0, 20);
+
+  const pkg = getPackage(packageSlug);
+  const city = getCity(citySlug);
+  if (!pkg || !city) {
+    return NextResponse.json({ ok: false, error: "unknown package or city" }, { status: 400 });
+  }
+
+  const rule = priceFor(packageSlug, citySlug);
+  const seat = rule?.[occupancy] ?? rule?.triple ?? rule?.double;
+  const total = seat ? seat * pax : null;
+  const settings = getSettings();
+  const advance = total ? Math.round((total * settings.advancePercent) / 100) : null;
+
+  const bookingId = `TW-${Date.now().toString(36).toUpperCase()}`;
+  const payload = {
+    event: "booking_intent",
+    bookingId,
+    createdAt: new Date().toISOString(),
+    package: { slug: pkg.slug, code: pkg.code, name: pkg.name },
+    fromCity: { slug: city.slug, name: city.name },
+    date,
+    occupancy,
+    pax,
+    quote: { seat, total, advancePercent: settings.advancePercent, advance, currency: "INR" },
+    contact: { name, phone },
+    utm: body.utm ?? null,
+    source: "website",
+  };
+
+  // fire-and-forget to ops; a CRM hiccup must never block the visitor
+  const hook = process.env.TW_BOOKING_WEBHOOK;
+  if (hook) {
+    fetch(hook, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(4000),
+    }).catch((e) => console.error("[book] webhook failed:", e?.message));
+  } else {
+    console.log("[book] lead (no webhook configured):", JSON.stringify(payload));
+  }
+
+  return NextResponse.json({ ok: true, bookingId, quote: payload.quote });
+}

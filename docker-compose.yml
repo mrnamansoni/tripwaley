@@ -1,0 +1,35 @@
+# Tripwaley — production compose for Dokploy.
+#
+# Deliberately does NOT publish a host port. On a shared VPS running other
+# Dokploy apps, publishing e.g. "3000:3000" on the host risks colliding with
+# Dokploy's own dashboard (which defaults to host port 3000) or any other
+# service's port. Instead, Dokploy's Traefik proxy reaches this container over
+# Dokploy's internal Docker network using the *container* port (3000) — set
+# that in the Application's Domains tab as "Container Port". No host port is
+# ever claimed, so this can never conflict with anything else on the VPS.
+#
+# The two named volumes below are what make the admin CMS data and uploaded
+# photos survive redeploys — Dokploy will create them on first deploy.
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      # set the real values in Dokploy's Environment tab — do NOT commit secrets
+      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH}
+      SESSION_SECRET: ${SESSION_SECRET}
+      N8N_WEBHOOK_URL: ${N8N_WEBHOOK_URL:-}
+    volumes:
+      - tripwaley_data:/app/data # catalog / reviews / bookings JSON (all admin edits)
+      - tripwaley_uploads:/app/public/uploads # photos uploaded via the admin panel
+      - tripwaley_imgcache:/app/.next/cache/images # optimized WebP cache (encode once)
+    expose:
+      - "3000" # documents the container port; not published to the host
+
+volumes:
+  tripwaley_data:
+  tripwaley_uploads:
+  tripwaley_imgcache:
