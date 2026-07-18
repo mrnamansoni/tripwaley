@@ -9,13 +9,14 @@ import { AdminProvider, useAdmin, Field, Area, Btn, Head, input, label } from ".
 import PackagesEditor from "./PackagesEditor";
 import MediaManager from "./MediaManager";
 import ContentEditor from "./ContentEditor";
+import PagesEditor from "./PagesEditor";
 import FaqEditor from "./FaqEditor";
 import StoriesEditor from "./StoriesEditor";
 import SettingsEditor from "./SettingsEditor";
 import { inr, shortDate } from "@/lib/types";
 import type { City, Departure, PriceRule, Review } from "@/lib/types";
 
-const TABS = ["Dashboard", "Content", "Packages", "Prices", "Departures", "Cities", "Media", "Reviews", "FAQ", "Stories", "Settings", "Bookings"] as const;
+const TABS = ["Dashboard", "Content", "Pages", "Packages", "Prices", "Departures", "Cities", "Media", "Reviews", "FAQ", "Stories", "Settings", "Bookings"] as const;
 type Tab = (typeof TABS)[number];
 
 export default function AdminApp() {
@@ -61,6 +62,7 @@ function Shell() {
       <main className="min-w-0 flex-1 p-6 sm:p-9">
         {tab === "Dashboard" && <Dashboard go={setTab} />}
         {tab === "Content" && <ContentEditor />}
+        {tab === "Pages" && <PagesEditor />}
         {tab === "Packages" && <PackagesEditor />}
         {tab === "Prices" && <PricesEditor />}
         {tab === "Departures" && <DeparturesEditor />}

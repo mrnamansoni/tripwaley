@@ -29,7 +29,7 @@ export interface ExplorerDeparture {
   fromPrices: Record<string, number>;
 }
 
-export default function TripsExplorer({ packages, departures }: { packages: ExplorerPackage[]; departures: ExplorerDeparture[] }) {
+export default function TripsExplorer({ packages, departures, showRack = true, showGrid = true }: { packages: ExplorerPackage[]; departures: ExplorerDeparture[]; showRack?: boolean; showGrid?: boolean }) {
   const { city } = useCity();
   const [month, setMonth] = useState<string>("all");
 
@@ -56,6 +56,7 @@ export default function TripsExplorer({ packages, departures }: { packages: Expl
   return (
     <>
       {/* the rack */}
+      {showRack && (
       <section className="bg-[#0d0b09] py-[9vh]">
         <div className="mx-auto w-full max-w-7xl px-5 sm:px-8">
           <div className="flex flex-wrap items-end justify-between gap-4">
@@ -95,8 +96,10 @@ export default function TripsExplorer({ packages, departures }: { packages: Expl
           })}
         </div>
       </section>
+      )}
 
       {/* the grid */}
+      {showGrid && (
       <section className="bg-cream py-[9vh]">
         <div className="mx-auto w-full max-w-7xl px-5 sm:px-8">
           <div className="flex flex-wrap items-center justify-between gap-4">
@@ -158,6 +161,7 @@ export default function TripsExplorer({ packages, departures }: { packages: Expl
           )}
         </div>
       </section>
+      )}
     </>
   );
 }

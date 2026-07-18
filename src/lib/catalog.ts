@@ -5,8 +5,8 @@
  */
 
 import { readCatalog, readReviews } from "./store";
-import type { BlogPost, City, Departure, Faq, Package, PriceRule, Review, Settings, VideoTestimonial } from "./types";
-import { resolveSlot as resolveSlotPure, resolveContent as resolveContentPure, DEFAULT_VIDEO_TESTIMONIAL } from "./types";
+import type { BlogPost, City, Departure, Faq, Package, PriceRule, Review, Settings, VideoTestimonial, WireEntry } from "./types";
+import { resolveSlot as resolveSlotPure, resolveContent as resolveContentPure, resolvePageSection, DEFAULT_VIDEO_TESTIMONIAL } from "./types";
 import {
   collections as collectionDefaults,
   galleryPhotos as galleryDefaults,
@@ -80,6 +80,25 @@ export const getVideoTestimonial = (): VideoTestimonial => ({
   ...DEFAULT_VIDEO_TESTIMONIAL,
   ...(readCatalog().settings.videoTestimonial ?? {}),
 });
+
+/** is a page section switched on? (admin Pages tab; unset = registry default) */
+export const sectionOn = (page: "trips" | "destinations", key: string): boolean =>
+  resolvePageSection(readCatalog().pageSections, page, key);
+
+const DEFAULT_WIRE: WireEntry[] = [
+  { name: "Sneha", city: "Pune", act: "held a seat on", trip: "Manali · next batch" },
+  { name: "Kabir", city: "Delhi", act: "just booked", trip: "Jibhi · next batch" },
+  { name: "Ishita", city: "Mumbai", act: "joined the waitlist for", trip: "Kashmir · Aug" },
+  { name: "Dev", city: "Bengaluru", act: "paid the balance for", trip: "Kedarkantha · Dec" },
+  { name: "Mira", city: "Jaipur", act: "just booked", trip: "Manikaran · next batch" },
+  { name: "Aarav", city: "Kochi", act: "held a seat on", trip: "Rishikesh · next batch" },
+];
+
+/** admin-curated live-booking wire entries (falls back to a seeded set) */
+export const getWire = (): WireEntry[] => {
+  const w = readCatalog().wire;
+  return w && w.length ? w : DEFAULT_WIRE;
+};
 export const getCities = (): City[] => readCatalog().cities;
 export const getPricedCities = (): City[] => readCatalog().cities.filter((c) => c.priced);
 export const getCity = (slug: string): City | undefined => readCatalog().cities.find((c) => c.slug === slug);

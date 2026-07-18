@@ -138,6 +138,14 @@ export interface Booking {
   price: number | null;
   source: string;
 }
+/** one entry on the live-booking wire band (admin-curated, no real PII) */
+export interface WireEntry {
+  name: string;
+  city: string;
+  act: string; // e.g. "held a seat on" / "just booked"
+  trip: string; // e.g. "Spiti · 19 Jul"
+}
+
 export interface Catalog {
   settings: Settings;
   cities: City[];
@@ -152,6 +160,50 @@ export interface Catalog {
   faqs?: Faq[];
   /** blog / stories. */
   posts?: BlogPost[];
+  /** per-page section on/off switches, keyed [page][sectionKey] (admin Pages tab) */
+  pageSections?: Record<string, Record<string, boolean>>;
+  /** live-booking wire entries (admin-curated) */
+  wire?: WireEntry[];
+}
+
+/* ------------------------------------------------ page section registry
+
+   Every toggleable band on /trips and /destinations. The registry is code;
+   the on/off state lives in Catalog.pageSections (admin "Pages" tab).
+   Missing state = the default below, so new sections ship on. */
+
+export interface PageSectionDef {
+  page: "trips" | "destinations";
+  key: string;
+  label: string;
+  hint?: string;
+  default: boolean;
+}
+
+export const PAGE_SECTION_DEFS: PageSectionDef[] = [
+  { page: "trips", key: "rack", label: "Departures rack", hint: "boarding-pass stubs of the next real departures", default: true },
+  { page: "trips", key: "countdown", label: "Final Boarding countdown", hint: "flip-clock to the next departure + pulsing seat map", default: true },
+  { page: "trips", key: "grid", label: "Catalog grid", hint: "the filterable all-trips grid", default: true },
+  { page: "trips", key: "wire", label: "Live booking wire", hint: "the ticking feed of recent bookings (entries below)", default: true },
+  { page: "trips", key: "atlas", label: "Atlas table", hint: "grab-and-throw photo map of destinations", default: true },
+  { page: "destinations", key: "zodiac", label: "Zodiac orbit ring", hint: "regions orbiting a spinning ring of type", default: true },
+  { page: "destinations", key: "regions", label: "Region groups", hint: "the per-region package sections", default: true },
+  { page: "destinations", key: "daynight", label: "Day / Night seam", hint: "draggable before-after of day vs night", default: true },
+  { page: "destinations", key: "reel", label: "Video reel", hint: "also needs Settings → Video testimonial enabled", default: true },
+  { page: "destinations", key: "album", label: "Album wall", hint: "three-lane parallax photo masonry", default: true },
+  { page: "destinations", key: "weather", label: "Weather strip", default: true },
+  { page: "destinations", key: "seasons", label: "Seasons band", default: true },
+  { page: "destinations", key: "cta", label: "CTA band", default: true },
+];
+
+export function resolvePageSection(
+  sections: Record<string, Record<string, boolean>> | undefined,
+  page: string,
+  key: string
+): boolean {
+  const def = PAGE_SECTION_DEFS.find((d) => d.page === page && d.key === key);
+  const saved = sections?.[page]?.[key];
+  return typeof saved === "boolean" ? saved : (def?.default ?? true);
 }
 
 /* ------------------------------------------------ image slot registry
@@ -185,6 +237,10 @@ export const SLOT_DEFS: SlotDef[] = [
   { key: "home.moments", group: "Homepage · Moments", label: "Moment photos", hint: "One per moment panel — order: bonfire · astro · rapids · backwaters · summit", kind: "list", defaults: ["/images/camp-tents.jpg", "/images/stars.jpg", "/images/rishikesh.jpg", "/images/backwater-canoe.jpg", "/images/snowtrek.jpg"], max: 8 },
   { key: "destinations.regions", group: "Destinations page", label: "Region tile photos", hint: "Order: Himachal · Uttarakhand · Kashmir · Rajasthan · Goa", kind: "list", defaults: ["/images/himalaya-sunrise.jpg", "/images/snowtrek.jpg", "/images/kashmir.jpg", "/images/rajasthan.jpg", "/images/andaman.jpg"], max: 8 },
   { key: "collections.cards", group: "Collections page", label: "Collection card photos", hint: "One per collection card, in order", kind: "list", defaults: ["/images/himalaya-sunrise.jpg", "/images/tent-view.jpg", "/images/rajasthan.jpg", "/images/andaman.jpg", "/images/snowtrek.jpg", "/images/stars.jpg"], max: 12 },
+  { key: "destinations.album", group: "Destinations page", label: "Album wall photos", hint: "The 3-lane parallax wall — captions edited in Content", kind: "list", defaults: ["/images/tw-g-forest1.jpg", "/images/tw-snow-throw.jpg", "/images/tw-g-kasol-huts.jpg", "/images/tw-bonfire.jpg", "/images/tw-night-terrace.jpg", "/images/tw-rafting.jpg", "/images/tw-g-shivacafe1.jpg", "/images/tw-hero-huddle.jpg", "/images/tw-g-fountain.jpg"], max: 12 },
+  { key: "daynight.day", group: "Destinations page", label: "Day/Night — DAY photo", hint: "Left side of the draggable seam", kind: "single", defaults: ["/images/tw-manikaran.jpg"] },
+  { key: "daynight.night", group: "Destinations page", label: "Day/Night — NIGHT photo", hint: "Right side of the draggable seam", kind: "single", defaults: ["/images/tw-night-terrace.jpg"] },
+  { key: "atlas.tiles", group: "Trips page", label: "Atlas table photos", hint: "The grab-and-throw map table — labels edited in Content", kind: "list", defaults: ["/images/tw-manikaran.jpg", "/images/tw-snowfield.jpg", "/images/tw-rajasthan-fort.jpg", "/images/tw-waterfall-banner.jpg", "/images/tw-bus-roof.jpg", "/images/tw-g-kasol-huts.jpg", "/images/tw-rafting.jpg", "/images/tw-snow-road.jpg", "/images/tw-manali-night.jpg", "/images/tw-g-mannat.jpg", "/images/tw-bonfire.jpg", "/images/tw-hero-deodar.jpg"], max: 16 },
 ];
 
 export function resolveSlot(media: Record<string, string[]> | undefined, key: string): string[] {
@@ -234,6 +290,34 @@ export const CONTENT_DEFS: ContentDef[] = [
   { key: "footer.headline", group: "Homepage · Footer curtain", label: "Curtain headline", kind: "line", default: "…not of the map." },
   { key: "footer.sub", group: "Homepage · Footer curtain", label: "Curtain sub-line", kind: "multiline", default: "Somewhere a batch is boarding without you — Spiti at first light, Kashmir in bloom, Meghalaya after the rain. All still unstamped in your passport." },
   { key: "footer.cue", group: "Homepage · Footer curtain", label: "Curtain cue", kind: "line", default: "keep pulling ↓" },
+
+  /* ---- /trips page bands ---- */
+  { key: "trips.countdown.headline", group: "Trips page", label: "Countdown headline", kind: "line", default: "Seats melt." },
+  { key: "trips.countdown.accent", group: "Trips page", label: "Countdown accent (gold line)", kind: "line", default: "Clock's honest." },
+  { key: "trips.countdown.sub", group: "Trips page", label: "Countdown sub-line", kind: "multiline", default: "This is the real clock to the next batch leaving your city. When it hits zero, the bus leaves — with or without your name on a seat." },
+  { key: "trips.wire.headline", group: "Trips page", label: "Wire headline", kind: "line", default: "Somebody books" },
+  { key: "trips.wire.accent", group: "Trips page", label: "Wire accent (red line)", kind: "line", default: "every few minutes." },
+  { key: "trips.wire.sub", group: "Trips page", label: "Wire sub-line", kind: "multiline", default: "The booking wire, slightly delayed so nobody's boss sees them planning." },
+  { key: "trips.atlas.headline", group: "Trips page", label: "Atlas headline", kind: "line", default: "Grab the map." },
+  { key: "trips.atlas.accent", group: "Trips page", label: "Atlas accent (red word)", kind: "line", default: "Throw it." },
+  { key: "trips.atlas.sub", group: "Trips page", label: "Atlas sub-line", kind: "multiline", default: "Drag anywhere — momentum does the rest. Every region on one table." },
+  { key: "trips.atlas.labels", group: "Trips page", label: "Atlas tile labels (one per line, in photo order)", kind: "multiline", default: "Manikaran · N 32°\nKedarkantha · N 31°\nRajasthan · N 26°\nJibhi · N 31°\nManali · N 32°\nKasol · N 32°\nBeas rapids · N 32°\nRohtang · N 32°\nMall Road · N 32°\nMannat gate · N 31°\nBonfire camp · N 31°\nDeodar forest · N 32°" },
+
+  /* ---- /destinations page bands ---- */
+  { key: "dest.zodiac.headline", group: "Destinations page", label: "Zodiac headline", kind: "line", default: "Wherever it stops," },
+  { key: "dest.zodiac.accent", group: "Destinations page", label: "Zodiac accent (red line)", kind: "line", default: "you win." },
+  { key: "dest.zodiac.sub", group: "Destinations page", label: "Zodiac sub-line", kind: "multiline", default: "Every region in constant orbit. Tap one to hold the sky still — it'll take you straight to its batches." },
+  { key: "dest.zodiac.ringText", group: "Destinations page", label: "Zodiac ring text (circular type)", kind: "line", default: "TRIPWALEY · 14 STATES · 350 DEPARTURES · ONE CREW ·" },
+  { key: "dest.daynight.headline", group: "Destinations page", label: "Day/Night headline", kind: "line", default: "Day job." },
+  { key: "dest.daynight.accent", group: "Destinations page", label: "Day/Night accent (gold)", kind: "line", default: "Night shift." },
+  { key: "dest.daynight.sub", group: "Destinations page", label: "Day/Night sub-line", kind: "multiline", default: "Same itinerary, two personalities. Temple queues till six, terrace lights after." },
+  { key: "dest.daynight.dayLabel", group: "Destinations page", label: "Day/Night — day chip", kind: "line", default: "06:00 · manikaran" },
+  { key: "dest.daynight.nightLabel", group: "Destinations page", label: "Day/Night — night chip", kind: "line", default: "23:00 · valley lights" },
+  { key: "dest.album.eyebrow", group: "Destinations page", label: "Album eyebrow", kind: "line", default: "shot on 14 different phones" },
+  { key: "dest.album.headline", group: "Destinations page", label: "Album headline", kind: "line", default: "Proof it" },
+  { key: "dest.album.accent", group: "Destinations page", label: "Album accent (gold word)", kind: "line", default: "happened." },
+  { key: "dest.album.sub", group: "Destinations page", label: "Album sub-line", kind: "multiline", default: "Unstaged, uncropped, occasionally out of focus — exactly how memory works." },
+  { key: "dest.album.captions", group: "Destinations page", label: "Album captions (one per line, in photo order)", kind: "multiline", default: "deodar cathedral, entry free\nsnow fight: everyone lost\nkasol huts, population us\nbonfire committee in session\nvalley lights, no filter\narms tired. worth it.\nshiva cafe sunlight\nhuddle up, day six\nfountain break, jaipur" },
 ];
 
 export function resolveContent(content: Record<string, string> | undefined, key: string): string {

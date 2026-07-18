@@ -6,7 +6,10 @@ import CityProvider from "@/components/site/CityProvider";
 import CurtainFooter from "@/components/site/CurtainFooter";
 import { WeatherStrip, SeasonsBand, CtaBand } from "@/components/site/PageExtras";
 import VideoReel from "@/components/site/VideoReel";
-import { getCities, getSettings, getLivePackages, getVideoTestimonial, fromPrice, inr, nightsLabel, slot } from "@/lib/catalog";
+import ZodiacRing from "@/components/site/ZodiacRing";
+import DayNightSeam from "@/components/site/DayNightSeam";
+import AlbumWall from "@/components/site/AlbumWall";
+import { getCities, getSettings, getLivePackages, getVideoTestimonial, sectionOn, slotOne, text, fromPrice, inr, nightsLabel, slot } from "@/lib/catalog";
 
 export const metadata: Metadata = {
   title: "Destinations — where the batches go | Tripwaley",
@@ -35,6 +38,9 @@ export default function DestinationsPage() {
     packages: live.filter((p) => r.test.test(`${p.name} ${p.destination} ${p.route}`)),
   })).filter((g) => g.packages.length > 0);
 
+  const albumCaptions = text("dest.album.captions").split("\n").map((l) => l.trim()).filter(Boolean);
+  const albumPhotos = slot("destinations.album").map((src, i) => ({ src, note: albumCaptions[i] ?? "" }));
+
   return (
     <CityProvider cities={cities} defaultCity={settings.defaultCity}>
       <Navbar overDarkHero />
@@ -48,8 +54,18 @@ export default function DestinationsPage() {
           </div>
         </section>
 
-        {groups.map((g, gi) => (
-          <section key={g.slug} className={`py-[9vh] ${gi % 2 ? "bg-blush" : "bg-cream"}`}>
+        {sectionOn("destinations", "zodiac") && (
+          <ZodiacRing
+            items={groups.map((g) => ({ img: g.image, label: g.name, href: `#${g.slug}` }))}
+            headline={text("dest.zodiac.headline")}
+            accent={text("dest.zodiac.accent")}
+            sub={text("dest.zodiac.sub")}
+            ringText={text("dest.zodiac.ringText")}
+          />
+        )}
+
+        {sectionOn("destinations", "regions") && groups.map((g, gi) => (
+          <section key={g.slug} id={g.slug} className={`scroll-mt-24 py-[9vh] ${gi % 2 ? "bg-blush" : "bg-cream"}`}>
             <div className="mx-auto w-full max-w-7xl px-5 sm:px-8">
               <div className="grid gap-8 lg:grid-cols-[1fr_1.6fr]">
                 {/* region marquee tile */}
@@ -88,14 +104,34 @@ export default function DestinationsPage() {
           </section>
         ))}
 
-        {vt.enabled && <VideoReel vt={vt} />}
-        <WeatherStrip />
-        <SeasonsBand />
-        <CtaBand
+        {sectionOn("destinations", "daynight") && (
+          <DayNightSeam
+            day={slotOne("daynight.day")}
+            night={slotOne("daynight.night")}
+            dayLabel={text("dest.daynight.dayLabel")}
+            nightLabel={text("dest.daynight.nightLabel")}
+            headline={text("dest.daynight.headline")}
+            accent={text("dest.daynight.accent")}
+            sub={text("dest.daynight.sub")}
+          />
+        )}
+        {sectionOn("destinations", "reel") && vt.enabled && <VideoReel vt={vt} />}
+        {sectionOn("destinations", "album") && albumPhotos.length >= 3 && (
+          <AlbumWall
+            photos={albumPhotos}
+            eyebrow={text("dest.album.eyebrow")}
+            headline={text("dest.album.headline")}
+            accent={text("dest.album.accent")}
+            sub={text("dest.album.sub")}
+          />
+        )}
+        {sectionOn("destinations", "weather") && <WeatherStrip />}
+        {sectionOn("destinations", "seasons") && <SeasonsBand />}
+        {sectionOn("destinations", "cta") && <CtaBand
           whatsappLink={settings.whatsappLink}
           script="fourteen states, one decision"
           title="Pick a direction. We pack the rest."
-        />
+        />}
       </main>
       <CurtainFooter whatsappLink={settings.whatsappLink} announcement={settings.announcement} />
     </CityProvider>

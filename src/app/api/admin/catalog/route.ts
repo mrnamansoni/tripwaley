@@ -10,8 +10,8 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { sameOrigin } from "@/lib/auth";
 import { listMedia, readBookings, readCatalog, readReviews, writeCatalog, writeReviews } from "@/lib/store";
-import { SLOT_DEFS, CONTENT_DEFS, resolveSlot } from "@/lib/types";
-import type { BlogPost, Catalog, City, Departure, Faq, Package, PriceRule, Review } from "@/lib/types";
+import { SLOT_DEFS, CONTENT_DEFS, resolveSlot, PAGE_SECTION_DEFS } from "@/lib/types";
+import type { BlogPost, Catalog, City, Departure, Faq, Package, PriceRule, Review, WireEntry } from "@/lib/types";
 
 export async function GET() {
   const cat = readCatalog();
@@ -32,7 +32,7 @@ const isStr = (v: unknown): v is string => typeof v === "string";
 const isNum = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v);
 
 function validate(section: string, data: unknown): string | null {
-  const objectSections = new Set(["settings", "media", "content"]);
+  const objectSections = new Set(["settings", "media", "content", "pageSections"]);
   if (!Array.isArray(data) && !objectSections.has(section)) return "expected an array";
   switch (section) {
     case "settings": {
@@ -71,6 +71,20 @@ function validate(section: string, data: unknown): string | null {
     }
     case "faqs":
       return (data as Faq[]).every((f) => isStr(f.q) && isStr(f.a)) ? null : "invalid faq row";
+    case "pageSections": {
+      const ps = data as Record<string, unknown>;
+      const known = new Set(PAGE_SECTION_DEFS.map((d) => `${d.page}.${d.key}`));
+      for (const [page, sections] of Object.entries(ps)) {
+        if (typeof sections !== "object" || sections === null) return `invalid sections for page ${page}`;
+        for (const [key, val] of Object.entries(sections as Record<string, unknown>)) {
+          if (!known.has(`${page}.${key}`)) return `unknown page section ${page}.${key}`;
+          if (typeof val !== "boolean") return `section ${page}.${key} must be boolean`;
+        }
+      }
+      return null;
+    }
+    case "wire":
+      return (data as WireEntry[]).every((w) => isStr(w.name) && isStr(w.city) && isStr(w.act) && isStr(w.trip)) ? null : "invalid wire row";
     case "posts":
       return (data as BlogPost[]).every(
         (p) => isStr(p.slug) && p.slug && isStr(p.title) && typeof p.published === "boolean"
@@ -108,6 +122,8 @@ export async function PUT(req: Request) {
     if (section === "content") cat.content = { ...cat.content, ...(data as Record<string, string>) };
     if (section === "faqs") cat.faqs = data as Faq[];
     if (section === "posts") cat.posts = data as BlogPost[];
+    if (section === "pageSections") cat.pageSections = data as Record<string, Record<string, boolean>>;
+    if (section === "wire") cat.wire = data as WireEntry[];
     writeCatalog(cat);
   }
 
