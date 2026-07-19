@@ -152,7 +152,7 @@ function PricesEditor() {
       <Head title="Prices" sub="₹ per seat. Blank = not sold from that city. Two boxes per cell: triple | double.">
         <Btn onClick={() => save("prices", rules)}>Save prices</Btn>
       </Head>
-      <div className="overflow-x-auto rounded-2xl border border-white/10">
+      <div data-lenis-prevent className="overflow-x-auto rounded-2xl border border-white/10">
         <table className="w-full min-w-[60rem] text-left text-sm">
           <thead className="bg-black/40 text-[0.58rem] font-bold uppercase tracking-widest text-white/45">
             <tr>
@@ -333,7 +333,7 @@ function BookingsView() {
   return (
     <>
       <Head title="Bookings & leads" sub="Every 'hold my seat' lands here (and forwards to n8n → CRM when configured)." />
-      <div className="overflow-x-auto rounded-2xl border border-white/10">
+      <div data-lenis-prevent className="overflow-x-auto rounded-2xl border border-white/10">
         <table className="w-full min-w-[52rem] text-left text-sm">
           <thead className="bg-black/40 text-[0.58rem] font-bold uppercase tracking-widest text-white/45">
             <tr>

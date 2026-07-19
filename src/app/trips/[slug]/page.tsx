@@ -22,6 +22,7 @@ import {
   packageImages,
   nightsLabel,
   inr,
+  minRate,
   shortDate,
   weekday,
 } from "@/lib/catalog";
@@ -68,9 +69,7 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
   const priced = citiesPricedFor(slug);
   const deps = upcomingDepartures({ packageSlug: slug, limit: 12 });
   const geo = DEST_GEO.find(([re]) => re.test(`${pkg.name} ${pkg.destination} ${pkg.route}`))?.[1];
-  const minPrice = priced.length
-    ? Math.min(...priced.flatMap(({ rule }) => [rule.triple, rule.double].filter(Boolean) as number[]))
-    : undefined;
+  const minPrice = minRate(...priced.flatMap(({ rule }) => [rule.triple, rule.double]));
 
   const barDeps: BarDeparture[] = deps.map((d) => ({ date: d.date, citySlugs: d.cities.map((c) => c.slug) }));
   const barPrices: BarPrices = Object.fromEntries(priced.map(({ city, rule }) => [city.slug, { triple: rule.triple, double: rule.double }]));
@@ -97,7 +96,7 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
                   {chip}
                 </span>
               ))}
-              {minPrice && (
+              {minPrice != null && (
                 <span className="rounded-full bg-gold px-4 py-2 text-[0.66rem] font-extrabold uppercase tracking-wider text-ink">
                   from {inr(minPrice)}
                 </span>
@@ -236,7 +235,7 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
                 <p className="font-mono text-[0.62rem] font-bold uppercase tracking-[0.3em] text-gold">fare board · all boarding points</p>
                 <p className="font-mono text-[0.58rem] uppercase tracking-[0.2em] text-white/35">per seat · all-inclusive</p>
               </div>
-              <div className="overflow-x-auto">
+              <div data-lenis-prevent className="overflow-x-auto">
                 <table className="w-full min-w-[28rem] text-left">
                   <thead>
                     <tr className="text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white/40">

@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "@/lib/gsap";
 import RouteDraw from "@/components/svg/RouteDraw";
-import { testimonials, vibes, waLink } from "@/lib/data";
+import { testimonials, vibes } from "@/lib/data";
+import { useBooking } from "@/components/booking/BookingContext";
 
 const MAX_PICKS = 3;
 
@@ -17,6 +18,7 @@ function scoreFor(picked: string[]): number {
 }
 
 export default function VibeCheck() {
+  const { waLink } = useBooking();
   const [picked, setPicked] = useState<string[]>([]);
   const [revealed, setRevealed] = useState(false);
   const resultRef = useRef<HTMLDivElement>(null);

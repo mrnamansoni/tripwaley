@@ -29,13 +29,18 @@ export default function CityProvider({
   children: React.ReactNode;
 }) {
   const priced = cities.filter((c) => c.priced);
-  const fallback = priced.find((c) => c.slug === defaultCity) ?? priced[0];
+  // Never crash the entire site if an admin unprices (or deletes) every city —
+  // fall back to the full list, then to a synthetic placeholder city.
+  const pool: City[] = priced.length ? priced : cities;
+  const fallback: City =
+    pool.find((c) => c.slug === defaultCity) ??
+    pool[0] ?? { slug: "delhi", name: "Delhi", state: "Delhi", lat: 28.6, lng: 77.2, priced: true };
   const [slug, setSlug] = useState(fallback.slug);
   const [detected, setDetected] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem(KEY);
-    if (saved && priced.some((c) => c.slug === saved)) {
+    if (saved && pool.some((c) => c.slug === saved)) {
       setTimeout(() => setSlug(saved), 0);
       return;
     }
@@ -47,7 +52,7 @@ export default function CityProvider({
           const { latitude, longitude } = pos.coords;
           let best = fallback;
           let bd = Infinity;
-          for (const c of priced) {
+          for (const c of pool) {
             const d = (c.lat - latitude) ** 2 + (c.lng - longitude) ** 2;
             if (d < bd) { bd = d; best = c; }
           }
@@ -68,8 +73,8 @@ export default function CityProvider({
     localStorage.setItem(KEY, s);
   }, []);
 
-  const city = priced.find((c) => c.slug === slug) ?? fallback;
-  return <Ctx.Provider value={{ city, cities: priced, setCity, detected }}>{children}</Ctx.Provider>;
+  const city = pool.find((c) => c.slug === slug) ?? fallback;
+  return <Ctx.Provider value={{ city, cities: pool, setCity, detected }}>{children}</Ctx.Provider>;
 }
 
 /* The navbar / band chip that names the visitor's city and opens the switcher */

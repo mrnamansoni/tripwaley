@@ -17,8 +17,9 @@ const priceLabel = (n: number) => (n > 0 ? `from ${formatINR(n)}` : "on request"
 
 /**
  * Conversion modal: "Hold My Seat" (free 24h hold) and "Pay Token & Book".
- * Endpoints are placeholders (/api/hold-seat, /api/book-token) ready to be
- * pointed at the real booking service.
+ * The hold submits to /api/lead — the SAME durable pipeline the booking bar
+ * uses (persists the lead + forwards to n8n/CRM). The optional token step
+ * (/api/book-token) is the payment-gateway integration point.
  */
 export default function HoldSeatModal({ mode, initialTrip, trips, onClose }: Props) {
   const [phase, setPhase] = useState<Phase>("form");
@@ -49,25 +50,32 @@ export default function HoldSeatModal({ mode, initialTrip, trips, onClose }: Pro
     e.preventDefault();
     setError(null);
     const data = new FormData(e.currentTarget);
-    const phone = String(data.get("phone") ?? "").replace(/\D/g, "");
+    // strip any country-code / leading-zero prefix before validating (a visitor
+    // may type +91 or 0 ahead of the 10 digits)
+    const digits = String(data.get("phone") ?? "").replace(/\D/g, "");
+    const phone = digits.length > 10 ? digits.slice(-10) : digits;
     if (!/^[6-9]\d{9}$/.test(phone)) {
       setError("Enter a valid 10-digit Indian mobile number.");
       return;
     }
     setPhase("submitting");
     try {
-      const res = await fetch("/api/hold-seat", {
+      // the SAME durable pipeline the booking bar uses: persists the lead to the
+      // bookings log and forwards to n8n/CRM. (The old /api/hold-seat was a
+      // placeholder that discarded the lead entirely.)
+      const res = await fetch("/api/lead", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: data.get("name"),
+          name: String(data.get("name") ?? ""),
           phone,
-          trip: selected.slug,
-          departure: selected.dateLabel,
-          intent: mode,
+          package: selected.slug,
+          date: selected.dateLabel,
+          price: selected.priceFrom > 0 ? selected.priceFrom : null,
+          source: mode === "token" ? "hold-modal-token" : "hold-modal",
         }),
       });
-      if (!res.ok) throw new Error("hold failed");
+      if (!res.ok) throw new Error("lead failed");
       setPhase("held");
     } catch {
       setPhase("form");

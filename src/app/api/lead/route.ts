@@ -45,6 +45,7 @@ export async function POST(req: Request) {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ event: "seat_hold", ...row }),
+      signal: AbortSignal.timeout(6000), // don't let a hung n8n pile up open sockets
     }).catch(() => {});
   }
 

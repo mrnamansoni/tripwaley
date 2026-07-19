@@ -22,7 +22,9 @@ export async function POST(req: NextRequest) {
   const citySlug = String(body.citySlug ?? "");
   const date = String(body.date ?? "");
   const occupancy = String(body.occupancy ?? "triple") as "triple" | "double";
-  const pax = Math.min(20, Math.max(1, Number(body.pax ?? 1)));
+  // guard against non-numeric pax ("abc" → NaN → corrupts the whole quote)
+  const paxNum = Number(body.pax);
+  const pax = Number.isFinite(paxNum) ? Math.min(20, Math.max(1, Math.round(paxNum))) : 1;
   const name = String(body.name ?? "").slice(0, 80);
   const phone = String(body.phone ?? "").slice(0, 20);
 
@@ -34,9 +36,9 @@ export async function POST(req: NextRequest) {
 
   const rule = priceFor(packageSlug, citySlug);
   const seat = rule?.[occupancy] ?? rule?.triple ?? rule?.double;
-  const total = seat ? seat * pax : null;
+  const total = seat != null ? seat * pax : null;
   const settings = getSettings();
-  const advance = total ? Math.round((total * settings.advancePercent) / 100) : null;
+  const advance = total != null ? Math.round((total * settings.advancePercent) / 100) : null;
 
   const bookingId = `TW-${Date.now().toString(36).toUpperCase()}`;
   const payload = {

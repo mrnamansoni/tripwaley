@@ -123,7 +123,7 @@ export default function FinalBoarding({
 
           <div className="mt-8 flex flex-wrap items-center gap-5">
             <Link href={`/trips/${next.slug}`} className="inline-flex min-h-12 items-center rounded-full bg-gold px-8 py-3.5 font-extrabold text-[#0e0c0a] shadow-card-lg transition-transform hover:scale-[1.04]">
-              {price ? `Lock ${inr(price)} now` : "Hold my seat"}
+              {price != null ? `Lock ${inr(price)} now` : "Hold my seat"}
             </Link>
             <p className="text-xs text-white/45">hold is free · cancel in one tap</p>
           </div>

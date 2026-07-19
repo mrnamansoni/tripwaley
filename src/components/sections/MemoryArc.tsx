@@ -127,7 +127,7 @@ export default function MemoryArc({
       const arcCenterY = apexY + arcR;
       const spread = isMobile ? 100 : 130;
       const startAngle = -90 - spread / 2;
-      const step = spread / (N - 1);
+      const step = N > 1 ? spread / (N - 1) : 0; // guard: single-photo gallery
       // sweep just enough that the arc visibly shuffles while staying full;
       // ends with the last photos centered (the "stop on the last image" beat)
       const shuffle = -t3 * spread * 0.3;

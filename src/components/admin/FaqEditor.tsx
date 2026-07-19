@@ -5,16 +5,12 @@
 
 import { useState } from "react";
 import { useAdmin, Btn, Head, Field, Area } from "./ui";
-import type { Faq } from "@/lib/types";
-
-const DEFAULT_SEED: Faq[] = [
-  { q: "Are these trips solo-friendly?", a: "Completely. Most travellers join solo and end up in a tight batch by day two." },
-  { q: "What does the price include?", a: "Stays, most meals, transport from the boarding city, permits and your trip captain." },
-];
+import { DEFAULT_FAQS, type Faq } from "@/lib/types";
 
 export default function FaqEditor() {
   const { data, save } = useAdmin();
-  const [faqs, setFaqs] = useState<Faq[]>(data.catalog.faqs?.length ? data.catalog.faqs : DEFAULT_SEED);
+  // seed from the SAME default the live site renders when catalog.faqs is unset
+  const [faqs, setFaqs] = useState<Faq[]>(data.catalog.faqs?.length ? data.catalog.faqs : DEFAULT_FAQS);
   const upd = (i: number, patch: Partial<Faq>) => setFaqs((f) => f.map((x, j) => (j === i ? { ...x, ...patch } : x)));
   const move = (i: number, dir: -1 | 1) =>
     setFaqs((f) => {

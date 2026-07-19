@@ -6,6 +6,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "@/lib/gsap";
+import { useMediaQuery } from "@/lib/useMediaQuery";
 import type { Review } from "@/lib/types";
 
 const HUES = [340, 205, 155, 25, 275, 105, 185, 315];
@@ -25,15 +26,7 @@ export default function DrumReviews({
   const ref = useRef<HTMLElement>(null);
   const drumRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 639px)");
-    const set = () => setIsMobile(mq.matches);
-    set();
-    mq.addEventListener("change", set);
-    return () => mq.removeEventListener("change", set);
-  }, []);
+  const isMobile = useMediaQuery("(max-width: 639px)");
 
   // Two constraints pick the radius:
   // 1. Fit: perspective projection scales a card at translateZ(R) by P/(P−R),

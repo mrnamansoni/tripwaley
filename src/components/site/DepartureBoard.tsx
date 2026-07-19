@@ -135,7 +135,7 @@ export default function DepartureBoard({
                 <span className="mt-2.5 flex items-end justify-between border-t border-dashed border-ink/15 pt-2.5">
                   <span>
                     <span className="block text-[0.52rem] font-bold uppercase tracking-widest text-ink/40">ex-{city.name} · from</span>
-                    <span className="font-display text-xl font-extrabold text-ink">{price ? inr(price) : "—"}</span>
+                    <span className="font-display text-xl font-extrabold text-ink">{price != null ? inr(price) : "—"}</span>
                   </span>
                   <span className="inline-flex h-9 items-center rounded-full bg-ink px-4 text-xs font-bold text-cream transition-colors group-hover:bg-brand">
                     Hold →

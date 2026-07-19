@@ -26,13 +26,19 @@ const FILES = {
 
 /* ------------------------------------------------ bootstrap & seeding */
 
+let seeded = false;
+
 function ensureSeeded() {
+  // once per process — a single page render fans out to hundreds of catalog
+  // reads; re-running 5 fs.existsSync checks each time is pure blocking waste.
+  if (seeded) return;
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
   if (!fs.existsSync(FILES.catalog)) fs.copyFileSync(SEED_CATALOG, FILES.catalog);
   if (!fs.existsSync(FILES.reviews)) fs.copyFileSync(SEED_REVIEWS, FILES.reviews);
   if (!fs.existsSync(FILES.bookings)) fs.writeFileSync(FILES.bookings, "[]");
   const uploads = path.join(PUBLIC_DIR, "uploads");
   if (!fs.existsSync(uploads)) fs.mkdirSync(uploads, { recursive: true });
+  seeded = true;
 }
 
 /* ------------------------------------------------ mtime-memoised reads */

@@ -87,7 +87,7 @@ export default function Collections({ items = defaultCollections }: { items?: Co
           </div>
         </div>
 
-        <div className="mt-8 snap-x snap-mandatory overflow-x-auto pb-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:snap-none md:overflow-visible md:pb-0">
+        <div data-lenis-prevent className="mt-8 snap-x snap-mandatory overflow-x-auto pb-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:snap-none md:overflow-visible md:pb-0">
           <div ref={trackRef} className="flex w-max items-stretch gap-4 px-5 sm:gap-6 sm:px-8">
             {items.map((c, i) => (
               <a

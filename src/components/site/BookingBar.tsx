@@ -81,7 +81,7 @@ export default function BookingBar({
       gsap.fromTo("[data-bb-stamp]", { autoAlpha: 0, scale: 2.4, rotate: 12 }, { autoAlpha: 1, scale: 1, rotate: -7, duration: 0.35, ease: "power4.in", delay: 0.75 });
     });
     const msg = encodeURIComponent(
-      `Hi Tripwaley! Hold a seat for me:\n• ${packageName}\n• From ${city.name}\n• ${chosen ? `${weekday(chosen)}, ${shortDate(chosen)}` : "next batch"}\n• ${occ} sharing${seat ? ` — ${inr(seat)}/seat` : ""}${name ? `\n• Name: ${name}` : ""}\n• Mobile: ${phone.replace(/[^\d]/g, "").slice(-10)}`
+      `Hi Tripwaley! Hold a seat for me:\n• ${packageName}\n• From ${city.name}\n• ${chosen ? `${weekday(chosen)}, ${shortDate(chosen)}` : "next batch"}\n• ${occ} sharing${seat != null ? ` — ${inr(seat)}/seat` : ""}${name ? `\n• Name: ${name}` : ""}\n• Mobile: ${phone.replace(/[^\d]/g, "").slice(-10)}`
     );
     setTimeout(() => {
       window.open(`https://wa.me/${whatsapp}?text=${msg}`, "_blank", "noopener");
@@ -106,7 +106,7 @@ export default function BookingBar({
               <button type="button" onClick={() => setModal(false)} aria-label="Close" className="text-2xl leading-none text-white/40 hover:text-white">×</button>
             </div>
             <p className="mt-1.5 text-sm text-white/50">
-              {packageName} · ex-{city.name} · {chosen ? `${weekday(chosen)}, ${shortDate(chosen)}` : "next batch"} · {occ}{seat ? ` · ${inr(seat)}/seat` : ""}
+              {packageName} · ex-{city.name} · {chosen ? `${weekday(chosen)}, ${shortDate(chosen)}` : "next batch"} · {occ}{seat != null ? ` · ${inr(seat)}/seat` : ""}
             </p>
 
             <label className="mt-6 block text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white/45">
@@ -187,7 +187,7 @@ export default function BookingBar({
             {packageName} · ex-{city.name}
           </p>
           <p className="font-display text-lg font-extrabold leading-tight text-white sm:text-2xl">
-            {seat ? inr(seat) : "on request"}
+            {seat != null ? inr(seat) : "on request"}
             <span className="ml-1.5 text-[0.58rem] font-bold uppercase tracking-wider text-white/40 sm:text-[0.62rem]">/seat</span>
           </p>
         </div>

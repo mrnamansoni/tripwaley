@@ -109,7 +109,7 @@ export default function RootLayout({
         />
         <SiteChrome bar={settings.announcementBar} popup={settings.leadPopup} />
         <SmoothScroll>
-          <BookingProvider trips={bookingTrips}>{children}</BookingProvider>
+          <BookingProvider trips={bookingTrips} whatsapp={settings.whatsapp}>{children}</BookingProvider>
         </SmoothScroll>
       </body>
     </html>

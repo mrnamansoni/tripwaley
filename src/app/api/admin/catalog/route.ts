@@ -30,6 +30,12 @@ const IMG_PATH = /^\/(images|uploads)\/[\w.\-]+\.(jpe?g|png|webp)$/i;
 
 const isStr = (v: unknown): v is string => typeof v === "string";
 const isNum = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v);
+/** real calendar date, not just the right shape (rejects 2026-13-45) */
+const isValidISODate = (s: unknown): boolean => {
+  if (typeof s !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const dt = new Date(`${s}T00:00:00Z`);
+  return !Number.isNaN(dt.getTime()) && dt.toISOString().slice(0, 10) === s;
+};
 
 function validate(section: string, data: unknown): string | null {
   const objectSections = new Set(["settings", "media", "content", "pageSections"]);
@@ -48,7 +54,7 @@ function validate(section: string, data: unknown): string | null {
     case "prices":
       return (data as PriceRule[]).every((r) => isStr(r.packageSlug) && isStr(r.citySlug) && (r.triple == null || isNum(r.triple)) && (r.double == null || isNum(r.double))) ? null : "invalid price rule";
     case "departures":
-      return (data as Departure[]).every((d) => /^\d{4}-\d{2}-\d{2}$/.test(d.date) && isStr(d.packageSlug) && Array.isArray(d.citySlugs)) ? null : "invalid departure row";
+      return (data as Departure[]).every((d) => isValidISODate(d.date) && isStr(d.packageSlug) && Array.isArray(d.citySlugs)) ? null : "invalid departure row";
     case "reviews":
       return (data as Review[]).every((r) => isStr(r.name) && isStr(r.text) && isNum(r.rating) && r.rating >= 1 && r.rating <= 5) ? null : "invalid review row";
     case "media": {

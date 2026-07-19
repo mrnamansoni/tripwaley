@@ -76,6 +76,15 @@ export interface City {
 }
 export interface ItineraryDay { day: number; title: string; body: string; image?: string }
 export interface Faq { q: string; a: string }
+/** The live-site FAQ fallback (used when catalog.faqs is unset). Defined here
+ *  in the client-safe module so the admin FAQ editor seeds from the exact same
+ *  list the site renders — no divergent hardcoded copy. */
+export const DEFAULT_FAQS: Faq[] = [
+  { q: "Are these trips solo-friendly?", a: "Completely. Most of our travellers join solo — you're placed in a small batch with a certified trip captain, and by day two it feels like a friend group." },
+  { q: "What does the price include?", a: "Stays, most meals, all transport from the boarding city, permits, and your trip captain. The exact inclusions are listed on every trip page — no hidden costs." },
+  { q: "How do I hold a seat?", a: "Tap 'Hold a seat', drop your number, and we block it free for 24 hours while you decide. No payment needed to hold." },
+  { q: "What's the cancellation policy?", a: "Free cancellation until 7 days before departure. Closer to the date, partial refunds apply — the full policy is shared before you pay." },
+];
 export interface BlogPost {
   slug: string;
   title: string;
@@ -354,6 +363,14 @@ export function packageImages(p: Package): string[] {
 /* ------------------------------------------------ formatting */
 
 export const inr = (n: number) => `₹${n.toLocaleString("en-IN")}`;
+
+/** Smallest defined seat rate. Treats ₹0 as a real price (a promo/comped seat);
+ *  returns undefined only when NO rate is set — never Infinity from Math.min([]).
+ *  Use this instead of `[...].filter(Boolean)` on prices, which drops a real 0. */
+export function minRate(...rates: (number | undefined | null)[]): number | undefined {
+  const nums = rates.filter((r): r is number => typeof r === "number" && Number.isFinite(r));
+  return nums.length ? Math.min(...nums) : undefined;
+}
 export function shortDate(iso: string): string {
   const d = new Date(iso + "T00:00:00");
   return d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });

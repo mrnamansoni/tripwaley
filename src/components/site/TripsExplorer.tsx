@@ -131,7 +131,9 @@ export default function TripsExplorer({ packages, departures, showRack = true, s
           <div className="mt-9 grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
             {grid.map((p) => {
               const price = p.fromPrices[city.slug] ?? Object.values(p.fromPrices)[0];
-              const next = departures.find((d) => d.packageSlug === p.slug && (d.citySlugs.includes(city.slug) || true));
+              const next =
+                departures.find((d) => d.packageSlug === p.slug && d.citySlugs.includes(city.slug)) ??
+                departures.find((d) => d.packageSlug === p.slug);
               return (
                 <Link key={p.slug} href={`/trips/${p.slug}`} className="group overflow-hidden rounded-2xl border border-line bg-card shadow-sm transition-all hover:-translate-y-1 hover:shadow-card-lg sm:rounded-3xl">
                   <div className="relative aspect-[4/3] overflow-hidden">

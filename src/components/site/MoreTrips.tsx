@@ -31,7 +31,7 @@ export default function MoreTrips({ trips }: { trips: MoreTrip[] }) {
           More escapes<span className="text-gold">.</span>
         </h2>
         <p className="mt-2 text-[0.62rem] font-bold uppercase tracking-[0.3em] text-white/40">
-          {current ? `${current.name}${current.price ? ` · from ${inr(current.price)}` : ""}` : ""}
+          {current ? `${current.name}${current.price != null ? ` · from ${inr(current.price)}` : ""}` : ""}
         </p>
       </div>
 

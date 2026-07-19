@@ -22,6 +22,10 @@ export interface BookingTrip {
 
 interface BookingState {
   open: (mode: BookingMode, trip?: string) => void;
+  /** the real, admin-configured WhatsApp number (digits) — so header/nav
+   *  WhatsApp links never fall back to a hardcoded placeholder. */
+  whatsapp: string;
+  waLink: (text: string) => string;
 }
 
 const BookingCtx = createContext<BookingState | null>(null);
@@ -35,14 +39,21 @@ export function useBooking(): BookingState {
 /** Global provider so any section (hero card, bento, CTA band) can launch booking.
  *  `trips` is resolved server-side (real packages + next departures) and handed
  *  to the modal so the dropdown never shows placeholder destinations. */
-export function BookingProvider({ children, trips = [] }: { children: ReactNode; trips?: BookingTrip[] }) {
+export function BookingProvider({ children, trips = [], whatsapp = "" }: { children: ReactNode; trips?: BookingTrip[]; whatsapp?: string }) {
   const [modal, setModal] = useState<{ mode: BookingMode; trip?: string } | null>(null);
 
   const open = useCallback((mode: BookingMode, trip?: string) => {
     setModal({ mode, trip });
   }, []);
 
-  const value = useMemo(() => ({ open }), [open]);
+  const value = useMemo(
+    () => ({
+      open,
+      whatsapp,
+      waLink: (text: string) => `https://wa.me/${whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(text)}`,
+    }),
+    [open, whatsapp]
+  );
 
   return (
     <BookingCtx.Provider value={value}>

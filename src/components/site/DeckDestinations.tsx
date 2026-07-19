@@ -10,6 +10,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
+import { useMediaQuery } from "@/lib/useMediaQuery";
 import SpinCarousel from "./SpinCarousel";
 import { useCity } from "./CityProvider";
 import { inr } from "@/lib/types";
@@ -48,17 +49,16 @@ function CardFace({ c, sizes }: { c: DeckCard; sizes: string }) {
 export default function DeckDestinations({ cards, eyebrow = "somewhere in here is your next trip" }: { cards: DeckCard[]; eyebrow?: string }) {
   const ref = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
-  const [isTouch, setIsTouch] = useState(false);
+  const isTouch = useMediaQuery("(pointer: coarse)");
   const { city } = useCity();
 
   useEffect(() => {
-    if (window.matchMedia("(pointer: coarse)").matches) {
-      setIsTouch(true);
+    if (isTouch) {
       // section height changes drastically when the carousel replaces the
       // pinned coverflow — recompute every trigger below it
       requestAnimationFrame(() => ScrollTrigger.refresh());
     }
-  }, []);
+  }, [isTouch]);
 
   useEffect(() => {
     if (isTouch) return; // carousel mode needs no ScrollTrigger
@@ -104,7 +104,7 @@ export default function DeckDestinations({ cards, eyebrow = "somewhere in here i
             {activeCard?.name}
           </h2>
           <p className="mt-1 text-[0.62rem] font-bold uppercase tracking-[0.3em] text-white/40">
-            {price ? `from ${inr(price)} ex-${city.name}` : activeCard?.destination || activeCard?.nightsLabel}
+            {price != null ? `from ${inr(price)} ex-${city.name}` : activeCard?.destination || activeCard?.nightsLabel}
           </p>
         </div>
 

@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { LogoLockup } from "@/components/ui/Logo";
-import { navLinks, waLink } from "@/lib/data";
+import { navLinks } from "@/lib/data";
 import { useBooking } from "@/components/booking/BookingContext";
 
 export default function Navbar({ overDarkHero = false }: { overDarkHero?: boolean }) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const { open } = useBooking();
+  const { open, waLink } = useBooking();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
