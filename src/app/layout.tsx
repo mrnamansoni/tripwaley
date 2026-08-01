@@ -6,6 +6,12 @@ import { BookingProvider } from "@/components/booking/BookingContext";
 import SiteChrome from "@/components/site/SiteChrome";
 import { getSettings, getLivePackages, upcomingDepartures, fromPrice, shortDate } from "@/lib/catalog";
 
+// every page reads admin-edited data (catalog.json, media, settings) straight
+// off disk on each request — force dynamic rendering everywhere so an admin
+// save is live on the very next request, instead of waiting on Next's static
+// route cache to notice the on-demand revalidatePath() call from the save API.
+export const dynamic = "force-dynamic";
+
 const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
   variable: "--font-bricolage",
