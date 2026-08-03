@@ -5,8 +5,8 @@
  */
 
 import { readCatalog, readReviews } from "./store";
-import type { BlogPost, City, Departure, Faq, Package, PriceRule, Review, Settings, VideoTestimonial, WireEntry } from "./types";
-import { resolveSlot as resolveSlotPure, resolveContent as resolveContentPure, resolvePageSection, minRate, DEFAULT_FAQS, DEFAULT_VIDEO_TESTIMONIAL } from "./types";
+import type { BlogPost, City, Departure, Faq, Package, PriceRule, Review, Settings, TripCategory, VideoTestimonial, WireEntry } from "./types";
+import { resolveSlot as resolveSlotPure, resolveContent as resolveContentPure, resolvePageSection, minRate, inCategory, DEFAULT_FAQS, DEFAULT_VIDEO_TESTIMONIAL } from "./types";
 import {
   collections as collectionDefaults,
   galleryPhotos as galleryDefaults,
@@ -127,6 +127,9 @@ function normalizePackage(p: Package): Package {
 }
 
 export const getLivePackages = (): Package[] => readCatalog().packages.filter((p) => p.status === "live").map(normalizePackage);
+/** live trips that belong on a given landing page (group / honeymoon / solo) */
+export const getPackagesByCategory = (cat: TripCategory): Package[] =>
+  getLivePackages().filter((p) => inCategory(p, cat));
 export const getRichPackages = (): Package[] => getLivePackages().filter((p) => p.rich || p.itinerary.length > 0);
 export const getPackage = (slug: string): Package | undefined => {
   const p = readCatalog().packages.find((x) => x.slug === slug);

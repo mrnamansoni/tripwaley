@@ -4,7 +4,18 @@ import "./globals.css";
 import SmoothScroll from "@/components/providers/SmoothScroll";
 import { BookingProvider } from "@/components/booking/BookingContext";
 import SiteChrome from "@/components/site/SiteChrome";
-import { getSettings, getLivePackages, upcomingDepartures, fromPrice, shortDate } from "@/lib/catalog";
+import VideoAutoPause from "@/components/site/VideoAutoPause";
+import { SearchProvider, type SearchItem } from "@/components/site/SearchProvider";
+import {
+  getSettings,
+  getLivePackages,
+  upcomingDepartures,
+  fromPrice,
+  shortDate,
+  nightsLabel,
+  packageImages,
+  packageCategories,
+} from "@/lib/catalog";
 
 // every page reads admin-edited data (catalog.json, media, settings) straight
 // off disk on each request — force dynamic rendering everywhere so an admin
@@ -98,8 +109,22 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const settings = getSettings();
+  const live = getLivePackages();
+
+  // search index — built once here and handed to the overlay, so searching
+  // needs no endpoint and no round-trip
+  const searchItems: SearchItem[] = live.map((p) => ({
+    slug: p.slug,
+    name: p.name,
+    destination: p.destination || p.route,
+    nightsLabel: nightsLabel(p),
+    media: p.heroMedia || packageImages(p)[0],
+    price: fromPrice(p.slug),
+    keywords: `${p.route} ${p.destination} ${p.departureHubs} ${packageCategories(p).join(" ")}`.toLowerCase(),
+  }));
+
   // real, bookable trips for the global Hold-my-seat modal (soonest departure first)
-  const bookingTrips = getLivePackages()
+  const bookingTrips = live
     .map((p) => {
       const next = upcomingDepartures({ packageSlug: p.slug, limit: 1 })[0];
       return { slug: p.slug, name: p.name, date: next?.date ?? "", priceFrom: fromPrice(p.slug) ?? 0 };
@@ -114,8 +139,11 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <SiteChrome bar={settings.announcementBar} popup={settings.leadPopup} />
+        <VideoAutoPause />
         <SmoothScroll>
-          <BookingProvider trips={bookingTrips} whatsapp={settings.whatsapp}>{children}</BookingProvider>
+          <SearchProvider items={searchItems}>
+            <BookingProvider trips={bookingTrips} whatsapp={settings.whatsapp}>{children}</BookingProvider>
+          </SearchProvider>
         </SmoothScroll>
       </body>
     </html>

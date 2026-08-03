@@ -10,7 +10,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { sameOrigin } from "@/lib/auth";
 import { listMedia, readBookings, readCatalog, readReviews, writeCatalog, writeReviews } from "@/lib/store";
-import { SLOT_DEFS, CONTENT_DEFS, resolveSlot, PAGE_SECTION_DEFS } from "@/lib/types";
+import { SLOT_DEFS, CONTENT_DEFS, resolveSlot, PAGE_SECTION_DEFS, isValidMediaRef, CATEGORY_DEFS } from "@/lib/types";
 import type { BlogPost, Catalog, City, Departure, Faq, Package, PriceRule, Review, WireEntry } from "@/lib/types";
 
 export async function GET() {
@@ -26,9 +26,14 @@ export async function GET() {
   });
 }
 
-const IMG_PATH = /^\/(images|uploads)\/[\w.\-]+\.(jpe?g|png|webp)$/i;
+const CATEGORY_KEYS = new Set<string>(CATEGORY_DEFS.map((c) => c.key));
 
 const isStr = (v: unknown): v is string => typeof v === "string";
+/** optional media ref: unset/blank is fine, otherwise must be a real ref */
+const okMedia = (v: unknown): boolean => v == null || v === "" || isValidMediaRef(v);
+/** optional link the admin pastes (itinerary PDF, etc.) */
+const okLink = (v: unknown): boolean =>
+  v == null || v === "" || (typeof v === "string" && /^https?:\/\//i.test(v) && v.length <= 500);
 const isNum = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v);
 /** real calendar date, not just the right shape (rejects 2026-13-45) */
 const isValidISODate = (s: unknown): boolean => {
@@ -49,8 +54,21 @@ function validate(section: string, data: unknown): string | null {
     }
     case "cities":
       return (data as City[]).every((c) => isStr(c.slug) && c.slug && isStr(c.name) && isNum(c.lat) && isNum(c.lng)) ? null : "invalid city row";
-    case "packages":
-      return (data as Package[]).every((p) => isStr(p.slug) && p.slug && isStr(p.name) && (p.status === "live" || p.status === "draft")) ? null : "invalid package row";
+    case "packages": {
+      for (const p of data as Package[]) {
+        if (!isStr(p.slug) || !p.slug || !isStr(p.name) || (p.status !== "live" && p.status !== "draft")) return "invalid package row";
+        if (p.categories != null && (!Array.isArray(p.categories) || !p.categories.every((c) => CATEGORY_KEYS.has(c)))) {
+          return `invalid categories on ${p.slug}`;
+        }
+        if (!okLink(p.itineraryPdf)) return `itinerary PDF on ${p.slug} must be a full http(s) link`;
+        if (!okMedia(p.heroMedia)) return `invalid hero media on ${p.slug}`;
+        if (p.images != null && (!Array.isArray(p.images) || !p.images.every(isValidMediaRef))) return `invalid gallery on ${p.slug}`;
+        if (p.itinerary != null && (!Array.isArray(p.itinerary) || !p.itinerary.every((d) => okMedia(d.image)))) {
+          return `invalid day photo on ${p.slug}`;
+        }
+      }
+      return null;
+    }
     case "prices":
       return (data as PriceRule[]).every((r) => isStr(r.packageSlug) && isStr(r.citySlug) && (r.triple == null || isNum(r.triple)) && (r.double == null || isNum(r.double))) ? null : "invalid price rule";
     case "departures":
@@ -62,7 +80,7 @@ function validate(section: string, data: unknown): string | null {
       const known = new Set(SLOT_DEFS.map((d) => d.key));
       for (const [key, arr] of Object.entries(m)) {
         if (!known.has(key)) return `unknown slot ${key}`;
-        if (!Array.isArray(arr) || !arr.every((p) => typeof p === "string" && IMG_PATH.test(p))) return `invalid images for slot ${key}`;
+        if (!Array.isArray(arr) || !arr.every(isValidMediaRef)) return `invalid media for slot ${key}`;
       }
       return null;
     }

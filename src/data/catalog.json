@@ -1351,6 +1351,747 @@
    "status": "live",
    "rich": false,
    "hasDepartures": true
+  },
+  {
+   "type": "Group Departure",
+   "transport": "Private cab + houseboat stay",
+   "route": "",
+   "addons": [],
+   "trekOptions": [],
+   "travelTips": [],
+   "thingsToCarry": [],
+   "cityDetails": {},
+   "status": "live",
+   "rich": true,
+   "hasDepartures": true,
+   "itineraryPdf": "",
+   "heroMedia": "",
+   "code": "TRWLY-HM01",
+   "slug": "kashmir-honeymoon-shikara-days",
+   "name": "Kashmir — Shikara Days, Gulmarg Nights",
+   "destination": "Srinagar · Gulmarg · Pahalgam",
+   "nights": 6,
+   "bestTime": "March–October, and December for snow",
+   "departureHubs": "Delhi / Jaipur / Banaras",
+   "images": [
+    "/images/houseboat.jpg",
+    "/images/kashmir.jpg",
+    "/images/tw-night-terrace.jpg"
+   ],
+   "summaryFromDelhi": "KASHMIR HONEYMOON — SRINAGAR, GULMARG & PAHALGAM\n5 Nights / 6 Days · Private trip for two\n\nThe one everybody pictures when they say honeymoon, done without the crowds. Two nights on a cedar-panelled houseboat on Dal Lake, a morning shikara ride while the lake is still glass, the Gulmarg gondola above the treeline, and two unhurried days in the Betaab valley at Pahalgam.\n\nNo group, no fixed roll call. A private cab and driver stay with you for the whole trip, so the day starts when you're ready for it to start.\n\nWHAT MAKES IT DIFFERENT\nThe houseboat is booked whole, not by the room. The Pahalgam property is chosen for the valley-facing balcony, not the star rating. And your planner has personally stayed in both.",
+   "socialProof": "Booked it three days after the wedding. The shikara at 6 AM with nobody else on the lake is the photo we printed.",
+   "scarcityNote": "Houseboats book out 6–8 weeks ahead for the tulip season.",
+   "inclusions": [
+    "5 nights stay — 2 on a private Dal Lake houseboat, 3 in valley-facing hotels",
+    "Daily breakfast and dinner for two",
+    "Private cab with driver for the entire trip",
+    "Airport pickup and drop at Srinagar",
+    "One-hour private shikara ride on Dal Lake",
+    "Flower-decorated room on the night you arrive",
+    "One candlelit dinner for two",
+    "Gulmarg gondola phase-1 tickets for two",
+    "All tolls, parking and driver charges"
+   ],
+   "exclusions": [
+    "Flights to and from Srinagar",
+    "Gondola phase-2 tickets",
+    "Pony rides and local guides at Betaab / Aru valley",
+    "Lunches, and anything personal",
+    "Travel insurance"
+   ],
+   "itinerary": [
+    {
+     "day": 1,
+     "title": "Land in Srinagar → the houseboat",
+     "body": "Met at the airport and driven straight to Dal Lake. Your houseboat is booked whole — carved cedar, a private deck, and tea whenever you ask for it. The room is decorated for your arrival. Evening is deliberately empty: sit on the deck and watch the lake go orange.",
+     "image": "/images/houseboat.jpg"
+    },
+    {
+     "day": 2,
+     "title": "Sunrise shikara, then the old city",
+     "body": "Out on the water by six, before the lake wakes up — this is the hour the photographs come from. Back for a long breakfast, then the Mughal gardens, Shalimar and Nishat, in the afternoon. Dinner back on the boat.",
+     "image": "/images/kashmir.jpg"
+    },
+    {
+     "day": 3,
+     "title": "Gulmarg — above the treeline",
+     "body": "A two-hour drive up to Gulmarg and the gondola over the pines. In summer it's meadow and wildflowers; in winter you step out into deep snow. Back down to Srinagar for the night, or stay up top if you'd rather — just tell your planner.",
+     "image": "/images/tw-snowfield.jpg"
+    },
+    {
+     "day": 4,
+     "title": "Down to Pahalgam",
+     "body": "The drive follows the Lidder river past saffron fields and cricket-bat workshops. Pahalgam is the slow half of this trip: your room faces the valley, and the plan for the evening is intentionally nothing at all.",
+     "image": "/images/tw-g-forest1.jpg"
+    },
+    {
+     "day": 5,
+     "title": "Betaab valley, and the candlelit dinner",
+     "body": "Morning in the Betaab and Aru valleys — pine, meltwater, and very few people if you go early. The candlelit dinner is tonight, set up wherever the property has the best view.",
+     "image": "/images/tw-night-terrace.jpg"
+    },
+    {
+     "day": 6,
+     "title": "Srinagar, and home",
+     "body": "An unhurried morning, a stop for saffron and kahwa on the way, and your drop at Srinagar airport.",
+     "image": "/images/kashmir.jpg"
+    }
+   ],
+   "categories": [
+    "honeymoon"
+   ]
+  },
+  {
+   "type": "Group Departure",
+   "transport": "Private cab + private houseboat",
+   "route": "",
+   "addons": [],
+   "trekOptions": [],
+   "travelTips": [],
+   "thingsToCarry": [],
+   "cityDetails": {},
+   "status": "live",
+   "rich": true,
+   "hasDepartures": true,
+   "itineraryPdf": "",
+   "heroMedia": "",
+   "code": "TRWLY-HM02",
+   "slug": "kerala-honeymoon-hills-backwaters",
+   "name": "Kerala — Tea Hills & a Houseboat of Your Own",
+   "destination": "Munnar · Thekkady · Alleppey",
+   "nights": 6,
+   "bestTime": "September–March",
+   "departureHubs": "Kochi / Delhi / Banaras",
+   "images": [
+    "/images/kerala.jpg",
+    "/images/backwater-canoe.jpg",
+    "/images/houseboat.jpg"
+   ],
+   "summaryFromDelhi": "KERALA HONEYMOON — MUNNAR, THEKKADY & ALLEPPEY\n5 Nights / 6 Days · Private trip for two\n\nMist on the tea slopes for the first half, water for the second. Munnar for the cold mornings and the endless green, Thekkady for the spice country, then a houseboat in Alleppey that is yours alone — crew, cook, and a sun deck nobody else is on.\n\nThe pace is the point. Nothing before 9 AM unless you ask for it.\n\nWHAT MAKES IT DIFFERENT\nThe Alleppey houseboat is a private single-bedroom boat, not a shared cabin on a bigger one. The Munnar stay looks straight down a tea valley. Both were picked in person.",
+   "socialProof": "The houseboat cook made us a fish curry we still talk about. And there was genuinely nobody else on the boat.",
+   "scarcityNote": "December and January weekends go early.",
+   "inclusions": [
+    "5 nights stay — 2 Munnar, 1 Thekkady, 1 private Alleppey houseboat, 1 Kochi",
+    "All meals on the houseboat, breakfast elsewhere",
+    "Private air-conditioned cab for the whole route",
+    "Kochi airport pickup and drop",
+    "Flower-decorated room on arrival",
+    "One candlelit dinner for two",
+    "Spice plantation walk with a guide",
+    "All tolls, parking and driver charges"
+   ],
+   "exclusions": [
+    "Flights to and from Kochi",
+    "Periyar boating and safari tickets",
+    "Lunches and dinners outside the houseboat",
+    "Anything personal"
+   ],
+   "itinerary": [
+    {
+     "day": 1,
+     "title": "Kochi → Munnar",
+     "body": "Picked up at Kochi and driven up through rubber and spice country. The last hour is all tea. Your room faces the valley; the evening is yours.",
+     "image": "/images/kerala.jpg"
+    },
+    {
+     "day": 2,
+     "title": "Munnar, slowly",
+     "body": "Tea estates, the Attukad falls, and Top Station if the sky is clear. Mornings here are genuinely cold — good excuse to stay in longer.",
+     "image": "/images/himalaya-sunrise.jpg"
+    },
+    {
+     "day": 3,
+     "title": "Thekkady and the spice trail",
+     "body": "Down to Thekkady, a guided walk through cardamom, pepper and vanilla, and a quiet evening in the plantation belt.",
+     "image": "/images/tw-g-forest2.jpg"
+    },
+    {
+     "day": 4,
+     "title": "The houseboat",
+     "body": "Board your own houseboat at Alleppey around noon. The boat cruises the narrow canals, moors before sunset, and the crew cooks dinner on board. This is the night people remember.",
+     "image": "/images/houseboat.jpg"
+    },
+    {
+     "day": 5,
+     "title": "Backwater morning → Kochi",
+     "body": "Breakfast on the deck as the boat comes back in, then to Fort Kochi — the Chinese nets, the old streets, and tonight's candlelit dinner.",
+     "image": "/images/backwater-canoe.jpg"
+    },
+    {
+     "day": 6,
+     "title": "Home from Kochi",
+     "body": "A slow breakfast and your drop at Kochi airport.",
+     "image": "/images/kerala.jpg"
+    }
+   ],
+   "categories": [
+    "honeymoon"
+   ]
+  },
+  {
+   "type": "Group Departure",
+   "transport": "Private cab + ferries",
+   "route": "",
+   "addons": [],
+   "trekOptions": [],
+   "travelTips": [],
+   "thingsToCarry": [],
+   "cityDetails": {},
+   "status": "live",
+   "rich": true,
+   "hasDepartures": true,
+   "itineraryPdf": "",
+   "heroMedia": "",
+   "code": "TRWLY-HM03",
+   "slug": "andaman-honeymoon-private-shores",
+   "name": "Andaman — Private Shores",
+   "destination": "Havelock · Neil Island · Port Blair",
+   "nights": 6,
+   "bestTime": "October–May",
+   "departureHubs": "Delhi / Kochi / Jaipur",
+   "images": [
+    "/images/andaman.jpg",
+    "/images/tent-view.jpg",
+    "/images/stars.jpg"
+   ],
+   "summaryFromDelhi": "ANDAMAN HONEYMOON — HAVELOCK & NEIL\n5 Nights / 6 Days · Private trip for two\n\nThe clearest water in India, and enough time to actually swim in it. Two nights on Havelock for Radhanagar sunsets, two on Neil for the quiet, and the ferries between booked in the good class so the crossings are calm.\n\nOptional scuba for two on Havelock — first-timers welcome, and the instructor holds your hand the entire way down.\n\nWHAT MAKES IT DIFFERENT\nBeach-facing rooms on both islands, not garden view. Private transfers on each island. And the schedule leaves two full afternoons with nothing in them.",
+   "socialProof": "Radhanagar at sunset, then bioluminescence the same night. Neither of us had seen water glow before.",
+   "scarcityNote": "Ferry seats and beach-facing rooms are the bottleneck in peak season.",
+   "inclusions": [
+    "5 nights stay — 1 Port Blair, 2 Havelock, 2 Neil (beach-facing)",
+    "Daily breakfast for two",
+    "Private transfers on every island",
+    "Air-conditioned ferry tickets between islands",
+    "Port Blair airport pickup and drop",
+    "Flower-decorated room on arrival",
+    "One candlelit dinner on the beach",
+    "All permits and entry tickets on the itinerary"
+   ],
+   "exclusions": [
+    "Flights to and from Port Blair",
+    "Scuba diving and snorkelling (bookable as an add-on)",
+    "Lunches and dinners not listed",
+    "Anything personal"
+   ],
+   "itinerary": [
+    {
+     "day": 1,
+     "title": "Port Blair, and the light show",
+     "body": "Landing, transfer, and an easy evening — Corbyn's Cove, then the sound-and-light show at the Cellular Jail as it gets dark.",
+     "image": "/images/andaman.jpg"
+    },
+    {
+     "day": 2,
+     "title": "Ferry to Havelock → Radhanagar",
+     "body": "Morning ferry across. Check into a beach-facing room, then Radhanagar for sunset, which is the one everyone has seen a photo of and it still lands.",
+     "image": "/images/andaman.jpg"
+    },
+    {
+     "day": 3,
+     "title": "Havelock — water day",
+     "body": "Elephant beach by boat for snorkelling, or your scuba dive if you've added it. Afternoon deliberately free.",
+     "image": "/images/tent-view.jpg"
+    },
+    {
+     "day": 4,
+     "title": "Neil Island",
+     "body": "A short ferry to the slow island. Bharatpur for the clear shallows, Laxmanpur for the sunset and the natural rock bridge at low tide.",
+     "image": "/images/andaman.jpg"
+    },
+    {
+     "day": 5,
+     "title": "Neil, and the beach dinner",
+     "body": "Nothing scheduled until evening, which is the idea. Candlelit dinner set up on the sand tonight.",
+     "image": "/images/stars.jpg"
+    },
+    {
+     "day": 6,
+     "title": "Back to Port Blair, and home",
+     "body": "Morning ferry back and your airport drop.",
+     "image": "/images/andaman.jpg"
+    }
+   ],
+   "categories": [
+    "honeymoon"
+   ]
+  },
+  {
+   "type": "Group Departure",
+   "transport": "Private cab",
+   "route": "",
+   "addons": [],
+   "trekOptions": [],
+   "travelTips": [],
+   "thingsToCarry": [],
+   "cityDetails": {},
+   "status": "live",
+   "rich": true,
+   "hasDepartures": true,
+   "itineraryPdf": "",
+   "heroMedia": "",
+   "code": "TRWLY-HM04",
+   "slug": "udaipur-honeymoon-lake-days",
+   "name": "Udaipur — Lake Days, Palace Nights",
+   "destination": "Udaipur · Kumbhalgarh",
+   "nights": 4,
+   "bestTime": "October–March",
+   "departureHubs": "Delhi / Jaipur / Agra",
+   "images": [
+    "/images/rajasthan.jpg",
+    "/images/tw-rajasthan-fort.jpg",
+    "/images/tw-g-fountain.jpg"
+   ],
+   "summaryFromDelhi": "UDAIPUR HONEYMOON — LAKE PICHOLA & KUMBHALGARH\n3 Nights / 4 Days · Private trip for two\n\nThe short one — a long weekend that still feels like a proper trip. A lake-facing room in the old city, a private boat on Pichola at golden hour, dinner on a rooftop with the City Palace lit up across the water, and a day out at Kumbhalgarh's ramparts.\n\nIdeal if you have four days, not ten.\n\nWHAT MAKES IT DIFFERENT\nA haveli room actually facing the water, a private sunset boat rather than the shared one, and a planner who books the rooftop table before you arrive.",
+   "socialProof": "Three days and it still felt unhurried. The rooftop dinner with the palace lit up is the memory.",
+   "scarcityNote": "Lake-facing rooms are limited — book ahead for winter weekends.",
+   "inclusions": [
+    "3 nights in a lake-facing heritage haveli",
+    "Daily breakfast for two",
+    "Private cab for the whole trip including Kumbhalgarh",
+    "Udaipur airport or station pickup and drop",
+    "Private sunset boat ride on Lake Pichola",
+    "Flower-decorated room on arrival",
+    "One candlelit rooftop dinner for two",
+    "All tolls, parking and driver charges"
+   ],
+   "exclusions": [
+    "Travel to and from Udaipur",
+    "Monument entry tickets",
+    "Lunches and anything personal"
+   ],
+   "itinerary": [
+    {
+     "day": 1,
+     "title": "Into the old city",
+     "body": "Met and driven to your haveli in the lanes behind Gangaur Ghat. Evening walk to Ambrai ghat for the view back across the water.",
+     "image": "/images/rajasthan.jpg"
+    },
+    {
+     "day": 2,
+     "title": "City Palace, then the private boat",
+     "body": "The City Palace and Crystal Gallery in the morning, Saheliyon-ki-Bari after lunch, then your own boat on Pichola for sunset. Rooftop dinner booked for tonight.",
+     "image": "/images/tw-g-fountain.jpg"
+    },
+    {
+     "day": 3,
+     "title": "Kumbhalgarh",
+     "body": "Out early to the second-longest continuous wall in the world, and the Ranakpur marble temples on the way back. Back in Udaipur by evening.",
+     "image": "/images/tw-rajasthan-fort.jpg"
+    },
+    {
+     "day": 4,
+     "title": "Home",
+     "body": "A last breakfast over the lake and your drop.",
+     "image": "/images/rajasthan.jpg"
+    }
+   ],
+   "categories": [
+    "honeymoon"
+   ]
+  },
+  {
+   "type": "Group Departure",
+   "transport": "Tempo Traveller",
+   "route": "",
+   "addons": [],
+   "trekOptions": [],
+   "travelTips": [],
+   "thingsToCarry": [],
+   "cityDetails": {},
+   "status": "live",
+   "rich": true,
+   "hasDepartures": true,
+   "itineraryPdf": "",
+   "heroMedia": "",
+   "code": "TRWLY-SL01",
+   "slug": "spiti-solo-circuit",
+   "name": "Spiti Solo Circuit",
+   "destination": "Kaza · Chandratal · Key · Hikkim",
+   "nights": 8,
+   "bestTime": "June–September",
+   "departureHubs": "Delhi / Dehradun / Moradabad",
+   "images": [
+    "/images/spiti.jpg",
+    "/images/stars.jpg",
+    "/images/ladakh.jpg"
+   ],
+   "summaryFromDelhi": "SPITI SOLO CIRCUIT — THE FULL LOOP\n7 Nights / 8 Days · Solo-friendly group batch\n\nThe big one, and the trip most of our solo travellers pick as their first. A cold desert at 4,000m, monasteries older than most countries, the highest post office in the world, and a night beside Chandratal where the Milky Way is genuinely bright enough to read by.\n\nBatch size is capped at 16. You'll be matched into a twin-share room with someone your own age and gender — no single supplement, ever.\n\nWHO THIS IS FOR\nPeople who booked one seat and want the group to feel like a friend group by day three. It is high altitude, so there's a deliberate acclimatisation night built in.",
+   "socialProof": "Booked alone, spent eight days with fifteen people I'd now call if I moved cities. Chandratal night is unreal.",
+   "scarcityNote": "Only 16 seats a batch — June and September fill first.",
+   "inclusions": [
+    "7 nights stay — hotels, guesthouses and one Chandratal camp",
+    "All breakfasts and dinners",
+    "Travel from Delhi and back in a Tempo Traveller",
+    "Certified trip captain for the whole batch",
+    "All inner-line permits",
+    "Twin-share room matched by age and gender — no single supplement",
+    "Bonfire nights where the weather allows"
+   ],
+   "exclusions": [
+    "Lunches on the road",
+    "Anything personal, and entry tickets at monasteries",
+    "Travel insurance",
+    "Costs from roadblocks or weather beyond our control"
+   ],
+   "itinerary": [
+    {
+     "day": 1,
+     "title": "Delhi → Shimla (overnight drive)",
+     "body": "Board in Delhi in the evening. Introductions happen in the first hour and the batch group chat has usually already been going for a week.",
+     "image": "/images/tw-g-nightbus1.jpg"
+    },
+    {
+     "day": 2,
+     "title": "Shimla → Chitkul",
+     "body": "Up the Sutlej valley to the last inhabited village before the Tibet border. Cold, green, and very quiet. First night at altitude.",
+     "image": "/images/tw-hero-deodar.jpg"
+    },
+    {
+     "day": 3,
+     "title": "Chitkul → Kalpa → Nako",
+     "body": "Kinnaur Kailash from Kalpa at sunrise if the clouds allow, then the landscape turns from pine to bare rock in the space of two hours. Night at Nako.",
+     "image": "/images/spiti.jpg"
+    },
+    {
+     "day": 4,
+     "title": "Nako → Tabo → Kaza",
+     "body": "Tabo monastery — 1,000 years of continuous use — then Dhankar hanging above the confluence. Into Kaza by evening; this is your acclimatisation base.",
+     "image": "/images/ladakh.jpg"
+    },
+    {
+     "day": 5,
+     "title": "Key, Kibber, Hikkim, Langza",
+     "body": "The postcard day. Key monastery stacked up its hillside, the fossil village at Langza, and a postcard posted from Hikkim at 4,400m — it genuinely arrives.",
+     "image": "/images/spiti.jpg"
+    },
+    {
+     "day": 6,
+     "title": "Kaza → Chandratal",
+     "body": "Over Kunzum La to the moon lake. No network, no buildings, a camp beside the water. Sleep late — the sky is the reason you came.",
+     "image": "/images/stars.jpg"
+    },
+    {
+     "day": 7,
+     "title": "Chandratal → Manali",
+     "body": "Down the Rohtang side through Batal and Gramphu — the roughest and most spectacular stretch of the whole loop. Warm shower and a real bed in Manali.",
+     "image": "/images/tw-snow-road.jpg"
+    },
+    {
+     "day": 8,
+     "title": "Manali → Delhi",
+     "body": "Overnight drive back, arriving Delhi early morning. The group chat does not stop.",
+     "image": "/images/tw-g-nightbus2.jpg"
+    }
+   ],
+   "categories": [
+    "solo"
+   ]
+  },
+  {
+   "type": "Group Departure",
+   "transport": "Volvo + local cabs",
+   "route": "",
+   "addons": [],
+   "trekOptions": [],
+   "travelTips": [],
+   "thingsToCarry": [],
+   "cityDetails": {},
+   "status": "live",
+   "rich": true,
+   "hasDepartures": true,
+   "itineraryPdf": "",
+   "heroMedia": "",
+   "code": "TRWLY-SL02",
+   "slug": "kasol-kheerganga-solo-batch",
+   "name": "Kasol & Kheerganga — Solo Batch",
+   "destination": "Kasol · Tosh · Kheerganga",
+   "nights": 4,
+   "bestTime": "March–June, September–November",
+   "departureHubs": "Delhi / Moradabad / Agra",
+   "images": [
+    "/images/tw-g-kasol-huts.jpg",
+    "/images/tw-g-shivacafe1.jpg",
+    "/images/camp-tents.jpg"
+   ],
+   "summaryFromDelhi": "KASOL & KHEERGANGA — SOLO BATCH\n3 Nights / 4 Days · Solo-friendly group batch\n\nThe cheapest way to find out whether you like travelling with strangers. A long weekend in the Parvati valley: riverside cafés in Kasol, the walk up to Tosh, and the 12 km climb to the Kheerganga hot spring with a night in a camp at the top.\n\nLeaves Friday night, back Monday morning. You don't have to take leave.\n\nWHO THIS IS FOR\nFirst-time solo travellers. It's short, it's cheap, and the trek is genuinely doable by anyone who walks a bit.",
+   "socialProof": "Went for a long weekend not knowing a soul. Ended up in the group chat that planned the next four trips.",
+   "scarcityNote": "Weekend batches fill about ten days out.",
+   "inclusions": [
+    "3 nights — 2 in Kasol riverside stays, 1 in a Kheerganga camp",
+    "All breakfasts and dinners",
+    "Delhi–Kasol–Delhi travel in a Volvo",
+    "Local cabs to Barshaini and back",
+    "Certified trip captain and a local trek guide",
+    "Twin/triple-share matched by age and gender — no single supplement",
+    "Bonfire at the Kasol stay"
+   ],
+   "exclusions": [
+    "Lunches",
+    "Anything personal",
+    "Mule or porter charges on the trek"
+   ],
+   "itinerary": [
+    {
+     "day": 1,
+     "title": "Delhi → Kasol (overnight)",
+     "body": "Friday-night Volvo out of Delhi. You'll have met half the batch before Chandigarh.",
+     "image": "/images/tw-g-nightbus1.jpg"
+    },
+    {
+     "day": 2,
+     "title": "Kasol, Manikaran, Tosh",
+     "body": "Arrive, breakfast by the river, then the hot springs and gurudwara at Manikaran. Afternoon walk up to Tosh for the valley view. Bonfire back in Kasol.",
+     "image": "/images/tw-manikaran.jpg"
+    },
+    {
+     "day": 3,
+     "title": "Kheerganga trek",
+     "body": "12 km up through pine and waterfalls — four to five hours at an easy pace. The hot spring at the top is at 3,000m, and the camp is right beside it.",
+     "image": "/images/tw-g-forest3.jpg"
+    },
+    {
+     "day": 4,
+     "title": "Down, and back to Delhi",
+     "body": "Descend to Barshaini, lunch in Kasol, and the overnight bus home.",
+     "image": "/images/tw-g-kasol-huts.jpg"
+    }
+   ],
+   "categories": [
+    "solo"
+   ]
+  },
+  {
+   "type": "Group Departure",
+   "transport": "Tempo Traveller",
+   "route": "",
+   "addons": [],
+   "trekOptions": [],
+   "travelTips": [],
+   "thingsToCarry": [],
+   "cityDetails": {},
+   "status": "live",
+   "rich": true,
+   "hasDepartures": true,
+   "itineraryPdf": "",
+   "heroMedia": "",
+   "code": "TRWLY-SL03",
+   "slug": "kedarkantha-solo-winter-trek",
+   "name": "Kedarkantha — Solo Winter Trek",
+   "destination": "Sankri · Juda Ka Talab · Kedarkantha summit",
+   "nights": 5,
+   "bestTime": "December–April",
+   "departureHubs": "Dehradun / Delhi",
+   "images": [
+    "/images/snowtrek.jpg",
+    "/images/tw-snowfield.jpg",
+    "/images/tw-snow-throw.jpg"
+   ],
+   "summaryFromDelhi": "KEDARKANTHA — SOLO WINTER TREK\n4 Nights / 5 Days · Solo-friendly group batch\n\nIndia's most-loved beginner winter summit, at 12,500 ft. Deep snow from December, a frozen lake at Juda Ka Talab, and a pre-dawn summit push that puts you on top for sunrise over the Swargarohini range.\n\nNo prior trekking experience needed. If you can walk 5 km without stopping, you can do this.\n\nWHO THIS IS FOR\nSolo travellers who want the summit photo and the group that comes with it. Batches are capped at 15, with a certified mountain guide plus the trip captain.",
+   "socialProof": "Summit at sunrise with fourteen people I'd known four days. Half of us cried. Booked Spiti before we got down.",
+   "scarcityNote": "December–January batches are the first to close every year.",
+   "inclusions": [
+    "4 nights — 1 Sankri guesthouse, 3 in twin-share trekking tents",
+    "All meals from dinner on day 1 to breakfast on day 5",
+    "Dehradun–Sankri–Dehradun transport",
+    "Certified mountain guide, cook and support staff",
+    "Tents, sleeping bags rated for the season, and mats",
+    "Micro-spikes, gaiters and trekking poles",
+    "Forest permits and first-aid kit with oxygen",
+    "No single supplement — tents are shared by age and gender"
+   ],
+   "exclusions": [
+    "Travel to and from Dehradun",
+    "Personal trekking gear and clothing",
+    "Anything personal",
+    "Costs from weather-related changes"
+   ],
+   "itinerary": [
+    {
+     "day": 1,
+     "title": "Dehradun → Sankri",
+     "body": "A long, beautiful drive up the Tons valley. Gear check and briefing at the Sankri guesthouse in the evening.",
+     "image": "/images/tw-hero-deodar.jpg"
+    },
+    {
+     "day": 2,
+     "title": "Sankri → Juda Ka Talab",
+     "body": "Four hours through oak and pine to a frozen lake at 9,100 ft. First night in a tent, and the first proper snow for most of the batch.",
+     "image": "/images/snowtrek.jpg"
+    },
+    {
+     "day": 3,
+     "title": "Juda Ka Talab → Kedarkantha base",
+     "body": "A shorter day up to 11,250 ft, so the afternoon is free for the snow fight that always happens. Early dinner — tomorrow starts in the dark.",
+     "image": "/images/tw-snow-throw.jpg"
+    },
+    {
+     "day": 4,
+     "title": "Summit day → Hargaon",
+     "body": "Head torches on at 3 AM. Three hours up in the cold and dark, and then the sun comes over Swargarohini while you're standing on the top. Down to Hargaon camp for the last night.",
+     "image": "/images/tw-snowfield.jpg"
+    },
+    {
+     "day": 5,
+     "title": "Down to Sankri → Dehradun",
+     "body": "A knee-testing descent through the forest, lunch at Sankri, and the drive back to Dehradun by evening.",
+     "image": "/images/snowtrek.jpg"
+    }
+   ],
+   "categories": [
+    "solo"
+   ]
+  },
+  {
+   "type": "Group Departure",
+   "transport": "Volvo",
+   "route": "",
+   "addons": [],
+   "trekOptions": [],
+   "travelTips": [],
+   "thingsToCarry": [],
+   "cityDetails": {},
+   "status": "live",
+   "rich": true,
+   "hasDepartures": true,
+   "itineraryPdf": "",
+   "heroMedia": "",
+   "code": "TRWLY-SL04",
+   "slug": "rishikesh-solo-weekend",
+   "name": "Rishikesh — Solo Weekend",
+   "destination": "Rishikesh · Shivpuri · Neer falls",
+   "nights": 3,
+   "bestTime": "September–June",
+   "departureHubs": "Delhi / Dehradun / Moradabad",
+   "images": [
+    "/images/rishikesh.jpg",
+    "/images/tw-rafting.jpg",
+    "/images/tw-bonfire.jpg"
+   ],
+   "summaryFromDelhi": "RISHIKESH — SOLO WEEKEND\n2 Nights / 3 Days · Solo-friendly group batch\n\nThe cheapest trip we run, and the one people book when they want to test the water. 16 km of Grade III rapids, a cliff jump if you want it, riverside camping with a bonfire, and the Ganga aarti at Triveni Ghat on the last evening.\n\nOut Friday night, back Monday morning. Under ₹6,000 from Delhi.\n\nWHO THIS IS FOR\nAnyone who's never travelled with strangers and wants a low-stakes way to find out. Two nights, one bonfire, and usually a group chat that outlives the trip.",
+   "socialProof": "Six thousand rupees, one weekend, rapids and a cliff jump. Cheaper than my Friday nights out, honestly.",
+   "scarcityNote": "Riverside camps are capped — weekends go fast in season.",
+   "inclusions": [
+    "2 nights in riverside swiss tents",
+    "All breakfasts and dinners",
+    "Delhi–Rishikesh–Delhi Volvo travel",
+    "16 km river rafting with certified guides and full safety gear",
+    "Bonfire with music both nights",
+    "Trip captain for the batch",
+    "Twin/triple-share matched by age and gender — no single supplement"
+   ],
+   "exclusions": [
+    "Lunches",
+    "Bungee, zipline and other adventure add-ons",
+    "Anything personal"
+   ],
+   "itinerary": [
+    {
+     "day": 1,
+     "title": "Delhi → Rishikesh (overnight)",
+     "body": "Friday-night Volvo. Arrive at the camp by early morning.",
+     "image": "/images/tw-g-nightbus2.jpg"
+    },
+    {
+     "day": 2,
+     "title": "Rafting, waterfall, bonfire",
+     "body": "16 km from Shivpuri with the big rapids in the middle, and the cliff jump if you're up for it. Neer waterfall in the afternoon, bonfire at night.",
+     "image": "/images/tw-rafting.jpg"
+    },
+    {
+     "day": 3,
+     "title": "Aarti, then home",
+     "body": "Laxman Jhula and the cafés in the morning, Ganga aarti at Triveni Ghat as it gets dark, then the overnight bus back.",
+     "image": "/images/rishikesh.jpg"
+    }
+   ],
+   "categories": [
+    "solo"
+   ]
+  },
+  {
+   "type": "Group Departure",
+   "transport": "Tempo Traveller",
+   "route": "",
+   "addons": [],
+   "trekOptions": [],
+   "travelTips": [],
+   "thingsToCarry": [],
+   "cityDetails": {},
+   "status": "live",
+   "rich": true,
+   "hasDepartures": true,
+   "itineraryPdf": "",
+   "heroMedia": "",
+   "code": "TRWLY-SL05",
+   "slug": "meghalaya-solo-explorer",
+   "name": "Meghalaya — Solo Explorer",
+   "destination": "Shillong · Cherrapunji · Dawki · Mawlynnong",
+   "nights": 6,
+   "bestTime": "September–May",
+   "departureHubs": "Delhi / Patna / Ranchi",
+   "images": [
+    "/images/meghalaya.jpg",
+    "/images/tw-waterfall-big.jpg",
+    "/images/tw-g-forest1.jpg"
+   ],
+   "summaryFromDelhi": "MEGHALAYA — SOLO EXPLORER\n5 Nights / 6 Days · Solo-friendly group batch\n\nLiving root bridges that take fifteen years to grow, water at Dawki so clear the boats look like they're floating on air, and the cleanest village in Asia. The double-decker root bridge day is 3,500 steps down and 3,500 back up, and it is worth every one of them.\n\nBatch capped at 14, with a local guide who grew up in these villages.\n\nWHO THIS IS FOR\nSolo travellers who want somewhere that doesn't look like anywhere else in India. Moderate fitness helps on the root-bridge day.",
+   "socialProof": "The double-decker bridge day nearly finished me and it's still the best day I've had on a trip.",
+   "scarcityNote": "Small batches — 14 seats, and October–November books out early.",
+   "inclusions": [
+    "5 nights — Shillong, Cherrapunji and a homestay at Nongriat",
+    "All breakfasts and dinners",
+    "Guwahati pickup and drop, and all travel within Meghalaya",
+    "Certified trip captain and a local village guide",
+    "Dawki boat ride",
+    "Twin-share matched by age and gender — no single supplement"
+   ],
+   "exclusions": [
+    "Flights to and from Guwahati",
+    "Lunches",
+    "Cave and waterfall entry tickets",
+    "Anything personal"
+   ],
+   "itinerary": [
+    {
+     "day": 1,
+     "title": "Guwahati → Shillong",
+     "body": "Picked up at Guwahati, then the drive up past Umiam lake. Evening on Police Bazaar, which is louder than you expect.",
+     "image": "/images/meghalaya.jpg"
+    },
+    {
+     "day": 2,
+     "title": "Cherrapunji",
+     "body": "Nohkalikai falls, Mawsmai cave and the Arwah caves with their fossils. Wettest place on earth, so a raincoat is not optional.",
+     "image": "/images/tw-waterfall-big.jpg"
+    },
+    {
+     "day": 3,
+     "title": "The double-decker root bridge",
+     "body": "3,500 steps down to Nongriat, the double-decker living root bridge, and the blue pools past it. Homestay in the village — no cars, no noise.",
+     "image": "/images/tw-g-forest1.jpg"
+    },
+    {
+     "day": 4,
+     "title": "Back up, and to Dawki",
+     "body": "The climb back out, then Dawki on the Bangladesh border where the Umngot river is genuinely transparent. Boat ride in the afternoon.",
+     "image": "/images/backwater-canoe.jpg"
+    },
+    {
+     "day": 5,
+     "title": "Mawlynnong and back to Shillong",
+     "body": "The cleanest village in Asia, the single-decker root bridge, and a last evening in Shillong.",
+     "image": "/images/meghalaya.jpg"
+    },
+    {
+     "day": 6,
+     "title": "Guwahati, and home",
+     "body": "Drive down to Guwahati for your flight.",
+     "image": "/images/meghalaya.jpg"
+    }
+   ],
+   "categories": [
+    "solo"
+   ]
   }
  ],
  "prices": [
@@ -2133,6 +2874,250 @@
    "citySlug": "dehradun",
    "triple": 11700,
    "double": 12700
+  },
+  {
+   "packageSlug": "kashmir-honeymoon-shikara-days",
+   "citySlug": "delhi",
+   "double": 62000
+  },
+  {
+   "packageSlug": "kashmir-honeymoon-shikara-days",
+   "citySlug": "jaipur",
+   "double": 64000
+  },
+  {
+   "packageSlug": "kashmir-honeymoon-shikara-days",
+   "citySlug": "banaras",
+   "double": 66000
+  },
+  {
+   "packageSlug": "kashmir-honeymoon-shikara-days",
+   "citySlug": "patna",
+   "double": 68000
+  },
+  {
+   "packageSlug": "kashmir-honeymoon-shikara-days",
+   "citySlug": "kochi",
+   "double": 74000
+  },
+  {
+   "packageSlug": "kerala-honeymoon-hills-backwaters",
+   "citySlug": "kochi",
+   "double": 48000
+  },
+  {
+   "packageSlug": "kerala-honeymoon-hills-backwaters",
+   "citySlug": "delhi",
+   "double": 58000
+  },
+  {
+   "packageSlug": "kerala-honeymoon-hills-backwaters",
+   "citySlug": "banaras",
+   "double": 60000
+  },
+  {
+   "packageSlug": "kerala-honeymoon-hills-backwaters",
+   "citySlug": "jaipur",
+   "double": 59000
+  },
+  {
+   "packageSlug": "kerala-honeymoon-hills-backwaters",
+   "citySlug": "patna",
+   "double": 61000
+  },
+  {
+   "packageSlug": "andaman-honeymoon-private-shores",
+   "citySlug": "delhi",
+   "double": 78000
+  },
+  {
+   "packageSlug": "andaman-honeymoon-private-shores",
+   "citySlug": "jaipur",
+   "double": 79000
+  },
+  {
+   "packageSlug": "andaman-honeymoon-private-shores",
+   "citySlug": "kochi",
+   "double": 74000
+  },
+  {
+   "packageSlug": "andaman-honeymoon-private-shores",
+   "citySlug": "banaras",
+   "double": 81000
+  },
+  {
+   "packageSlug": "andaman-honeymoon-private-shores",
+   "citySlug": "patna",
+   "double": 82000
+  },
+  {
+   "packageSlug": "udaipur-honeymoon-lake-days",
+   "citySlug": "jaipur",
+   "double": 34000
+  },
+  {
+   "packageSlug": "udaipur-honeymoon-lake-days",
+   "citySlug": "delhi",
+   "double": 38000
+  },
+  {
+   "packageSlug": "udaipur-honeymoon-lake-days",
+   "citySlug": "agra",
+   "double": 37000
+  },
+  {
+   "packageSlug": "udaipur-honeymoon-lake-days",
+   "citySlug": "banaras",
+   "double": 42000
+  },
+  {
+   "packageSlug": "udaipur-honeymoon-lake-days",
+   "citySlug": "moradabad",
+   "double": 39000
+  },
+  {
+   "packageSlug": "spiti-solo-circuit",
+   "citySlug": "delhi",
+   "triple": 24500,
+   "double": 28500
+  },
+  {
+   "packageSlug": "spiti-solo-circuit",
+   "citySlug": "dehradun",
+   "triple": 25500,
+   "double": 29500
+  },
+  {
+   "packageSlug": "spiti-solo-circuit",
+   "citySlug": "moradabad",
+   "triple": 25000,
+   "double": 29000
+  },
+  {
+   "packageSlug": "spiti-solo-circuit",
+   "citySlug": "agra",
+   "triple": 26000,
+   "double": 30000
+  },
+  {
+   "packageSlug": "spiti-solo-circuit",
+   "citySlug": "jaipur",
+   "triple": 26500,
+   "double": 30500
+  },
+  {
+   "packageSlug": "kasol-kheerganga-solo-batch",
+   "citySlug": "delhi",
+   "triple": 7499,
+   "double": 9499
+  },
+  {
+   "packageSlug": "kasol-kheerganga-solo-batch",
+   "citySlug": "moradabad",
+   "triple": 7999,
+   "double": 9999
+  },
+  {
+   "packageSlug": "kasol-kheerganga-solo-batch",
+   "citySlug": "agra",
+   "triple": 8299,
+   "double": 10299
+  },
+  {
+   "packageSlug": "kasol-kheerganga-solo-batch",
+   "citySlug": "dehradun",
+   "triple": 8199,
+   "double": 10199
+  },
+  {
+   "packageSlug": "kasol-kheerganga-solo-batch",
+   "citySlug": "jaipur",
+   "triple": 8999,
+   "double": 10999
+  },
+  {
+   "packageSlug": "kedarkantha-solo-winter-trek",
+   "citySlug": "dehradun",
+   "triple": 9999,
+   "double": 12499
+  },
+  {
+   "packageSlug": "kedarkantha-solo-winter-trek",
+   "citySlug": "delhi",
+   "triple": 11999,
+   "double": 14499
+  },
+  {
+   "packageSlug": "kedarkantha-solo-winter-trek",
+   "citySlug": "moradabad",
+   "triple": 12499,
+   "double": 14999
+  },
+  {
+   "packageSlug": "kedarkantha-solo-winter-trek",
+   "citySlug": "agra",
+   "triple": 12999,
+   "double": 15499
+  },
+  {
+   "packageSlug": "rishikesh-solo-weekend",
+   "citySlug": "delhi",
+   "triple": 5999,
+   "double": 7499
+  },
+  {
+   "packageSlug": "rishikesh-solo-weekend",
+   "citySlug": "moradabad",
+   "triple": 6299,
+   "double": 7799
+  },
+  {
+   "packageSlug": "rishikesh-solo-weekend",
+   "citySlug": "dehradun",
+   "triple": 5499,
+   "double": 6999
+  },
+  {
+   "packageSlug": "rishikesh-solo-weekend",
+   "citySlug": "agra",
+   "triple": 6499,
+   "double": 7999
+  },
+  {
+   "packageSlug": "rishikesh-solo-weekend",
+   "citySlug": "jaipur",
+   "triple": 7299,
+   "double": 8799
+  },
+  {
+   "packageSlug": "meghalaya-solo-explorer",
+   "citySlug": "delhi",
+   "triple": 26999,
+   "double": 30999
+  },
+  {
+   "packageSlug": "meghalaya-solo-explorer",
+   "citySlug": "patna",
+   "triple": 24999,
+   "double": 28999
+  },
+  {
+   "packageSlug": "meghalaya-solo-explorer",
+   "citySlug": "ranchi",
+   "triple": 25499,
+   "double": 29499
+  },
+  {
+   "packageSlug": "meghalaya-solo-explorer",
+   "citySlug": "banaras",
+   "triple": 25999,
+   "double": 29999
+  },
+  {
+   "packageSlug": "meghalaya-solo-explorer",
+   "citySlug": "kochi",
+   "triple": 29999,
+   "double": 33999
   }
  ],
  "departures": [
@@ -3432,6 +4417,692 @@
     "delhi",
     "jaipur",
     "moradabad"
+   ]
+  },
+  {
+   "date": "2026-08-18",
+   "packageSlug": "kashmir-honeymoon-shikara-days",
+   "citySlugs": [
+    "delhi",
+    "jaipur",
+    "banaras",
+    "patna",
+    "kochi"
+   ]
+  },
+  {
+   "date": "2026-09-11",
+   "packageSlug": "kashmir-honeymoon-shikara-days",
+   "citySlugs": [
+    "delhi",
+    "jaipur",
+    "banaras",
+    "patna",
+    "kochi"
+   ]
+  },
+  {
+   "date": "2026-10-05",
+   "packageSlug": "kashmir-honeymoon-shikara-days",
+   "citySlugs": [
+    "delhi",
+    "jaipur",
+    "banaras",
+    "patna",
+    "kochi"
+   ]
+  },
+  {
+   "date": "2026-10-29",
+   "packageSlug": "kashmir-honeymoon-shikara-days",
+   "citySlugs": [
+    "delhi",
+    "jaipur",
+    "banaras",
+    "patna",
+    "kochi"
+   ]
+  },
+  {
+   "date": "2026-11-22",
+   "packageSlug": "kashmir-honeymoon-shikara-days",
+   "citySlugs": [
+    "delhi",
+    "jaipur",
+    "banaras",
+    "patna",
+    "kochi"
+   ]
+  },
+  {
+   "date": "2026-12-16",
+   "packageSlug": "kashmir-honeymoon-shikara-days",
+   "citySlugs": [
+    "delhi",
+    "jaipur",
+    "banaras",
+    "patna",
+    "kochi"
+   ]
+  },
+  {
+   "date": "2027-01-09",
+   "packageSlug": "kashmir-honeymoon-shikara-days",
+   "citySlugs": [
+    "delhi",
+    "jaipur",
+    "banaras",
+    "patna",
+    "kochi"
+   ]
+  },
+  {
+   "date": "2026-08-21",
+   "packageSlug": "kerala-honeymoon-hills-backwaters",
+   "citySlugs": [
+    "kochi",
+    "delhi",
+    "banaras",
+    "jaipur",
+    "patna"
+   ]
+  },
+  {
+   "date": "2026-09-14",
+   "packageSlug": "kerala-honeymoon-hills-backwaters",
+   "citySlugs": [
+    "kochi",
+    "delhi",
+    "banaras",
+    "jaipur",
+    "patna"
+   ]
+  },
+  {
+   "date": "2026-10-08",
+   "packageSlug": "kerala-honeymoon-hills-backwaters",
+   "citySlugs": [
+    "kochi",
+    "delhi",
+    "banaras",
+    "jaipur",
+    "patna"
+   ]
+  },
+  {
+   "date": "2026-11-01",
+   "packageSlug": "kerala-honeymoon-hills-backwaters",
+   "citySlugs": [
+    "kochi",
+    "delhi",
+    "banaras",
+    "jaipur",
+    "patna"
+   ]
+  },
+  {
+   "date": "2026-11-25",
+   "packageSlug": "kerala-honeymoon-hills-backwaters",
+   "citySlugs": [
+    "kochi",
+    "delhi",
+    "banaras",
+    "jaipur",
+    "patna"
+   ]
+  },
+  {
+   "date": "2026-12-19",
+   "packageSlug": "kerala-honeymoon-hills-backwaters",
+   "citySlugs": [
+    "kochi",
+    "delhi",
+    "banaras",
+    "jaipur",
+    "patna"
+   ]
+  },
+  {
+   "date": "2027-01-12",
+   "packageSlug": "kerala-honeymoon-hills-backwaters",
+   "citySlugs": [
+    "kochi",
+    "delhi",
+    "banaras",
+    "jaipur",
+    "patna"
+   ]
+  },
+  {
+   "date": "2026-08-20",
+   "packageSlug": "andaman-honeymoon-private-shores",
+   "citySlugs": [
+    "delhi",
+    "jaipur",
+    "kochi",
+    "banaras",
+    "patna"
+   ]
+  },
+  {
+   "date": "2026-09-13",
+   "packageSlug": "andaman-honeymoon-private-shores",
+   "citySlugs": [
+    "delhi",
+    "jaipur",
+    "kochi",
+    "banaras",
+    "patna"
+   ]
+  },
+  {
+   "date": "2026-10-07",
+   "packageSlug": "andaman-honeymoon-private-shores",
+   "citySlugs": [
+    "delhi",
+    "jaipur",
+    "kochi",
+    "banaras",
+    "patna"
+   ]
+  },
+  {
+   "date": "2026-10-31",
+   "packageSlug": "andaman-honeymoon-private-shores",
+   "citySlugs": [
+    "delhi",
+    "jaipur",
+    "kochi",
+    "banaras",
+    "patna"
+   ]
+  },
+  {
+   "date": "2026-11-24",
+   "packageSlug": "andaman-honeymoon-private-shores",
+   "citySlugs": [
+    "delhi",
+    "jaipur",
+    "kochi",
+    "banaras",
+    "patna"
+   ]
+  },
+  {
+   "date": "2026-12-18",
+   "packageSlug": "andaman-honeymoon-private-shores",
+   "citySlugs": [
+    "delhi",
+    "jaipur",
+    "kochi",
+    "banaras",
+    "patna"
+   ]
+  },
+  {
+   "date": "2027-01-11",
+   "packageSlug": "andaman-honeymoon-private-shores",
+   "citySlugs": [
+    "delhi",
+    "jaipur",
+    "kochi",
+    "banaras",
+    "patna"
+   ]
+  },
+  {
+   "date": "2026-08-15",
+   "packageSlug": "udaipur-honeymoon-lake-days",
+   "citySlugs": [
+    "jaipur",
+    "delhi",
+    "agra",
+    "banaras",
+    "moradabad"
+   ]
+  },
+  {
+   "date": "2026-09-08",
+   "packageSlug": "udaipur-honeymoon-lake-days",
+   "citySlugs": [
+    "jaipur",
+    "delhi",
+    "agra",
+    "banaras",
+    "moradabad"
+   ]
+  },
+  {
+   "date": "2026-10-02",
+   "packageSlug": "udaipur-honeymoon-lake-days",
+   "citySlugs": [
+    "jaipur",
+    "delhi",
+    "agra",
+    "banaras",
+    "moradabad"
+   ]
+  },
+  {
+   "date": "2026-10-26",
+   "packageSlug": "udaipur-honeymoon-lake-days",
+   "citySlugs": [
+    "jaipur",
+    "delhi",
+    "agra",
+    "banaras",
+    "moradabad"
+   ]
+  },
+  {
+   "date": "2026-11-19",
+   "packageSlug": "udaipur-honeymoon-lake-days",
+   "citySlugs": [
+    "jaipur",
+    "delhi",
+    "agra",
+    "banaras",
+    "moradabad"
+   ]
+  },
+  {
+   "date": "2026-12-13",
+   "packageSlug": "udaipur-honeymoon-lake-days",
+   "citySlugs": [
+    "jaipur",
+    "delhi",
+    "agra",
+    "banaras",
+    "moradabad"
+   ]
+  },
+  {
+   "date": "2027-01-06",
+   "packageSlug": "udaipur-honeymoon-lake-days",
+   "citySlugs": [
+    "jaipur",
+    "delhi",
+    "agra",
+    "banaras",
+    "moradabad"
+   ]
+  },
+  {
+   "date": "2026-08-15",
+   "packageSlug": "spiti-solo-circuit",
+   "citySlugs": [
+    "delhi",
+    "dehradun",
+    "moradabad",
+    "agra",
+    "jaipur"
+   ]
+  },
+  {
+   "date": "2026-09-08",
+   "packageSlug": "spiti-solo-circuit",
+   "citySlugs": [
+    "delhi",
+    "dehradun",
+    "moradabad",
+    "agra",
+    "jaipur"
+   ]
+  },
+  {
+   "date": "2026-10-02",
+   "packageSlug": "spiti-solo-circuit",
+   "citySlugs": [
+    "delhi",
+    "dehradun",
+    "moradabad",
+    "agra",
+    "jaipur"
+   ]
+  },
+  {
+   "date": "2026-10-26",
+   "packageSlug": "spiti-solo-circuit",
+   "citySlugs": [
+    "delhi",
+    "dehradun",
+    "moradabad",
+    "agra",
+    "jaipur"
+   ]
+  },
+  {
+   "date": "2026-11-19",
+   "packageSlug": "spiti-solo-circuit",
+   "citySlugs": [
+    "delhi",
+    "dehradun",
+    "moradabad",
+    "agra",
+    "jaipur"
+   ]
+  },
+  {
+   "date": "2026-12-13",
+   "packageSlug": "spiti-solo-circuit",
+   "citySlugs": [
+    "delhi",
+    "dehradun",
+    "moradabad",
+    "agra",
+    "jaipur"
+   ]
+  },
+  {
+   "date": "2027-01-06",
+   "packageSlug": "spiti-solo-circuit",
+   "citySlugs": [
+    "delhi",
+    "dehradun",
+    "moradabad",
+    "agra",
+    "jaipur"
+   ]
+  },
+  {
+   "date": "2026-08-15",
+   "packageSlug": "kasol-kheerganga-solo-batch",
+   "citySlugs": [
+    "delhi",
+    "moradabad",
+    "agra",
+    "dehradun",
+    "jaipur"
+   ]
+  },
+  {
+   "date": "2026-09-08",
+   "packageSlug": "kasol-kheerganga-solo-batch",
+   "citySlugs": [
+    "delhi",
+    "moradabad",
+    "agra",
+    "dehradun",
+    "jaipur"
+   ]
+  },
+  {
+   "date": "2026-10-02",
+   "packageSlug": "kasol-kheerganga-solo-batch",
+   "citySlugs": [
+    "delhi",
+    "moradabad",
+    "agra",
+    "dehradun",
+    "jaipur"
+   ]
+  },
+  {
+   "date": "2026-10-26",
+   "packageSlug": "kasol-kheerganga-solo-batch",
+   "citySlugs": [
+    "delhi",
+    "moradabad",
+    "agra",
+    "dehradun",
+    "jaipur"
+   ]
+  },
+  {
+   "date": "2026-11-19",
+   "packageSlug": "kasol-kheerganga-solo-batch",
+   "citySlugs": [
+    "delhi",
+    "moradabad",
+    "agra",
+    "dehradun",
+    "jaipur"
+   ]
+  },
+  {
+   "date": "2026-12-13",
+   "packageSlug": "kasol-kheerganga-solo-batch",
+   "citySlugs": [
+    "delhi",
+    "moradabad",
+    "agra",
+    "dehradun",
+    "jaipur"
+   ]
+  },
+  {
+   "date": "2027-01-06",
+   "packageSlug": "kasol-kheerganga-solo-batch",
+   "citySlugs": [
+    "delhi",
+    "moradabad",
+    "agra",
+    "dehradun",
+    "jaipur"
+   ]
+  },
+  {
+   "date": "2026-08-16",
+   "packageSlug": "kedarkantha-solo-winter-trek",
+   "citySlugs": [
+    "dehradun",
+    "delhi",
+    "moradabad",
+    "agra"
+   ]
+  },
+  {
+   "date": "2026-09-09",
+   "packageSlug": "kedarkantha-solo-winter-trek",
+   "citySlugs": [
+    "dehradun",
+    "delhi",
+    "moradabad",
+    "agra"
+   ]
+  },
+  {
+   "date": "2026-10-03",
+   "packageSlug": "kedarkantha-solo-winter-trek",
+   "citySlugs": [
+    "dehradun",
+    "delhi",
+    "moradabad",
+    "agra"
+   ]
+  },
+  {
+   "date": "2026-10-27",
+   "packageSlug": "kedarkantha-solo-winter-trek",
+   "citySlugs": [
+    "dehradun",
+    "delhi",
+    "moradabad",
+    "agra"
+   ]
+  },
+  {
+   "date": "2026-11-20",
+   "packageSlug": "kedarkantha-solo-winter-trek",
+   "citySlugs": [
+    "dehradun",
+    "delhi",
+    "moradabad",
+    "agra"
+   ]
+  },
+  {
+   "date": "2026-12-14",
+   "packageSlug": "kedarkantha-solo-winter-trek",
+   "citySlugs": [
+    "dehradun",
+    "delhi",
+    "moradabad",
+    "agra"
+   ]
+  },
+  {
+   "date": "2027-01-07",
+   "packageSlug": "kedarkantha-solo-winter-trek",
+   "citySlugs": [
+    "dehradun",
+    "delhi",
+    "moradabad",
+    "agra"
+   ]
+  },
+  {
+   "date": "2026-08-19",
+   "packageSlug": "rishikesh-solo-weekend",
+   "citySlugs": [
+    "delhi",
+    "moradabad",
+    "dehradun",
+    "agra",
+    "jaipur"
+   ]
+  },
+  {
+   "date": "2026-09-02",
+   "packageSlug": "rishikesh-solo-weekend",
+   "citySlugs": [
+    "delhi",
+    "moradabad",
+    "dehradun",
+    "agra",
+    "jaipur"
+   ]
+  },
+  {
+   "date": "2026-09-16",
+   "packageSlug": "rishikesh-solo-weekend",
+   "citySlugs": [
+    "delhi",
+    "moradabad",
+    "dehradun",
+    "agra",
+    "jaipur"
+   ]
+  },
+  {
+   "date": "2026-09-30",
+   "packageSlug": "rishikesh-solo-weekend",
+   "citySlugs": [
+    "delhi",
+    "moradabad",
+    "dehradun",
+    "agra",
+    "jaipur"
+   ]
+  },
+  {
+   "date": "2026-10-14",
+   "packageSlug": "rishikesh-solo-weekend",
+   "citySlugs": [
+    "delhi",
+    "moradabad",
+    "dehradun",
+    "agra",
+    "jaipur"
+   ]
+  },
+  {
+   "date": "2026-10-28",
+   "packageSlug": "rishikesh-solo-weekend",
+   "citySlugs": [
+    "delhi",
+    "moradabad",
+    "dehradun",
+    "agra",
+    "jaipur"
+   ]
+  },
+  {
+   "date": "2026-11-11",
+   "packageSlug": "rishikesh-solo-weekend",
+   "citySlugs": [
+    "delhi",
+    "moradabad",
+    "dehradun",
+    "agra",
+    "jaipur"
+   ]
+  },
+  {
+   "date": "2026-08-20",
+   "packageSlug": "meghalaya-solo-explorer",
+   "citySlugs": [
+    "delhi",
+    "patna",
+    "ranchi",
+    "banaras",
+    "kochi"
+   ]
+  },
+  {
+   "date": "2026-09-13",
+   "packageSlug": "meghalaya-solo-explorer",
+   "citySlugs": [
+    "delhi",
+    "patna",
+    "ranchi",
+    "banaras",
+    "kochi"
+   ]
+  },
+  {
+   "date": "2026-10-07",
+   "packageSlug": "meghalaya-solo-explorer",
+   "citySlugs": [
+    "delhi",
+    "patna",
+    "ranchi",
+    "banaras",
+    "kochi"
+   ]
+  },
+  {
+   "date": "2026-10-31",
+   "packageSlug": "meghalaya-solo-explorer",
+   "citySlugs": [
+    "delhi",
+    "patna",
+    "ranchi",
+    "banaras",
+    "kochi"
+   ]
+  },
+  {
+   "date": "2026-11-24",
+   "packageSlug": "meghalaya-solo-explorer",
+   "citySlugs": [
+    "delhi",
+    "patna",
+    "ranchi",
+    "banaras",
+    "kochi"
+   ]
+  },
+  {
+   "date": "2026-12-18",
+   "packageSlug": "meghalaya-solo-explorer",
+   "citySlugs": [
+    "delhi",
+    "patna",
+    "ranchi",
+    "banaras",
+    "kochi"
+   ]
+  },
+  {
+   "date": "2027-01-11",
+   "packageSlug": "meghalaya-solo-explorer",
+   "citySlugs": [
+    "delhi",
+    "patna",
+    "ranchi",
+    "banaras",
+    "kochi"
    ]
   }
  ],

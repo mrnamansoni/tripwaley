@@ -372,10 +372,11 @@ export const stats = [
 
 export const navLinks = [
   { href: "/trips", label: "Trips" },
+  { href: "/group-departures", label: "Group" },
+  { href: "/honeymoon", label: "Honeymoon" },
+  { href: "/solo", label: "Solo" },
   { href: "/destinations", label: "Destinations" },
-  { href: "/collections", label: "Collections" },
   { href: "/stories", label: "Stories" },
-  { href: "/vibe-check", label: "Vibe Check" },
   { href: "/#reviews", label: "Reviews" },
 ];
 

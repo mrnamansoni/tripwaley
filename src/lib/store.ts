@@ -13,6 +13,11 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import type { Booking, Catalog, Review } from "./types";
 
+/** Bump when src/data/catalog.json gains packages/prices/departures that an
+ *  already-running install should receive. mergeSeedContent() then adds only
+ *  the rows whose keys are missing — admin edits are never overwritten. */
+const SEED_VERSION = 1;
+
 const DATA_DIR = path.join(process.cwd(), "data");
 const SEED_CATALOG = path.join(process.cwd(), "src", "data", "catalog.json");
 const SEED_REVIEWS = path.join(process.cwd(), "src", "data", "reviews.json");
@@ -38,7 +43,52 @@ function ensureSeeded() {
   if (!fs.existsSync(FILES.bookings)) fs.writeFileSync(FILES.bookings, "[]");
   const uploads = path.join(PUBLIC_DIR, "uploads");
   if (!fs.existsSync(uploads)) fs.mkdirSync(uploads, { recursive: true });
-  seeded = true;
+  seeded = true; // set before merging: mergeSeedContent reads through readJson
+  mergeSeedContent();
+}
+
+/**
+ * Additive, idempotent seed merge.
+ *
+ * The runtime catalog lives on a Docker volume and is never re-copied from the
+ * seed, so new starter content shipped in src/data/catalog.json would otherwise
+ * never reach an existing install. This adds ONLY rows whose key is absent —
+ * an admin's edited copy of a row always wins, and nothing is ever deleted.
+ */
+function mergeSeedContent() {
+  try {
+    const live = readJson<Catalog>(FILES.catalog);
+    if ((live.seedVersion ?? 0) >= SEED_VERSION) return;
+
+    const seed = JSON.parse(fs.readFileSync(SEED_CATALOG, "utf8")) as Catalog;
+    const next: Catalog = { ...live };
+    let added = 0;
+
+    const haveCities = new Set(live.cities.map((c) => c.slug));
+    const newCities = (seed.cities ?? []).filter((c) => !haveCities.has(c.slug));
+    if (newCities.length) { next.cities = [...live.cities, ...newCities]; added += newCities.length; }
+
+    const havePkgs = new Set(live.packages.map((p) => p.slug));
+    const newPkgs = (seed.packages ?? []).filter((p) => !havePkgs.has(p.slug));
+    if (newPkgs.length) { next.packages = [...live.packages, ...newPkgs]; added += newPkgs.length; }
+
+    const priceKey = (r: { packageSlug: string; citySlug: string }) => `${r.packageSlug}|${r.citySlug}`;
+    const havePrices = new Set(live.prices.map(priceKey));
+    const newPrices = (seed.prices ?? []).filter((r) => !havePrices.has(priceKey(r)));
+    if (newPrices.length) { next.prices = [...live.prices, ...newPrices]; added += newPrices.length; }
+
+    const depKey = (d: { date: string; packageSlug: string }) => `${d.date}|${d.packageSlug}`;
+    const haveDeps = new Set(live.departures.map(depKey));
+    const newDeps = (seed.departures ?? []).filter((d) => !haveDeps.has(depKey(d)));
+    if (newDeps.length) { next.departures = [...live.departures, ...newDeps]; added += newDeps.length; }
+
+    next.seedVersion = SEED_VERSION;
+    writeJson(FILES.catalog, next);
+    if (added) console.log(`[store] seed v${SEED_VERSION}: merged ${added} new row(s)`);
+  } catch (e) {
+    // a bad merge must never take the site down — the existing catalog is fine
+    console.error("[store] seed merge skipped:", e instanceof Error ? e.message : e);
+  }
 }
 
 /* ------------------------------------------------ mtime-memoised reads */
@@ -82,7 +132,10 @@ export function appendBooking(b: Omit<Booking, "id" | "ts">): Booking {
 
 /* ------------------------------------------------ media library */
 
-export interface MediaItem { path: string; bytes: number; dir: "images" | "uploads" }
+export interface MediaItem { path: string; bytes: number; dir: "images" | "uploads"; kind: "image" | "video" }
+
+const LIB_IMAGE = /\.(jpe?g|png|webp|avif|gif)$/i;
+const LIB_VIDEO = /\.(mp4|webm|mov|m4v)$/i;
 
 export function listMedia(): MediaItem[] {
   ensureSeeded();
@@ -91,27 +144,40 @@ export function listMedia(): MediaItem[] {
     const abs = path.join(PUBLIC_DIR, dir);
     if (!fs.existsSync(abs)) continue;
     for (const f of fs.readdirSync(abs)) {
-      if (!/\.(jpe?g|png|webp)$/i.test(f)) continue;
-      out.push({ path: `/${dir}/${f}`, bytes: fs.statSync(path.join(abs, f)).size, dir });
+      const isVid = LIB_VIDEO.test(f);
+      if (!isVid && !LIB_IMAGE.test(f)) continue;
+      out.push({
+        path: `/${dir}/${f}`,
+        bytes: fs.statSync(path.join(abs, f)).size,
+        dir,
+        kind: isVid ? "video" : "image",
+      });
     }
   }
-  return out.sort((a, b) => a.path.localeCompare(b.path));
+  // newest uploads first, then the bundled library — the admin almost always
+  // wants the file they just added, not the alphabetical top of /images
+  return out.sort((a, b) => (a.dir === b.dir ? a.path.localeCompare(b.path) : a.dir === "uploads" ? -1 : 1));
 }
 
-/** resolve a public web path (/images/x.jpg | /uploads/x.jpg) safely to disk */
-export function resolvePublicImage(webPath: string): string | null {
-  if (!/^\/(images|uploads)\/[\w.\-]+\.(jpe?g|png|webp)$/i.test(webPath)) return null;
+/** resolve a public web path (/images/x.jpg | /uploads/x.mp4) safely to disk */
+export function resolvePublicMedia(webPath: string): string | null {
+  if (!/^\/(images|uploads)\/[\w.\-]+\.(jpe?g|png|webp|avif|gif|mp4|webm|mov|m4v)$/i.test(webPath)) return null;
   const abs = path.resolve(path.join(PUBLIC_DIR, webPath));
   const root = path.resolve(PUBLIC_DIR) + path.sep;
   if (!abs.startsWith(root)) return null; // path traversal guard
   return abs;
 }
 
-export function saveImage(buffer: Buffer, opts: { replacePath?: string; name?: string; ext: string }): string {
+export function saveMedia(buffer: Buffer, opts: { replacePath?: string; name?: string; ext: string }): string {
   ensureSeeded();
   if (opts.replacePath) {
-    const abs = resolvePublicImage(opts.replacePath);
+    const abs = resolvePublicMedia(opts.replacePath);
     if (!abs || !fs.existsSync(abs)) throw new Error("replace target not found");
+    // a replace must keep the same URL, so it must keep the same file type —
+    // swapping a .jpg's bytes for an .mp4 would break every <img> using it
+    if (path.extname(abs).slice(1).toLowerCase() !== opts.ext.toLowerCase()) {
+      throw new Error(`replace must be the same file type (${path.extname(abs)})`);
+    }
     fs.writeFileSync(abs, buffer);
     return opts.replacePath;
   }

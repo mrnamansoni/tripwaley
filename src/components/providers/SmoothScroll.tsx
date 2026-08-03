@@ -7,28 +7,34 @@ import { gsap, ScrollTrigger } from "@/lib/gsap";
 /**
  * ONE scroll engine for the whole site: Lenis.
  *  - Desktop: smooths the wheel (lerp).
- *  - Touch: syncTouch — Lenis owns touch scrolling too, so the entire page
- *    shares a single, uniform momentum curve and every ScrollTrigger scrub
- *    (hero, gallery, drum, curtain) tracks the finger 1:1. This replaced
- *    ScrollTrigger.normalizeScroll, whose synthesized tap-clicks caused the
- *    ticket-rack "auto-click while swiping" bug.
+ *  - Touch: NATIVE scrolling. Lenis deliberately does not intercept it.
  *  - Elements that scroll themselves (horizontal rails, dropdowns, the spin
  *    carousel) opt out with data-lenis-prevent so their gestures stay native.
  * Disabled entirely for users who prefer reduced motion.
+ *
+ * Why touch is native
+ * ------------------
+ * syncTouch made Lenis own finger-scrolling so every scrub tracked 1:1. It
+ * looks lovely on a desktop emulator and is the main reason the site felt
+ * laggy on real phones: native scrolling is handled on the compositor thread,
+ * but syncTouch moves it onto the main thread, where it has to queue behind
+ * ScrollTrigger updates, GSAP tweens and image decodes. Any one slow frame
+ * becomes visible scroll stutter — the finger stops tracking the screen.
+ * Native touch scroll never stalls, so we let the browser do it and accept
+ * that scrubbed effects update per scroll event rather than per frame.
+ * (This does NOT bring back ScrollTrigger.normalizeScroll, whose synthesized
+ * tap-clicks caused the old ticket-rack "auto-click while swiping" bug.)
  */
 export default function SmoothScroll({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    const coarse = window.matchMedia("(pointer: coarse)").matches;
     ScrollTrigger.config({ ignoreMobileResize: true });
 
     const lenis = new Lenis({
       lerp: 0.115,
       wheelMultiplier: 1,
-      syncTouch: coarse, // unified momentum on phones; wheel-only on desktop
-      syncTouchLerp: 0.08, // slightly heavier glide so flicks feel weighty, not twitchy
-      touchMultiplier: 1.4,
+      syncTouch: false, // see note above — phones scroll natively
     });
     lenis.on("scroll", ScrollTrigger.update);
     (window as Window & { __lenis?: Lenis }).__lenis = lenis;

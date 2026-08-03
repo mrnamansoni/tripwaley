@@ -6,7 +6,7 @@
 
 import { useState } from "react";
 import { useAdmin, Btn, Head, Field, Area, input, label } from "./ui";
-import ImagePicker from "./ImagePicker";
+import MediaPicker from "./MediaPicker";
 import type { AnnouncementBar, LeadPopup, Seo, Socials, Settings, VideoTestimonial } from "@/lib/types";
 import { DEFAULT_VIDEO_TESTIMONIAL } from "@/lib/types";
 
@@ -112,7 +112,7 @@ export default function SettingsEditor() {
               <Field l="incentive chip" v={popup.incentive} on={(v) => setPopup({ incentive: v })} />
               <div className="sm:col-span-2"><Area l="subtitle" v={popup.subtitle} on={(v) => setPopup({ subtitle: v })} rows={2} /></div>
             </div>
-            <ImagePicker label="popup image" value={popup.image} onChange={(p) => setPopup({ image: p })} />
+            <MediaPicker label="popup image" value={popup.image} onChange={(p) => setPopup({ image: p })} />
           </div>
         </section>
 
@@ -122,7 +122,8 @@ export default function SettingsEditor() {
           <div className={`mt-3 space-y-4 ${card}`}>
             <Field l="meta title (blank = default)" v={seo.title} on={(v) => setSeo({ title: v })} />
             <Area l="meta description" v={seo.description} on={(v) => setSeo({ description: v })} rows={2} />
-            <ImagePicker label="social share image (OG)" value={seo.ogImage} onChange={(p) => setSeo({ ogImage: p })} aspect="aspect-[16/9]" />
+            {/* OG previews must be a still — social platforms never play video */}
+            <MediaPicker label="social share image (OG)" value={seo.ogImage} onChange={(p) => setSeo({ ogImage: p })} aspect="aspect-[16/9]" allowVideo={false} />
           </div>
         </section>
 
@@ -139,7 +140,7 @@ export default function SettingsEditor() {
               v={vt.videoUrl}
               on={(v) => setVt({ videoUrl: v })}
             />
-            <ImagePicker label="poster frame" value={vt.poster} onChange={(p) => setVt({ poster: p })} aspect="aspect-video" />
+            <MediaPicker label="poster frame" value={vt.poster} onChange={(p) => setVt({ poster: p })} aspect="aspect-video" />
             <Area l="quote (revealed word-by-word on scroll)" v={vt.quote} on={(v) => setVt({ quote: v })} rows={3} />
             <div className="grid gap-4 sm:grid-cols-3">
               <Field l="traveller name" v={vt.name} on={(v) => setVt({ name: v })} />

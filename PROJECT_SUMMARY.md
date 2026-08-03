@@ -1,20 +1,41 @@
 # Project Summary: Tripwaley
 
-Last updated: 2026-07-12
+Last updated: 2026-08-01
 
 ## Project Overview
-Tripwaley is a production-grade travel booking website for a premium, group-departure travel brand in India. It is a Next.js 16 site with 3D/scroll-driven visuals (React Three Fiber, GSAP, Lenis), city-aware pricing, a lead-capture booking flow, and a full custom admin panel (CMS-style) so the owner can edit trips, prices, departures, cities, media, reviews, and bookings without touching code. There is no database yet — everything is stored in JSON files under `data/`.
+Tripwaley is a production-grade travel booking website for a premium, group-departure travel brand in India. It is a Next.js 16 site with 3D/scroll-driven visuals (React Three Fiber, GSAP, Lenis), city-aware pricing, a lead-capture booking flow, and a full custom admin panel (CMS-style) so the owner can edit trips, prices, departures, cities, media, reviews, and bookings without touching code. There is no database — everything is stored in JSON files under `data/`.
 
 ## Current Status
-- The site is fully built and has been through many rounds of feature work (see history below). No dev server was running at the time of this summary — start it with `npm run dev` (http://localhost:3000) to preview.
-- Homepage, `/trips`, `/trips/[slug]`, `/from/[city]`, `/destinations`, `/collections`, `/about`, `/vibe-check` pages exist and pull from the JSON data layer.
-- Admin panel lives at `/admin` (login at `/admin/login`), protected by a password-hash + session-cookie auth system.
-- Booking/lead capture is wired end-to-end: `BookingBar.tsx` (sticky bar on package pages) → phone-required modal → `POST /api/lead` → saved to `data/bookings.json` → optionally forwarded to an n8n webhook (for CRM) → user is handed off to WhatsApp with a pre-filled message.
-- Media management: every image used anywhere on the site is a named "slot" (e.g. hero film frames, blinds image, about-page crew banner, captain portraits). Admin → Media tab lets the owner replace any slot's image, add more images to list-type slots (like the hero film strip), remove extra images, upload new files, or do a global "replace this file everywhere it's used" swap. This directly satisfies the owner's request that every image be replaceable and slot-mapped, not hardcoded.
-- Phone number capture is enforced server-side (not just in the UI) — `/api/lead` returns HTTP 422 if no valid 10-digit Indian mobile number (starts 6–9) is present, so a lead cannot be created without a phone number.
-- A large "lab" of experimental hero/section designs exists under `src/components/lab/` (Hero01–Hero42) and `src/components/lab2/` (L01–L40 + micro-interaction sets), viewable at `/lab` and `/lab2` — these were built as a design exploration phase before the final homepage was assembled.
+- The site is **live in production** at `tripwaley.com`, deployed on a Hostinger VPS through Dokploy. It builds and deploys automatically from GitHub — every push to the `main` branch triggers a new deploy.
+- Homepage, `/trips`, `/trips/[slug]`, `/from/[city]`, `/destinations`, `/collections`, `/about`, `/vibe-check`, `/stories` pages all exist and pull from the JSON data layer.
+- Admin panel lives at `/admin` (login at `/admin/login`), protected by a password-hash + session-cookie auth system. Admin edits (prices, packages, photos, reviews, settings) now show up on the live site right away — this was broken until today's fix, see below.
+- Booking/lead capture is wired end-to-end and confirmed working in production: the sticky booking bar and the "Hold my seat" popup both save to `data/bookings.json` and forward to an n8n webhook.
+- Media management: every image used anywhere on the site is a named "slot". Admin → Media tab lets the owner replace any slot's image, add more images to list-type slots, remove extra images, upload new files, or do a global "replace this file everywhere it's used" swap.
+- Phone number capture is enforced server-side — a lead cannot be created without a valid 10-digit Indian mobile number.
+- A large "lab" of experimental hero/section designs still exists under `src/components/lab/` and `src/components/lab2/`, viewable at `/lab` and `/lab2` — design sandbox, not part of the live user-facing site.
+- **New standing rule from the owner (2026-08-01, still in effect):** never push any change to GitHub directly. Always explain the plan in chat first and wait for a clear "yes" before making or pushing any change.
 
 ## Recent Changes
+
+### 2026-08-01 — Fixed: admin edits and new photos not showing on the live site until saved twice
+- Asked for: the owner reported that changes made in the admin panel (especially newly uploaded photos) would not appear on the live website right away. They had to go back into the admin panel and click Save a second time before the change showed up. They also asked to make sure admin data itself was not being wiped by deploys, and set the new rule above (never push without asking first).
+- Investigated: checked the VPS directly over SSH. The admin data (prices, bookings, uploaded photos) was safe and not being lost — it survives deploys correctly, the storage folders are set up right. The real problem was different: the website's pages were being built once and reused (cached) instead of checking for new data on every visit. The signal that tells the site "go get fresh data" was being sent, but it did not always take effect before the next visitor arrived, which is why the first Save often looked like it did nothing and a second Save "fixed" it.
+- Done:
+  - Changed `src/app/layout.tsx` so every page always reads the latest data directly, every time someone visits, instead of relying on a cached copy. This removes the "have to save twice" problem completely.
+  - Changed `next.config.ts` so replaced photos (same filename, new picture) stop being shown as the old cached picture for up to a year — now that clears itself within a minute.
+  - Tested this for real: ran the exact same production setup locally, edited the data file directly, and confirmed the change appeared on the very next page load with no delay.
+  - Got the owner's approval first, then pushed the fix (commit `79a59e0`). Confirmed on the live VPS afterward: the new version deployed within 3 minutes, the fix is live, and all existing admin data (prices, bookings, the uploaded photo) came through the deploy untouched.
+- Notes: This was a caching/timing bug, not a data-loss bug — nothing was ever actually being deleted. Full technical explanation kept in chat history for reference if this area needs touching again.
+
+### 2026-07-19 (approx.) — Big fix round: 22 issues found in a full site review
+- Asked for: the owner asked to fix everything found in a full review of the site (a cloud-based review plus a manual review), all in one go.
+- Done: fixed 22 issues in total. The most important one: the "Hold my seat" popup (shown on every page) was silently throwing away every booking request instead of saving it — this is now fixed and every "Hold my seat" click is saved for real. Also fixed: a crash risk in the city-picker, the WhatsApp number shown to visitors was a placeholder instead of the real number set in admin settings, old/expired trip dates were being shown as if they were upcoming, prices of exactly ₹0 were being hidden by mistake, a few data-validation gaps in the admin save API, and five unused old files were deleted to keep the codebase clean.
+- Notes: This was pushed straight to GitHub without asking first, because the "always ask before pushing" rule did not exist yet at that point. The owner set that rule right after this, and it has been followed since.
+
+### 2026-07-17 to 2026-07-19 (approx.) — Site deployed to a real VPS with Dokploy
+- Asked for: get the site properly hosted and live on the owner's own server, with the admin panel's data (prices, bookings, photos) safely surviving future updates instead of resetting.
+- Done: Set up deployment on a Hostinger VPS (using Dokploy, a self-hosting control panel) connected to the GitHub repo, so every push to `main` automatically builds and deploys the site. Set up three separate storage areas on the server (outside the app itself) so that admin-saved prices/bookings/reviews and uploaded photos are kept safe and are not overwritten every time the site is updated.
+- Notes: The storage setup uses Dokploy's own built-in "Volumes" feature, not the `docker-compose.yml` file that is also sitting in the project folder (that file exists but Dokploy is not actually using it — worth remembering so nobody edits that file expecting it to change anything on the live server).
 
 ### 2026-07-12 — Media slot system + mandatory phone capture
 - Asked for: (1) A way to control which image is used where across the site — e.g. "images 1-5 are in hero section film" — with the ability to replace any image and add more. (2) Phone number capture must be mandatory for every booking/lead.
@@ -50,18 +71,19 @@ Tripwaley is a production-grade travel booking website for a premium, group-depa
 - Done: `create-next-app` scaffold with Next.js 16 (App Router, TypeScript strict, Tailwind v4), React Three Fiber 9 + GSAP ScrollTrigger + Lenis smooth scroll, a procedural low-poly 3D Himalayan valley hero (`components/three/`), brand design tokens in `globals.css` (`@theme`), placeholder `BookingContext`/`HoldSeatModal` conversion funnel, and placeholder `/api/hold-seat` + `/api/book-token` routes. This became the foundation everything else was layered on.
 
 ## Pending / Next Steps
-- [ ] Start the dev server and show the user a live localhost preview — this was the user's most recent request and has not been fulfilled yet.
-- [ ] Visually verify the Media tab slot-editing flow in the browser (especially the `hero.film` list slot the user specifically asked about).
-- [ ] Visually verify the phone-capture booking flow end-to-end in the browser (BookingBar modal → WhatsApp handoff).
-- [ ] Run `npm run build` / lint to confirm no errors were introduced by the recent media-slot and phone-capture changes (not yet re-run after those edits).
-- [ ] Real photography still needs to replace the Unsplash placeholder images in `public/images/` at some point (per README note).
-- [ ] Real CRM/payment gateway integration is still a placeholder in `/api/hold-seat` and `/api/book-token` (per README note) — n8n webhook is the current CRM bridge for `/api/lead`.
+- [ ] Real payment gateway is still a placeholder in `/api/book-token` (the "pay token to confirm booking" step after "Hold my seat") — known, not yet requested.
+- [ ] Real photography still needs to replace any remaining placeholder images in `public/images/` at some point (per README note).
+- [ ] Remember the new rule: always explain the plan in chat and get a clear yes before pushing anything to GitHub.
 
 ## Key Details
 - Project root: `/Users/apple/Applications/tripwaley`
 - Stack: Next.js 16 (App Router), TypeScript strict, Tailwind v4, React Three Fiber 9, GSAP ScrollTrigger, Lenis smooth scroll.
-- Data storage: flat JSON files in `data/` (`catalog.json`, `bookings.json`, `reviews.json`) — no database yet.
-- Dev command: `npm install` then `npm run dev` → http://localhost:3000. Production: `npm run build && npm start`, or Docker (`Dockerfile` present, `standalone` output) — deploys to Dokploy, no env vars strictly required but admin auth needs them for production.
+- Data storage: flat JSON files in `data/` (`catalog.json`, `bookings.json`, `reviews.json`) — no database. `src/data/*.json` is the starter/seed copy baked into the app; `data/*.json` is the real, live copy the admin panel edits.
+- Dev command: `npm install` then `npm run dev` → http://localhost:3000. Production build: `npm run build`. To test the production build locally (not `npm run dev`, which behaves differently), run `node .next/standalone/server.js` or use the `tripwaley-prod` preview config.
+- **Live site**: `tripwaley.com`
+- **Hosting**: Hostinger VPS, IP `72.61.169.200`, using Dokploy (a self-hosting control panel). SSH access works from this Mac: `ssh root@72.61.169.200`.
+- **GitHub**: `mrnamansoni/tripwaley`, branch `main`. A push to `main` auto-deploys through Dokploy, usually live within a few minutes.
+- **Storage on the server**: three separate storage areas set up in Dokploy itself (not in the project's `docker-compose.yml`, which is not actually used) — one for admin data (prices/bookings/reviews), one for uploaded photos, one for the image cache. These keep admin changes safe across every deploy.
 - Admin panel: `/admin` (guarded), login at `/admin/login`. Auth env vars: `ADMIN_PASSWORD_HASH` + `SESSION_SECRET` (generate hash via `node scripts/hash-password.mjs "your-password"`); dev fallback password `tripwaley@2026` if hash isn't set.
 - CRM integration: `N8N_WEBHOOK_URL` env var — when set, every lead (`/api/lead`) is also POSTed to this n8n webhook for CRM push (e.g. Twenty CRM).
 - Image slot registry: `SLOT_DEFS` in `src/lib/types.ts` — add new slots here to make any future hardcoded image editable from the admin Media tab.
@@ -71,3 +93,5 @@ Tripwaley is a production-grade travel booking website for a premium, group-depa
   - No database — chose JSON file storage for simplicity since this is a single-owner admin panel, not multi-tenant.
   - Phone capture enforced server-side (HTTP 422 on invalid/missing phone) rather than only client-side, so the lead requirement can't be bypassed.
   - Image slots modeled as a registry (`SLOT_DEFS`) with defaults + admin overrides, rather than editing image paths directly in code, so every image on the site is owner-replaceable through the admin UI.
+  - Every page now always fetches fresh data on every visit (added 2026-08-01), instead of relying on cached pages plus a refresh signal, because the refresh signal was not reliable enough on its own.
+  - Every page-generating request now does a small amount of extra work on every visit instead of using a saved copy — this is fine because reading the data file is fast and cheap, not a heavy database call.

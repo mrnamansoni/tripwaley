@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/sections/Navbar";
@@ -11,6 +10,9 @@ import CaptainFeed from "@/components/site/CaptainFeed";
 import WeatherNow from "@/components/site/WeatherNow";
 import BookingBar, { type BarDeparture, type BarPrices } from "@/components/site/BookingBar";
 import MoreTrips from "@/components/site/MoreTrips";
+import SiteMedia from "@/components/site/SiteMedia";
+import RichText from "@/components/site/RichText";
+import DownloadItinerary from "@/components/site/DownloadItinerary";
 import {
   getCities,
   getSettings,
@@ -80,7 +82,8 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
       <main className="bg-cream pb-28">
         {/* ---- header ---- */}
         <section className="relative min-h-[78vh] overflow-hidden">
-          <Image src={images[0]} alt={pkg.name} fill priority sizes="100vw" className="object-cover" />
+          {/* heroMedia lets the owner set a dedicated banner — photo OR video */}
+          <SiteMedia src={pkg.heroMedia || images[0]} alt={pkg.name} fill priority sizes="100vw" className="object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/25 to-ink/35" aria-hidden="true" />
           <div className="relative mx-auto flex min-h-[78vh] w-full max-w-6xl flex-col justify-end px-5 pb-12 pt-32 sm:px-8">
             <p className="font-mono text-[0.62rem] font-bold uppercase tracking-[0.35em] text-gold">
@@ -102,24 +105,38 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
                 </span>
               )}
             </div>
+            {pkg.itineraryPdf && (
+              <div className="mt-6">
+                <DownloadItinerary href={pkg.itineraryPdf} tone="dark" />
+              </div>
+            )}
           </div>
         </section>
 
         {/* ---- meta + weather ---- */}
-        <section className="mx-auto grid w-full max-w-6xl gap-6 px-5 py-12 sm:px-8 lg:grid-cols-[1.4fr_1fr]">
+        {/* items-start: the brief can now run long, and the forecast card
+            shouldn't stretch into a tall empty block to match it */}
+        <section className="mx-auto grid w-full max-w-6xl items-start gap-6 px-5 py-12 sm:px-8 lg:grid-cols-[1.4fr_1fr]">
           <div className="rounded-3xl border border-line bg-card p-7 shadow-sm sm:p-9">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <h2 className="font-display text-2xl font-extrabold tracking-tight sm:text-3xl">The brief</h2>
               <CitySwitcher tone="light" />
             </div>
-            <p className="mt-4 whitespace-pre-line text-[0.95rem] leading-relaxed text-ink/70">
-              {(pkg.summaryFromDelhi || pkg.socialProof || pkg.route || `${pkg.name} — fixed group departure with stays, transport and a trip captain handled end to end.`).slice(0, 500)}
-            </p>
+            {/* the FULL brief — structured and expandable, never truncated */}
+            <RichText
+              className="mt-4"
+              text={
+                pkg.summaryFromDelhi ||
+                pkg.socialProof ||
+                pkg.route ||
+                `${pkg.name} — fixed group departure with stays, transport and a trip captain handled end to end.`
+              }
+            />
             <div className="mt-6 grid grid-cols-2 gap-4 border-t border-line pt-5 sm:grid-cols-3">
               {pkg.bestTime && (
                 <div>
                   <p className="text-[0.58rem] font-bold uppercase tracking-[0.25em] text-ink/40">best time</p>
-                  <p className="mt-1 text-sm font-bold text-ink">{pkg.bestTime.split("\n")[0]}</p>
+                  <p className="mt-1 whitespace-pre-line text-sm font-bold text-ink">{pkg.bestTime}</p>
                 </div>
               )}
               <div>
@@ -152,7 +169,7 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
                 <div className="rounded-3xl border border-line bg-card p-7 shadow-sm">
                   <h3 className="font-display text-xl font-extrabold text-ink">On the house</h3>
                   <ul className="mt-4 space-y-2.5">
-                    {pkg.inclusions.slice(0, 10).map((item) => (
+                    {pkg.inclusions.map((item) => (
                       <li key={item} className="flex gap-3 text-sm leading-relaxed text-ink/70">
                         <span className="mt-0.5 shrink-0 font-bold text-success" aria-hidden="true">✓</span>
                         {item}
@@ -166,7 +183,7 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
                   <div className="rounded-3xl border border-line bg-card p-7 shadow-sm">
                     <h3 className="font-display text-xl font-extrabold text-ink">On you</h3>
                     <ul className="mt-4 space-y-2.5">
-                      {pkg.exclusions.slice(0, 6).map((item) => (
+                      {pkg.exclusions.map((item) => (
                         <li key={item} className="flex gap-3 text-sm leading-relaxed text-ink/70">
                           <span className="mt-0.5 shrink-0 font-bold text-brand" aria-hidden="true">✕</span>
                           {item}
@@ -179,7 +196,7 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
                   <div className="rounded-3xl border border-line bg-card p-7 shadow-sm">
                     <h3 className="font-display text-xl font-extrabold text-ink">Add-ons</h3>
                     <div className="mt-4 flex flex-wrap gap-2.5">
-                      {pkg.addons.slice(0, 8).map((a) => (
+                      {pkg.addons.map((a) => (
                         <span key={a.name} className="rounded-full bg-blush px-4 py-2 text-xs font-bold text-ink">
                           {a.name}
                           {a.price && <span className="ml-1.5 text-brand">{inr(a.price)}{a.priceMax ? `–${inr(a.priceMax)}` : ""}</span>}
@@ -281,7 +298,7 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
                       <span className="text-brand transition-transform duration-300 group-open:rotate-45" aria-hidden="true">+</span>
                     </summary>
                     <ul className="mt-4 space-y-2">
-                      {items.slice(0, 8).map((t) => (
+                      {items.map((t) => (
                         <li key={t} className="flex gap-2.5 text-sm leading-relaxed text-ink/65">
                           <span className="text-gold" aria-hidden="true">—</span>
                           {t}
@@ -299,11 +316,11 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
         <section className="mx-auto w-full max-w-4xl px-5 py-12 text-center sm:px-8">
           {pkg.socialProof && (
             <blockquote className="font-display text-2xl font-extrabold leading-snug text-ink sm:text-3xl">
-              &ldquo;{pkg.socialProof.split("\n")[0]}&rdquo;
+              &ldquo;{pkg.socialProof.split(/\n\s*\n/)[0]}&rdquo;
             </blockquote>
           )}
           {pkg.scarcityNote && (
-            <p className="mt-4 text-xs text-ink/45">{pkg.scarcityNote.split("\n")[0]}</p>
+            <p className="mt-4 whitespace-pre-line text-xs text-ink/45">{pkg.scarcityNote}</p>
           )}
           <Link href="/trips" className="mt-8 inline-flex min-h-11 items-center rounded-full border-2 border-ink px-6 py-3 text-sm font-bold text-ink transition-colors hover:bg-ink hover:text-cream">
             ← All departures

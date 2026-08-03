@@ -3,12 +3,11 @@
 /* Package editor — every field the site renders, including the photo
    gallery (picked from the media library). */
 
-import Image from "next/image";
 import { useState } from "react";
 import { useAdmin, Field, Area, Btn, Head, input, label, linesToArr, arrToLines } from "./ui";
-import ImagePicker from "./ImagePicker";
-import type { Package, ItineraryDay } from "@/lib/types";
-import { packageImages } from "@/lib/types";
+import MediaPicker from "./MediaPicker";
+import type { Package, ItineraryDay, TripCategory } from "@/lib/types";
+import { CATEGORY_DEFS, packageCategories } from "@/lib/types";
 
 export default function PackagesEditor() {
   const { data, save } = useAdmin();
@@ -27,6 +26,7 @@ export default function PackagesEditor() {
         type: "Group Departure", departureHubs: "", transport: "", route: "", inclusions: [], exclusions: [],
         addons: [], itinerary: [], nights: 0, bestTime: "", trekOptions: [], travelTips: [], thingsToCarry: [],
         socialProof: "", scarcityNote: "", cityDetails: {}, status: "draft", rich: false, hasDepartures: false, images: [],
+        categories: ["group"], itineraryPdf: "", heroMedia: "",
       },
       ...all,
     ]);
@@ -48,6 +48,13 @@ export default function PackagesEditor() {
                 {p.name}
                 <span className="ml-2 font-mono text-[0.6rem] text-white/35">{p.code}</span>
               </button>
+              <span className="hidden gap-1 sm:flex">
+                {packageCategories(p).map((c) => (
+                  <span key={c} className="rounded-full bg-white/10 px-2 py-0.5 text-[0.55rem] font-bold uppercase tracking-wider text-white/55">
+                    {c}
+                  </span>
+                ))}
+              </span>
               <span className="hidden text-xs text-white/40 sm:block">{p.itinerary.length ? `${p.itinerary.length} days` : "no itinerary"}</span>
               <button
                 type="button"
@@ -65,13 +72,43 @@ export default function PackagesEditor() {
   }
 
   /* ---------------- editor view ---------------- */
-  const gallery = packageImages(open);
+  const cats = packageCategories(open);
+  const toggleCat = (key: TripCategory) => {
+    const next = cats.includes(key) ? cats.filter((c) => c !== key) : [...cats, key];
+    upd({ categories: next.length ? next : ["group"] }); // never leave it homeless
+  };
+  const gallery = open.images ?? [];
   return (
     <>
       <Head title={open.name} sub={`${open.code} · /trips/${open.slug}`}>
         <Btn tone="ghost" onClick={() => setOpenSlug(null)}>← Back to list</Btn>
         <Btn onClick={async () => { if (await save("packages", pkgs)) setOpenSlug(null); }}>Save all packages</Btn>
       </Head>
+
+      {/* ---- which landing pages this trip appears on ---- */}
+      <div className="mb-6 max-w-5xl rounded-2xl border border-gold/25 bg-gold/[0.06] p-4">
+        <p className={label}>shows on these pages</p>
+        <div className="mt-2.5 flex flex-wrap gap-2">
+          {CATEGORY_DEFS.map((c) => {
+            const on = cats.includes(c.key);
+            return (
+              <button
+                key={c.key}
+                type="button"
+                onClick={() => toggleCat(c.key)}
+                className={`rounded-full px-4 py-2 text-xs font-bold transition-colors ${
+                  on ? "bg-gold text-ink" : "border border-white/20 text-white/60 hover:border-gold hover:text-gold"
+                }`}
+              >
+                {on ? "✓ " : ""}{c.label}
+              </button>
+            );
+          })}
+        </div>
+        <p className="mt-2 text-xs text-white/40">
+          A trip can sit on more than one page. Every live trip also appears on /trips.
+        </p>
+      </div>
 
       <div className="grid max-w-5xl gap-4 sm:grid-cols-2">
         <Field l="name" v={open.name} on={(v) => upd({ name: v })} />
@@ -85,6 +122,22 @@ export default function PackagesEditor() {
             <option value="draft">draft — hidden</option>
           </select>
         </label>
+        <Field l="code" v={open.code} on={(v) => upd({ code: v })} />
+        <Field l="departure hubs" v={open.departureHubs} on={(v) => upd({ departureHubs: v })} />
+        <div className="sm:col-span-2">
+          {/* THE BRIEF — this is the long description the package page leads with.
+              It had no field here before, so it could only be set by the importer. */}
+          <Area
+            l="the brief — full trip description (shown on the package page, any length)"
+            v={open.summaryFromDelhi}
+            on={(v) => upd({ summaryFromDelhi: v })}
+            rows={10}
+          />
+          <p className="mt-1 text-xs text-white/40">
+            {open.summaryFromDelhi.length.toLocaleString()} characters. Blank lines start a new paragraph;
+            a line in ALL CAPS becomes a heading on the page.
+          </p>
+        </div>
         <div className="sm:col-span-2"><Area l="route / destinations covered" v={open.route} on={(v) => upd({ route: v })} rows={2} /></div>
         <div className="sm:col-span-2"><Area l="scarcity note (rack & batch chips)" v={open.scarcityNote} on={(v) => upd({ scarcityNote: v })} rows={2} /></div>
         <div className="sm:col-span-2"><Area l="social proof line" v={open.socialProof} on={(v) => upd({ socialProof: v })} rows={2} /></div>
@@ -143,8 +196,8 @@ export default function PackagesEditor() {
                   </div>
                 </div>
                 <div className="mt-2 grid gap-3 sm:grid-cols-[1fr_auto]">
-                  <Area l="details" v={d.body} on={(v) => patchDay({ body: v })} rows={2} />
-                  <ImagePicker label="day photo (optional)" value={d.image ?? ""} onChange={(p) => patchDay({ image: p })} />
+                  <Area l="details — shown in full on the page" v={d.body} on={(v) => patchDay({ body: v })} rows={4} />
+                  <MediaPicker label="day photo / video" value={d.image ?? ""} onChange={(p) => patchDay({ image: p })} />
                 </div>
               </div>
             );
@@ -152,28 +205,74 @@ export default function PackagesEditor() {
         </div>
       </div>
 
-      {/* gallery picker */}
+      {/* hero + printable itinerary */}
+      <div className="mt-8 grid max-w-5xl gap-6 sm:grid-cols-2">
+        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+          <MediaPicker
+            label="hero background — photo or video"
+            value={open.heroMedia ?? ""}
+            onChange={(p) => upd({ heroMedia: p })}
+            aspect="aspect-video"
+          />
+          <p className="mt-2 text-xs text-white/40">
+            The big banner at the top of this trip&apos;s page. Leave empty to use the first gallery photo.
+          </p>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+          <Field l="itinerary PDF link (Google Drive)" v={open.itineraryPdf ?? ""} on={(v) => upd({ itineraryPdf: v })} />
+          <p className="mt-2 text-xs text-white/40">
+            Paste the normal Drive share link — we convert it to a direct download. Leave empty to hide
+            the Download itinerary button on this trip.
+          </p>
+        </div>
+      </div>
+
+      {/* gallery */}
       <div className="mt-8 max-w-5xl">
-        <p className={label}>photos — click to add/remove from this package&apos;s gallery (order = click order)</p>
-        <p className="mt-1 text-xs text-white/40">Currently showing: {gallery.join(", ")} {(!open.images || open.images.length === 0) && "(auto-picked — select photos to override)"}</p>
-        <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-5 lg:grid-cols-6">
-          {data.media.map((m) => {
-            const sel = open.images?.indexOf(m.path) ?? -1;
-            return (
-              <button
-                key={m.path}
-                type="button"
-                onClick={() => {
-                  const cur = open.images ?? [];
-                  upd({ images: sel >= 0 ? cur.filter((x) => x !== m.path) : [...cur, m.path] });
+        <div className="mb-2 flex items-center justify-between">
+          <p className={label}>gallery — photos &amp; video, in order (first one is the fallback hero)</p>
+          <Btn tone="ghost" onClick={() => upd({ images: [...gallery, ""] })}>+ Add</Btn>
+        </div>
+        {gallery.length === 0 && (
+          <p className="mb-3 text-xs text-white/40">
+            Nothing picked yet — the site is auto-choosing photos by destination. Add one to take control.
+          </p>
+        )}
+        <div className="flex flex-wrap gap-4">
+          {gallery.map((src, i) => (
+            <div key={`g-${i}`} className="w-44">
+              <MediaPicker
+                value={src}
+                label={`#${i + 1}`}
+                onChange={(ref) => {
+                  const next = [...gallery];
+                  if (!ref) next.splice(i, 1);
+                  else next[i] = ref;
+                  upd({ images: next });
                 }}
-                className={`relative aspect-[4/3] overflow-hidden rounded-lg border-2 transition-all ${sel >= 0 ? "border-gold" : "border-transparent opacity-60 hover:opacity-100"}`}
-              >
-                <Image src={m.path} alt="" fill sizes="160px" className="object-cover" />
-                {sel >= 0 && <span className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gold text-[0.6rem] font-extrabold text-ink">{sel + 1}</span>}
-              </button>
-            );
-          })}
+              />
+              {gallery.length > 1 && (
+                <div className="mt-1.5 flex gap-1.5">
+                  {([-1, 1] as const).map((dir) => (
+                    <button
+                      key={dir}
+                      type="button"
+                      onClick={() => {
+                        const j = i + dir;
+                        if (j < 0 || j >= gallery.length) return;
+                        const next = [...gallery];
+                        [next[i], next[j]] = [next[j], next[i]];
+                        upd({ images: next });
+                      }}
+                      className="rounded border border-white/20 px-2 py-0.5 text-[0.6rem] font-bold text-white/60 hover:border-gold hover:text-gold"
+                    >
+                      {dir === -1 ? "←" : "→"}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </>

@@ -375,3 +375,54 @@ body {
     font-size: 16px;
   }
 }
+
+/* ---- trip-type landing pages -------------------------------------------
+   Entrance reveal for the Group / Honeymoon / Solo pages. Deliberately pure
+   CSS: those pages are otherwise fully server-rendered, so this keeps them at
+   zero animation JS. Transform + opacity only, so it never triggers layout. */
+@keyframes tt-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.tt-rise {
+  animation: tt-rise 0.8s var(--ease-out-soft) both;
+}
+.tt-d1 {
+  animation-delay: 0.09s;
+}
+.tt-d2 {
+  animation-delay: 0.18s;
+}
+.tt-d3 {
+  animation-delay: 0.27s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tt-rise {
+    animation: none;
+  }
+}
+
+/* ---- mobile compositing budget ------------------------------------------
+   `will-change: transform` permanently promotes an element to its own GPU
+   layer. The site sets it on ~50 elements so desktop transforms stay crisp,
+   but a mid-range phone has a small texture budget: 50 always-on layers cost
+   real memory and make the compositor do more work on every single frame,
+   which reads as scroll stutter.
+
+   On coarse pointers we drop the standing hint. Nothing stops animating —
+   browsers promote an element automatically for the duration of a transform
+   or opacity animation, and GSAP sets will-change inline while a tween is
+   actually running (inline wins over this rule). We only give up the
+   *permanent* promotion, which is the part phones can't afford. */
+@media (pointer: coarse) {
+  .will-change-transform {
+    will-change: auto;
+  }
+}

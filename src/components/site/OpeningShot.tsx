@@ -206,20 +206,28 @@ export default function OpeningShot({
           </div>
         </div>
 
-        {/* ACT III — blinds + live departures */}
+        {/* ACT III — blinds + live departures.
+            Each slat shows one seventh of the same photo. This used to be a CSS
+            background-image, which meant the browser fetched the ORIGINAL file
+            (1.5 MB here) seven times over — CSS backgrounds can't go through
+            next/image. Rendering a real <Image> that is 700% wide and offset
+            per slat gives the identical composition from a single optimized
+            AVIF/WebP download. */}
         <div className="absolute inset-0 z-50 flex" aria-hidden="true">
           {Array.from({ length: 7 }).map((_, i) => (
             <div key={i} className="relative h-full overflow-hidden" style={{ width: `${100 / 7}%` }}>
-              <div
-                data-os-slat
-                className="absolute inset-0 will-change-transform"
-                style={{
-                  transform: `translateY(${i % 2 === 0 ? 104 : -104}%)`,
-                  backgroundImage: `url(${heroBlinds})`,
-                  backgroundSize: "700% 100%",
-                  backgroundPosition: `${(i / 6) * 100}% 50%`,
-                }}
-              />
+              <div data-os-slat className="absolute inset-0" style={{ transform: `translateY(${i % 2 === 0 ? 104 : -104}%)` }}>
+                <div className="absolute inset-0 overflow-hidden">
+                  <Image
+                    src={heroBlinds}
+                    alt=""
+                    fill
+                    sizes="100vw"
+                    className="object-cover"
+                    style={{ width: "700%", maxWidth: "none", left: `${-i * 100}%` }}
+                  />
+                </div>
+              </div>
             </div>
           ))}
         </div>

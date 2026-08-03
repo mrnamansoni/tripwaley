@@ -1,14 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { LogoLockup } from "@/components/ui/Logo";
 import { navLinks } from "@/lib/data";
 import { useBooking } from "@/components/booking/BookingContext";
+import { useSearch } from "@/components/site/SearchProvider";
+
+function SearchIcon() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2.2" />
+      <path d="M16.5 16.5L21 21" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 export default function Navbar({ overDarkHero = false }: { overDarkHero?: boolean }) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const { open, waLink } = useBooking();
+  const { open: openSearch } = useSearch();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -50,14 +62,20 @@ export default function Navbar({ overDarkHero = false }: { overDarkHero?: boolea
       }`}
     >
       <nav className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between px-5 sm:px-8" aria-label="Main">
-        <a href="/" aria-label="Tripwaley — home" className="rounded-lg">
+        <Link href="/" aria-label="Tripwaley — home" className="rounded-lg">
           <LogoLockup inverted={overDark} />
-        </a>
+        </Link>
 
         <ul className="hidden items-center gap-9 lg:flex">
           {navLinks.map((l) => (
             <li key={l.href}>
-              <a href={l.href} className="link-sweep text-[0.95rem] font-semibold text-ink/75 transition-colors hover:text-ink">
+              {/* invert over a dark hero — ink-on-dark was near-invisible */}
+              <a
+                href={l.href}
+                className={`link-sweep text-[0.95rem] font-semibold transition-colors ${
+                  overDark ? "text-white/85 hover:text-gold" : "text-ink/75 hover:text-ink"
+                }`}
+              >
                 {l.label}
               </a>
             </li>
@@ -65,6 +83,19 @@ export default function Navbar({ overDarkHero = false }: { overDarkHero?: boolea
         </ul>
 
         <div className="hidden items-center gap-3 lg:flex">
+          <button
+            onClick={openSearch}
+            aria-label="Search trips"
+            className={`inline-flex min-h-11 items-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition-colors ${
+              overDark
+                ? "border-white/30 text-white hover:border-gold hover:text-gold"
+                : "border-line bg-card text-ink hover:border-brand hover:text-brand"
+            }`}
+          >
+            <SearchIcon />
+            Search
+            <kbd className="ml-0.5 rounded border border-current/30 px-1.5 py-0.5 text-[0.55rem] font-bold uppercase opacity-50">⌘K</kbd>
+          </button>
           <a
             href={waLink("Hi Tripwaley! Tell me about upcoming departures ✈️")}
             target="_blank"
@@ -84,17 +115,26 @@ export default function Navbar({ overDarkHero = false }: { overDarkHero?: boolea
           </button>
         </div>
 
-        {/* Mobile hamburger */}
+        {/* Mobile: search + hamburger */}
+        <div className="flex items-center gap-1 lg:hidden">
+        <button
+          onClick={openSearch}
+          aria-label="Search trips"
+          className={`flex h-11 w-11 items-center justify-center rounded-full transition-colors ${overDark ? "text-white" : "text-ink"}`}
+        >
+          <SearchIcon />
+        </button>
         <button
           onClick={() => setMenuOpen((v) => !v)}
           aria-expanded={menuOpen}
           aria-label={menuOpen ? "Close menu" : "Open menu"}
-          className="flex h-11 w-11 flex-col items-center justify-center gap-[5px] rounded-full lg:hidden"
+          className="flex h-11 w-11 flex-col items-center justify-center gap-[5px] rounded-full"
         >
           <span className={`h-0.5 w-6 rounded transition-transform duration-300 ${overDark ? "bg-white" : "bg-ink"} ${menuOpen ? "translate-y-[7px] rotate-45" : ""}`} />
           <span className={`h-0.5 w-6 rounded transition-opacity duration-300 ${overDark ? "bg-white" : "bg-ink"} ${menuOpen ? "opacity-0" : ""}`} />
           <span className={`h-0.5 w-6 rounded transition-transform duration-300 ${overDark ? "bg-white" : "bg-ink"} ${menuOpen ? "-translate-y-[7px] -rotate-45" : ""}`} />
         </button>
+        </div>
       </nav>
 
       {/* Mobile menu — a compact dropdown card, not a full-screen takeover.

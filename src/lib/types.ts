@@ -124,6 +124,12 @@ export interface Package {
   hasDepartures: boolean;
   /** admin-curated gallery; falls back to keyword rules when empty */
   images?: string[];
+  /** which landing pages this trip appears on — unset behaves as ["group"] */
+  categories?: TripCategory[];
+  /** Google Drive (or any) link to the printable itinerary PDF */
+  itineraryPdf?: string;
+  /** hero override — image OR video, upload or pasted link. Falls to images[0] */
+  heroMedia?: string;
 }
 export interface PriceRule { packageSlug: string; citySlug: string; triple?: number; double?: number; quad?: number }
 export interface Departure { date: string; packageSlug: string; citySlugs: string[] }
@@ -173,7 +179,111 @@ export interface Catalog {
   pageSections?: Record<string, Record<string, boolean>>;
   /** live-booking wire entries (admin-curated) */
   wire?: WireEntry[];
+  /** highest seed batch already merged in — see mergeSeedContent() in store.ts */
+  seedVersion?: number;
 }
+
+/* ------------------------------------------------ media references
+
+   Anywhere the site shows a photo it accepts a "media ref": either a file
+   uploaded to the VPS (/images/… or /uploads/…) or a pasted external link.
+   Either one may be a video instead of a photo — <SiteMedia> picks the right
+   element. Refs are plain strings, so every existing slot/gallery value keeps
+   working untouched. */
+
+const VIDEO_EXT = /\.(mp4|webm|mov|m4v|ogv)(\?|#|$)/i;
+const IMAGE_EXT = /\.(jpe?g|png|webp|avif|gif|svg)(\?|#|$)/i;
+
+/** absolute http(s) link (pasted) rather than a file on our own server */
+export const isExternalMedia = (src: string): boolean => /^https?:\/\//i.test(src.trim());
+/** a file we host ourselves under /public */
+export const isLocalMedia = (src: string): boolean => /^\/(images|uploads)\//i.test(src.trim());
+
+/** Should this ref render as <video> rather than <img>?
+ *  Extension-driven, and Drive/Dropbox video links are normalised first. */
+export function isVideoMedia(src: string): boolean {
+  const s = normalizeMediaUrl(src);
+  if (VIDEO_EXT.test(s)) return true;
+  // a normalised Drive link keeps its original extension in the id-less form,
+  // so fall back to the raw string too
+  return VIDEO_EXT.test(src.trim());
+}
+export const isImageMedia = (src: string): boolean => !!src && !isVideoMedia(src);
+
+/** pull the file id out of any Google Drive share URL shape */
+function driveId(url: string): string | null {
+  const u = url.trim();
+  if (!/drive\.google\.com|docs\.google\.com/i.test(u)) return null;
+  const m =
+    u.match(/\/file\/d\/([\w-]{10,})/) ??
+    u.match(/[?&]id=([\w-]{10,})/) ??
+    u.match(/\/d\/([\w-]{10,})/);
+  return m ? m[1] : null;
+}
+
+/** A pasted share link is a *preview page*, not a file. Rewrite the ones we
+ *  can into something an <img>/<video> can actually load. Anything else is
+ *  passed straight through. */
+export function normalizeMediaUrl(raw: string): string {
+  const src = (raw ?? "").trim();
+  if (!src) return "";
+  const id = driveId(src);
+  if (id) return `https://lh3.googleusercontent.com/d/${id}`;
+  // Dropbox: ?dl=0 serves an HTML page; raw=1 serves the bytes
+  if (/dropbox\.com/i.test(src)) return src.replace(/([?&])dl=0/, "$1raw=1");
+  return src;
+}
+
+/** Direct-download form, for the "Download itinerary" button. */
+export function fileDownloadUrl(raw: string): string {
+  const src = (raw ?? "").trim();
+  if (!src) return "";
+  const id = driveId(src);
+  if (id) return `https://drive.google.com/uc?export=download&id=${id}`;
+  if (/dropbox\.com/i.test(src)) return src.replace(/([?&])dl=0/, "$1dl=1");
+  return src;
+}
+
+/** Validation shared by the admin API and the media picker. */
+export function isValidMediaRef(src: unknown): src is string {
+  if (typeof src !== "string" || !src.trim()) return false;
+  const s = src.trim();
+  if (isLocalMedia(s)) return (IMAGE_EXT.test(s) || VIDEO_EXT.test(s)) && !s.includes("..");
+  if (isExternalMedia(s)) return s.length <= 500;
+  return false;
+}
+
+/* ------------------------------------------------ trip categories
+
+   Which landing page a trip belongs to. Group departures are the historical
+   default, so a package with no categories set still shows up exactly where
+   it always did. */
+
+export type TripCategory = "group" | "honeymoon" | "solo";
+
+export interface CategoryDef {
+  key: TripCategory;
+  label: string;
+  href: string;
+  /** the price row that headlines this page's cards */
+  rateLabel: string;
+}
+
+export const CATEGORY_DEFS: CategoryDef[] = [
+  { key: "group", label: "Group departures", href: "/group-departures", rateLabel: "per seat" },
+  { key: "honeymoon", label: "Honeymoon", href: "/honeymoon", rateLabel: "per couple" },
+  { key: "solo", label: "Solo", href: "/solo", rateLabel: "per seat" },
+];
+
+const CATEGORY_KEYS = new Set<string>(CATEGORY_DEFS.map((c) => c.key));
+
+/** A package's categories, defaulted so legacy rows keep their old home. */
+export function packageCategories(p: Pick<Package, "categories">): TripCategory[] {
+  const set = (p.categories ?? []).filter((c): c is TripCategory => CATEGORY_KEYS.has(c));
+  return set.length ? set : ["group"];
+}
+export const inCategory = (p: Pick<Package, "categories">, cat: TripCategory): boolean =>
+  packageCategories(p).includes(cat);
 
 /* ------------------------------------------------ page section registry
 
@@ -250,6 +360,20 @@ export const SLOT_DEFS: SlotDef[] = [
   { key: "daynight.day", group: "Destinations page", label: "Day/Night — DAY photo", hint: "Left side of the draggable seam", kind: "single", defaults: ["/images/tw-manikaran.jpg"] },
   { key: "daynight.night", group: "Destinations page", label: "Day/Night — NIGHT photo", hint: "Right side of the draggable seam", kind: "single", defaults: ["/images/tw-night-terrace.jpg"] },
   { key: "atlas.tiles", group: "Trips page", label: "Atlas table photos", hint: "The grab-and-throw map table — labels edited in Content", kind: "list", defaults: ["/images/tw-manikaran.jpg", "/images/tw-snowfield.jpg", "/images/tw-rajasthan-fort.jpg", "/images/tw-waterfall-banner.jpg", "/images/tw-bus-roof.jpg", "/images/tw-g-kasol-huts.jpg", "/images/tw-rafting.jpg", "/images/tw-snow-road.jpg", "/images/tw-manali-night.jpg", "/images/tw-g-mannat.jpg", "/images/tw-bonfire.jpg", "/images/tw-hero-deodar.jpg"], max: 16 },
+
+  /* ---- the three trip-type landing pages (photo OR video in every slot) ---- */
+  { key: "group.hero", group: "Group departures page", label: "Hero background", hint: "Photo or video behind the page title", kind: "single", defaults: ["/images/tw-hero-huddle.jpg"] },
+  { key: "group.strip", group: "Group departures page", label: "Proof strip photos", hint: "The band of batch photos under the intro", kind: "list", defaults: ["/images/tw-bonfire.jpg", "/images/tw-g-boarding.jpg", "/images/tw-bus-inside.jpg", "/images/tw-snow-throw.jpg", "/images/tw-g-shivacafe1.jpg", "/images/tw-hero-deodar.jpg"], max: 12 },
+
+  { key: "honeymoon.hero", group: "Honeymoon page", label: "Hero background", hint: "Photo or video behind the page title", kind: "single", defaults: ["/images/houseboat.jpg"] },
+  // Deliberately scenery and pairs only — no batch group shots. A page selling
+  // "just the two of you" cannot open with a photo of eighteen people.
+  { key: "honeymoon.gallery", group: "Honeymoon page", label: "Moments gallery", hint: "Arched photo band — keep these couple/scenery shots, not group photos. Captions in Content.", kind: "list", defaults: ["/images/kashmir.jpg", "/images/backwater-canoe.jpg", "/images/andaman.jpg", "/images/tent-view.jpg", "/images/kerala.jpg", "/images/stars.jpg"], max: 12 },
+  { key: "honeymoon.suite", group: "Honeymoon page", label: "Private-suite feature photo", hint: "Large feature image beside the inclusions", kind: "single", defaults: ["/images/tent-view.jpg"] },
+
+  { key: "solo.hero", group: "Solo page", label: "Hero background", hint: "Photo or video behind the page title", kind: "single", defaults: ["/images/traveller-street.jpg"] },
+  { key: "solo.gallery", group: "Solo page", label: "Crew gallery", hint: "Strangers-to-friends photo band", kind: "list", defaults: ["/images/tw-hero-huddle.jpg", "/images/group-trek.jpg", "/images/tw-bonfire-dog.jpg", "/images/tw-g-bench.jpg", "/images/tw-dhaba.jpg", "/images/tw-g-forest2.jpg"], max: 12 },
+  { key: "solo.safety", group: "Solo page", label: "Safety band photo", hint: "Beside the solo-safety promises", kind: "single", defaults: ["/images/tw-captain-1.jpg"] },
 ];
 
 export function resolveSlot(media: Record<string, string[]> | undefined, key: string): string[] {
@@ -327,6 +451,42 @@ export const CONTENT_DEFS: ContentDef[] = [
   { key: "dest.album.accent", group: "Destinations page", label: "Album accent (gold word)", kind: "line", default: "happened." },
   { key: "dest.album.sub", group: "Destinations page", label: "Album sub-line", kind: "multiline", default: "Unstaged, uncropped, occasionally out of focus — exactly how memory works." },
   { key: "dest.album.captions", group: "Destinations page", label: "Album captions (one per line, in photo order)", kind: "multiline", default: "deodar cathedral, entry free\nsnow fight: everyone lost\nkasol huts, population us\nbonfire committee in session\nvalley lights, no filter\narms tired. worth it.\nshiva cafe sunlight\nhuddle up, day six\nfountain break, jaipur" },
+
+  /* ---- Group departures page ---- */
+  { key: "group.eyebrow", group: "Group departures page", label: "Eyebrow (script)", kind: "line", default: "fixed dates · guaranteed departures" },
+  { key: "group.headline", group: "Group departures page", label: "Headline", kind: "line", default: "Book a seat." },
+  { key: "group.accent", group: "Group departures page", label: "Headline accent (gold)", kind: "line", default: "Leave with a crew." },
+  { key: "group.sub", group: "Group departures page", label: "Sub-line", kind: "multiline", default: "Fixed departure dates, a certified trip captain, and 12–18 people who were strangers at the boarding point. Everything from your city and back is handled." },
+  { key: "group.promises", group: "Group departures page", label: "Promise cards (one per line — title | detail)", kind: "multiline", default: "Guaranteed departure | The date on the ticket is the date the bus leaves. We don't cancel for low numbers.\nOne captain per batch | Certified, first-aid trained, and the reason nobody gets left at a chai stop.\nBoarding from your city | Ten pickup cities and counting — the fare you see is your city's real fare.\nNo hidden costs | Stays, transport, permits and most meals are in. What's out is written on the page." },
+  { key: "group.stripEyebrow", group: "Group departures page", label: "Proof strip eyebrow", kind: "line", default: "one batch, six days, fourteen new numbers in your phone" },
+
+  /* ---- Honeymoon page ---- */
+  { key: "honeymoon.eyebrow", group: "Honeymoon page", label: "Eyebrow (script)", kind: "line", default: "just the two of you ✦" },
+  { key: "honeymoon.headline", group: "Honeymoon page", label: "Headline", kind: "line", default: "The trip you'll" },
+  { key: "honeymoon.accent", group: "Honeymoon page", label: "Headline accent (rose)", kind: "line", default: "keep retelling." },
+  { key: "honeymoon.sub", group: "Honeymoon page", label: "Sub-line", kind: "multiline", default: "Private cars, no group, no 6 AM roll call. Handpicked stays with a view worth waking up for — and an itinerary that leaves room to do absolutely nothing." },
+  { key: "honeymoon.promises", group: "Honeymoon page", label: "Promise cards (one per line — title | detail)", kind: "multiline", default: "Only ever two seats | Private cab, private stay, private everything. No co-passengers, no shared schedule.\nRooms chosen for the view | Candlelit dinner, flower-decor room on arrival, and a stay we'd book ourselves.\nPlanned around you | Late starts, longer stops, and a captain on WhatsApp who never rings the doorbell.\nOne quiet number | A single planner who knows your booking — not a call centre." },
+  { key: "honeymoon.galleryEyebrow", group: "Honeymoon page", label: "Gallery eyebrow", kind: "line", default: "shot on real honeymoons" },
+  { key: "honeymoon.galleryHeadline", group: "Honeymoon page", label: "Gallery headline", kind: "line", default: "Slow mornings," },
+  { key: "honeymoon.galleryAccent", group: "Honeymoon page", label: "Gallery accent (rose)", kind: "line", default: "long evenings." },
+  { key: "honeymoon.galleryCaptions", group: "Honeymoon page", label: "Gallery captions (one per line, in photo order)", kind: "multiline", default: "the 6 AM shikara\nnobody else on the water\nbreakfast, eventually\nthe balcony we didn't leave\ntea at altitude\nlights out, stars on" },
+  { key: "honeymoon.quote", group: "Honeymoon page", label: "Love-note quote (script)", kind: "multiline", default: "We booked it three days after the wedding, and it is still the week we talk about most." },
+  { key: "honeymoon.quoteBy", group: "Honeymoon page", label: "Love-note attribution", kind: "line", default: "Aarti & Rohan · Kashmir, April batch" },
+  { key: "honeymoon.suiteTitle", group: "Honeymoon page", label: "Feature block title", kind: "line", default: "What's waiting in the room." },
+  { key: "honeymoon.suiteList", group: "Honeymoon page", label: "Feature block list (one per line)", kind: "multiline", default: "Flower-decorated room on the night you arrive\nCandlelit dinner for two, one evening of the trip\nPrivate cab for the whole route — never a shared coach\nA welcome cake, because somebody should bake you one\nLate checkout wherever the property allows it" },
+
+  /* ---- Solo page ---- */
+  { key: "solo.eyebrow", group: "Solo page", label: "Eyebrow (script)", kind: "line", default: "book for one ✦ arrive to fifteen" },
+  { key: "solo.headline", group: "Solo page", label: "Headline", kind: "line", default: "Go alone." },
+  { key: "solo.accent", group: "Solo page", label: "Headline accent (gold)", kind: "line", default: "Come back with a crew." },
+  { key: "solo.sub", group: "Solo page", label: "Sub-line", kind: "multiline", default: "Most of our travellers book a single seat. You'll be matched into a small batch, share a room with someone your own age and gender, and pay zero single-supplement for the privilege." },
+  { key: "solo.promises", group: "Solo page", label: "Promise cards (one per line — title | detail)", kind: "multiline", default: "No single supplement | Book one seat, pay one seat. We match you into a shared room — never a solo-traveller surcharge.\nMatched, not dumped | Roommates matched by age and gender before you board, so day one isn't awkward.\nWomen-first options | Women-only rooms and women captains available on request, on every batch.\nThe group chat starts early | You're in the batch WhatsApp group days before departure. Nobody arrives a stranger." },
+  { key: "solo.galleryEyebrow", group: "Solo page", label: "Gallery eyebrow", kind: "line", default: "everyone here booked a single seat" },
+  { key: "solo.galleryHeadline", group: "Solo page", label: "Gallery headline", kind: "line", default: "Strangers on day one." },
+  { key: "solo.galleryAccent", group: "Solo page", label: "Gallery accent (gold)", kind: "line", default: "Group chat forever." },
+  { key: "solo.markers", group: "Solo page", label: "Trail markers (one per line — label | value | note)", kind: "multiline", default: "highest point | 4,551 m  | Kunzum La, on the Spiti circuit. You'll feel the air thin out.\nbatch size | 12–16  | Small enough that everyone knows your name by day two.\nsolo travellers | 71%  | Most of a Tripwaley batch booked exactly one seat.\nsingle supplement | ₹0  | Shared rooms matched by age and gender. Never a surcharge." },
+  { key: "solo.safetyTitle", group: "Solo page", label: "Safety block title", kind: "line", default: "Solo, not unsupervised." },
+  { key: "solo.safetyList", group: "Solo page", label: "Safety block list (one per line)", kind: "multiline", default: "Verified stays only — we've slept in every one of them\nLive location shared with your emergency contact on request\nCertified, first-aid trained captain on every single batch\nWomen-only rooms and women captains, on request\n24×7 number that reaches a human, not a queue" },
 ];
 
 export function resolveContent(content: Record<string, string> | undefined, key: string): string {
