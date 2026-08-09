@@ -11,7 +11,7 @@ import { revalidatePath } from "next/cache";
 import { sameOrigin } from "@/lib/auth";
 import { listMedia, readBookings, readCatalog, readReviews, writeCatalog, writeReviews } from "@/lib/store";
 import { SLOT_DEFS, CONTENT_DEFS, resolveSlot, PAGE_SECTION_DEFS, isValidMediaRef, CATEGORY_DEFS } from "@/lib/types";
-import type { BlogPost, Catalog, City, Departure, Faq, Package, PriceRule, Review, WireEntry } from "@/lib/types";
+import type { BlogPost, Catalog, City, Creator, Departure, Faq, Package, PriceRule, Review, WireEntry } from "@/lib/types";
 
 export async function GET() {
   const cat = readCatalog();
@@ -107,6 +107,43 @@ function validate(section: string, data: unknown): string | null {
       }
       return null;
     }
+    case "creators": {
+      const seen = new Set<string>();
+      for (const c of data as Creator[]) {
+        if (!isStr(c.slug) || !/^[a-z0-9-]+$/.test(c.slug)) return "creator slug must be lowercase letters, numbers and dashes";
+        if (seen.has(c.slug)) return `duplicate creator slug ${c.slug}`;
+        seen.add(c.slug);
+        if (!isStr(c.name) || !c.name.trim()) return `creator ${c.slug} needs a name`;
+        if (!isStr(c.firstName) || !c.firstName.trim()) return `creator ${c.slug} needs a first name`;
+        if (c.accent !== "gold" && c.accent !== "brand") return `creator ${c.slug} has an invalid accent`;
+        if (typeof c.published !== "boolean") return `creator ${c.slug} needs a published flag`;
+        if (!okMedia(c.portrait) || !okMedia(c.cover) || !okMedia(c.cutout)) return `invalid media on creator ${c.slug}`;
+        if (c.gallery != null && (!Array.isArray(c.gallery) || !c.gallery.every(okMedia))) return `invalid gallery on ${c.slug}`;
+        if (!Array.isArray(c.trips)) return `creator ${c.slug} needs a trips array`;
+
+        const usedPkgs = new Set<string>();
+        for (const t of c.trips) {
+          if (!isStr(t.packageSlug) || !t.packageSlug) return `creator ${c.slug} has a trip with no package`;
+          if (usedPkgs.has(t.packageSlug)) return `creator ${c.slug} lists ${t.packageSlug} twice`;
+          usedPkgs.add(t.packageSlug);
+          if (typeof t.published !== "boolean") return `trip ${t.packageSlug} needs a published flag`;
+          if (t.price != null && (!isNum(t.price) || t.price < 0)) return `invalid price on ${c.slug}/${t.packageSlug}`;
+          if (!okMedia(t.heroMedia)) return `invalid hero on ${c.slug}/${t.packageSlug}`;
+          if (!Array.isArray(t.dates)) return `trip ${t.packageSlug} needs a dates array`;
+          for (const d of t.dates) {
+            if (!isValidISODate(d.date)) return `invalid date on ${c.slug}/${t.packageSlug}`;
+            if (!isNum(d.seats) || d.seats < 0) return `invalid seat count on ${c.slug}/${t.packageSlug} ${d.date}`;
+            if (!isNum(d.seatsLeft) || d.seatsLeft < 0 || d.seatsLeft > d.seats) {
+              return `seats left must be between 0 and ${d.seats} on ${c.slug}/${t.packageSlug} ${d.date}`;
+            }
+          }
+          if (t.itinerary != null && (!Array.isArray(t.itinerary) || !t.itinerary.every((x) => isNum(x.day) && isStr(x.title) && okMedia(x.image)))) {
+            return `invalid itinerary override on ${c.slug}/${t.packageSlug}`;
+          }
+        }
+      }
+      return null;
+    }
     case "wire":
       return (data as WireEntry[]).every((w) => isStr(w.name) && isStr(w.city) && isStr(w.act) && isStr(w.trip)) ? null : "invalid wire row";
     case "posts":
@@ -148,6 +185,7 @@ export async function PUT(req: Request) {
     if (section === "posts") cat.posts = data as BlogPost[];
     if (section === "pageSections") cat.pageSections = data as Record<string, Record<string, boolean>>;
     if (section === "wire") cat.wire = data as WireEntry[];
+    if (section === "creators") cat.creators = data as Creator[];
     writeCatalog(cat);
   }
 

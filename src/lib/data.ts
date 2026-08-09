@@ -375,6 +375,7 @@ export const navLinks = [
   { href: "/group-departures", label: "Group" },
   { href: "/honeymoon", label: "Honeymoon" },
   { href: "/solo", label: "Solo" },
+  { href: "/travel-with-creator", label: "Creators" },
   { href: "/destinations", label: "Destinations" },
   { href: "/stories", label: "Stories" },
   { href: "/#reviews", label: "Reviews" },

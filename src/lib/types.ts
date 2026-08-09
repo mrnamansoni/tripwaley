@@ -74,7 +74,25 @@ export interface City {
   lng: number;
   priced: boolean;
 }
-export interface ItineraryDay { day: number; title: string; body: string; image?: string }
+export type Meal = "breakfast" | "lunch" | "dinner";
+
+export interface ItineraryDay {
+  day: number;
+  title: string;
+  body: string;
+  image?: string;
+  /** which meals this day covers — rendered as chips so the answer to
+   *  "is dinner included on day 3" is scannable instead of buried in prose */
+  meals?: Meal[];
+  /** does the night's stay come with the package? */
+  stay?: boolean;
+}
+
+export const MEAL_LABEL: Record<Meal, string> = {
+  breakfast: "Breakfast",
+  lunch: "Lunch",
+  dinner: "Dinner",
+};
 export interface Faq { q: string; a: string }
 /** The live-site FAQ fallback (used when catalog.faqs is unset). Defined here
  *  in the client-safe module so the admin FAQ editor seeds from the exact same
@@ -179,6 +197,8 @@ export interface Catalog {
   pageSections?: Record<string, Record<string, boolean>>;
   /** live-booking wire entries (admin-curated) */
   wire?: WireEntry[];
+  /** creator collabs (Travel with a Creator pages) */
+  creators?: Creator[];
   /** highest seed batch already merged in — see mergeSeedContent() in store.ts */
   seedVersion?: number;
 }
@@ -251,6 +271,129 @@ export function isValidMediaRef(src: unknown): src is string {
   if (isLocalMedia(s)) return (IMAGE_EXT.test(s) || VIDEO_EXT.test(s)) && !s.includes("..");
   if (isExternalMedia(s)) return s.length <= 500;
   return false;
+}
+
+/* ------------------------------------------------ creators
+
+   Creator collabs: a creator rides along on a real departure and their
+   audience books the same seat. Every creator gets a promotable page of
+   their own, so these records carry portfolio material (gallery, reel,
+   quote, Q&A) as well as the dates they're actually on. */
+
+export interface CreatorSocial {
+  platform: "instagram" | "youtube" | "x" | "tiktok";
+  handle: string;
+  /** display string, e.g. "412K" — kept as text so the owner types it as-is */
+  followers: string;
+  url: string;
+}
+
+/** one departure of a creator trip */
+export interface CreatorTripDate {
+  date: string; // ISO yyyy-mm-dd
+  seats: number;
+  seatsLeft: number;
+  /** one line in the creator's voice about this specific batch */
+  hook?: string;
+}
+
+/**
+ * A creator running ONE package — the real unit of a collab.
+ *
+ * A creator usually runs several different trips, each with its own dates,
+ * its own price and often its own itinerary (a creator-led batch adds their
+ * sessions to the days). Each one gets its own page, because that is what a
+ * creator actually promotes: "come to Spiti with me", not "here is my
+ * profile". Anything left unset falls back to the underlying package.
+ */
+export interface CreatorTrip {
+  packageSlug: string;
+  /** the creator's own title for this trip */
+  headline?: string;
+  /** why they picked this one, in their voice */
+  pitch?: string;
+  /** overrides the package hero on this page */
+  heroMedia?: string;
+  gallery?: string[];
+  /** creator-led batches are often priced differently to the public batch */
+  price?: number;
+  /** overrides — empty/unset means "use the package's own" */
+  itinerary?: ItineraryDay[];
+  inclusions?: string[];
+  exclusions?: string[];
+  dates: CreatorTripDate[];
+  published: boolean;
+}
+
+/** legacy shape — creators were once a flat list of dates */
+export interface CreatorDeparture {
+  packageSlug: string;
+  date: string;
+  seats: number;
+  seatsLeft: number;
+  hook?: string;
+}
+
+export interface Creator {
+  slug: string;
+  name: string;
+  /** used for "Travel with ___" headlines */
+  firstName: string;
+  handle: string;
+  /** short positioning label — "The Spiti Regular". Sits above the name and
+   *  gives the creator an identity beyond their handle. */
+  epithet?: string;
+  tagline: string;
+  bio: string;
+  city: string;
+  niche: string;
+  /** which brand accent this creator's page leans on — palette stays locked */
+  accent: "gold" | "brand";
+  /** transparent-background PNG of the creator. When present the figure is
+   *  rendered bare (the poster look). Falls back to `portrait` when unset. */
+  cutout?: string;
+  /** ordinary photo of the creator, used when no cutout exists */
+  portrait: string;
+  /** object-position for `portrait`, so the face stays framed on any crop */
+  focal?: string;
+  /** wide backdrop behind the hero */
+  cover: string;
+  gallery: string[];
+  reel?: string;
+  socials: CreatorSocial[];
+  quote: string;
+  qa: { q: string; a: string }[];
+  /** what you specifically get because THEY are on the bus */
+  perks: string[];
+  /** one entry per package they run; each becomes its own page */
+  trips: CreatorTrip[];
+  /** legacy flat date list — normalised into `trips` on read */
+  departures?: CreatorDeparture[];
+  published: boolean;
+}
+
+export const creatorSeatsLabel = (d: CreatorTripDate): string =>
+  d.seatsLeft <= 0 ? "Sold out" : `${d.seatsLeft} of ${d.seats} seats left`;
+
+/** 0..1 — how full this departure is, for the seat meter */
+export const creatorFillRatio = (d: CreatorTripDate): number =>
+  d.seats > 0 ? Math.min(1, Math.max(0, (d.seats - d.seatsLeft) / d.seats)) : 0;
+
+/** Fold any legacy flat `departures` list into the `trips` shape, grouping
+ *  by package. Lets old records keep working without a data migration. */
+export function normalizeCreator(c: Creator): Creator {
+  const trips = [...(c.trips ?? [])];
+  for (const d of c.departures ?? []) {
+    const existing = trips.find((t) => t.packageSlug === d.packageSlug);
+    const date: CreatorTripDate = { date: d.date, seats: d.seats, seatsLeft: d.seatsLeft, hook: d.hook };
+    if (existing) {
+      if (!existing.dates.some((x) => x.date === d.date)) existing.dates.push(date);
+    } else {
+      trips.push({ packageSlug: d.packageSlug, dates: [date], published: true });
+    }
+  }
+  for (const t of trips) t.dates.sort((a, b) => a.date.localeCompare(b.date));
+  return { ...c, trips, departures: undefined };
 }
 
 /* ------------------------------------------------ trip categories

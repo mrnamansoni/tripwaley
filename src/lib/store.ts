@@ -16,7 +16,7 @@ import type { Booking, Catalog, Review } from "./types";
 /** Bump when src/data/catalog.json gains packages/prices/departures that an
  *  already-running install should receive. mergeSeedContent() then adds only
  *  the rows whose keys are missing — admin edits are never overwritten. */
-const SEED_VERSION = 1;
+const SEED_VERSION = 4;
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const SEED_CATALOG = path.join(process.cwd(), "src", "data", "catalog.json");
@@ -45,6 +45,55 @@ function ensureSeeded() {
   if (!fs.existsSync(uploads)) fs.mkdirSync(uploads, { recursive: true });
   seeded = true; // set before merging: mergeSeedContent reads through readJson
   mergeSeedContent();
+}
+
+/**
+ * Fill in fields the seed has gained on rows that ALREADY exist live.
+ *
+ * The merge below only ever adds whole rows, which is the right default —
+ * but it means a genuinely new *field* (per-day meals, a creator epithet)
+ * can never reach a package that was merged in an earlier seed version.
+ *
+ * This fills such a field ONLY where the live row has no value for it. An
+ * admin's value always wins; nothing is ever replaced, only filled. Keep it
+ * to additive, low-risk fields — never prices, dates or copy the owner edits.
+ */
+function backfill(next: Catalog, seed: Catalog): number {
+  let n = 0;
+
+  const seedPkgs = new Map((seed.packages ?? []).map((p) => [p.slug, p]));
+  next.packages = next.packages.map((live) => {
+    const from = seedPkgs.get(live.slug);
+    if (!from?.itinerary?.length || !live.itinerary?.length) return live;
+
+    const byDay = new Map(from.itinerary.map((d) => [d.day, d]));
+    let touched = false;
+    const itinerary = live.itinerary.map((d) => {
+      const src = byDay.get(d.day);
+      if (!src) return d;
+      const patch: Partial<typeof d> = {};
+      if (d.meals === undefined && src.meals !== undefined) patch.meals = src.meals;
+      if (d.stay === undefined && src.stay !== undefined) patch.stay = src.stay;
+      if (!Object.keys(patch).length) return d;
+      touched = true;
+      return { ...d, ...patch };
+    });
+    if (!touched) return live;
+    n++;
+    return { ...live, itinerary };
+  });
+
+  const seedCreators = new Map((seed.creators ?? []).map((c) => [c.slug, c]));
+  if (next.creators?.length) {
+    next.creators = next.creators.map((live) => {
+      const from = seedCreators.get(live.slug);
+      if (!from || live.epithet !== undefined || from.epithet === undefined) return live;
+      n++;
+      return { ...live, epithet: from.epithet };
+    });
+  }
+
+  return n;
 }
 
 /**
@@ -81,6 +130,12 @@ function mergeSeedContent() {
     const haveDeps = new Set(live.departures.map(depKey));
     const newDeps = (seed.departures ?? []).filter((d) => !haveDeps.has(depKey(d)));
     if (newDeps.length) { next.departures = [...live.departures, ...newDeps]; added += newDeps.length; }
+
+    const haveCreators = new Set((live.creators ?? []).map((c) => c.slug));
+    const newCreators = (seed.creators ?? []).filter((c) => !haveCreators.has(c.slug));
+    if (newCreators.length) { next.creators = [...(live.creators ?? []), ...newCreators]; added += newCreators.length; }
+
+    added += backfill(next, seed);
 
     next.seedVersion = SEED_VERSION;
     writeJson(FILES.catalog, next);

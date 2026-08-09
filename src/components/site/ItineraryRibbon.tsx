@@ -18,6 +18,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import SiteMedia from "./SiteMedia";
 import RichText from "./RichText";
+import DayChips from "./DayChips";
 import { gsap } from "@/lib/gsap";
 import type { ItineraryDay } from "@/lib/types";
 
@@ -239,6 +240,7 @@ export default function ItineraryRibbon({ days, images }: { days: ItineraryDay[]
                   <h3 className="font-display text-lg font-extrabold leading-snug text-ink transition-colors group-hover:text-brand">
                     {day.title}
                   </h3>
+                  <DayChips meals={day.meals} stay={day.stay} tone="light" className="mt-2.5" />
                   {/* full day text — expandable, never cut */}
                   {day.body && (
                     <RichText

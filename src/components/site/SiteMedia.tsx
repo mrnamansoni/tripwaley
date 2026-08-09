@@ -28,6 +28,8 @@ export interface SiteMediaProps {
   priority?: boolean;
   /** video only: still frame shown before the first frame decodes */
   poster?: string;
+  /** inline style — mainly object-position, to keep a face framed on crop */
+  style?: React.CSSProperties;
 }
 
 const FILL_CLS = "absolute inset-0 h-full w-full";
@@ -42,6 +44,7 @@ export default function SiteMedia({
   className = "",
   priority,
   poster,
+  style,
 }: SiteMediaProps) {
   const url = normalizeMediaUrl(src ?? "");
   if (!url) return null;
@@ -55,6 +58,7 @@ export default function SiteMedia({
         src={url}
         poster={poster ? normalizeMediaUrl(poster) : undefined}
         className={`${fill ? FILL_CLS : ""} ${className}`.trim()}
+        style={style}
         autoPlay
         muted
         loop
@@ -71,7 +75,7 @@ export default function SiteMedia({
   /* ---- uploaded photo: full AVIF/WebP + resize pipeline ---- */
   if (isLocalMedia(url)) {
     return fill ? (
-      <Image src={url} alt={alt} fill sizes={sizes} priority={priority} className={className} />
+      <Image src={url} alt={alt} fill sizes={sizes} priority={priority} className={className} style={style} />
     ) : (
       <Image
         src={url}
@@ -81,6 +85,7 @@ export default function SiteMedia({
         sizes={sizes}
         priority={priority}
         className={className}
+        style={style}
       />
     );
   }
@@ -96,6 +101,7 @@ export default function SiteMedia({
       loading={priority ? "eager" : "lazy"}
       decoding="async"
       className={`${fill ? `${FILL_CLS} object-cover` : ""} ${className}`.trim()}
+      style={style}
     />
   );
 }

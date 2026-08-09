@@ -66,7 +66,7 @@ export default function Navbar({ overDarkHero = false }: { overDarkHero?: boolea
           <LogoLockup inverted={overDark} />
         </Link>
 
-        <ul className="hidden items-center gap-9 lg:flex">
+        <ul className="hidden items-center gap-6 xl:flex">
           {navLinks.map((l) => (
             <li key={l.href}>
               {/* invert over a dark hero — ink-on-dark was near-invisible */}
@@ -82,11 +82,11 @@ export default function Navbar({ overDarkHero = false }: { overDarkHero?: boolea
           ))}
         </ul>
 
-        <div className="hidden items-center gap-3 lg:flex">
+        <div className="hidden items-center gap-2.5 xl:flex">
           <button
             onClick={openSearch}
             aria-label="Search trips"
-            className={`inline-flex min-h-11 items-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition-colors ${
+            className={`inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-bold transition-colors ${
               overDark
                 ? "border-white/30 text-white hover:border-gold hover:text-gold"
                 : "border-line bg-card text-ink hover:border-brand hover:text-brand"
@@ -94,13 +94,13 @@ export default function Navbar({ overDarkHero = false }: { overDarkHero?: boolea
           >
             <SearchIcon />
             Search
-            <kbd className="ml-0.5 rounded border border-current/30 px-1.5 py-0.5 text-[0.55rem] font-bold uppercase opacity-50">⌘K</kbd>
+            <kbd className="ml-0.5 hidden rounded border border-current/30 px-1.5 py-0.5 text-[0.55rem] font-bold uppercase opacity-50 2xl:inline">⌘K</kbd>
           </button>
           <a
             href={waLink("Hi Tripwaley! Tell me about upcoming departures ✈️")}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex min-h-11 items-center gap-2 rounded-full border border-line bg-card px-4 py-2 text-sm font-bold text-ink transition-colors hover:border-success hover:text-success"
+            className="inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-full border border-line bg-card px-4 py-2 text-sm font-bold text-ink transition-colors hover:border-success hover:text-success"
           >
             <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="text-success">
               <path d="M12 2a10 10 0 0 0-8.66 15L2 22l5.16-1.3A10 10 0 1 0 12 2Zm5.47 14.3c-.23.65-1.35 1.24-1.86 1.28-.5.05-.97.24-3.27-.68-2.77-1.1-4.53-3.94-4.67-4.12-.13-.18-1.11-1.48-1.11-2.83 0-1.34.7-2 .95-2.28.25-.27.55-.34.73-.34.18 0 .37 0 .53.01.17.01.4-.06.62.48.23.55.78 1.9.85 2.04.07.14.11.3.02.48-.09.18-.13.29-.27.45-.13.16-.28.36-.4.48-.14.13-.28.28-.12.55.16.27.71 1.17 1.53 1.9 1.05.94 1.94 1.23 2.21 1.37.28.14.44.11.6-.07.16-.18.69-.8.87-1.08.18-.27.37-.23.62-.14.25.09 1.59.75 1.86.89.27.13.45.2.52.32.06.11.06.65-.16 1.29Z" />
@@ -109,14 +109,14 @@ export default function Navbar({ overDarkHero = false }: { overDarkHero?: boolea
           </a>
           <button
             onClick={() => open("hold")}
-            className="inline-flex min-h-11 items-center rounded-full bg-brand px-5 py-2.5 text-sm font-bold text-white shadow-red transition-all hover:bg-brand-bright active:scale-[0.97]"
+            className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-full bg-brand px-5 py-2.5 text-sm font-bold text-white shadow-red transition-all hover:bg-brand-bright active:scale-[0.97]"
           >
             Hold a seat
           </button>
         </div>
 
         {/* Mobile: search + hamburger */}
-        <div className="flex items-center gap-1 lg:hidden">
+        <div className="flex items-center gap-1 xl:hidden">
         <button
           onClick={openSearch}
           aria-label="Search trips"
@@ -143,11 +143,11 @@ export default function Navbar({ overDarkHero = false }: { overDarkHero?: boolea
         <button
           aria-label="Close menu"
           onClick={() => setMenuOpen(false)}
-          className="fixed inset-0 z-30 cursor-default bg-ink/40 lg:hidden"
+          className="fixed inset-0 z-30 cursor-default bg-ink/40 xl:hidden"
         />
       )}
       <div
-        className={`fixed inset-x-3 z-40 origin-top rounded-3xl border border-line bg-cream shadow-card-lg transition-all duration-300 lg:hidden ${
+        className={`fixed inset-x-3 z-40 origin-top rounded-3xl border border-line bg-cream shadow-card-lg transition-all duration-300 xl:hidden ${
           menuOpen ? "visible scale-100 opacity-100" : "invisible scale-[0.97] opacity-0"
         }`}
         style={{ top: "calc(var(--ann-h, 0px) + 5rem)" }}

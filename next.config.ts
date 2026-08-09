@@ -19,6 +19,14 @@ const nextConfig: NextConfig = {
     // of requests a single page load fans out to, without masking a replace.
     minimumCacheTTL: 60,
   },
+  async rewrites() {
+    return {
+      // beforeFiles runs ahead of Next's own public-folder file check — see
+      // src/app/api/uploads/[...path]/route.ts for why that check can't be
+      // trusted for files an admin uploads after the server has booted.
+      beforeFiles: [{ source: "/uploads/:path*", destination: "/api/uploads/:path*" }],
+    };
+  },
 };
 
 export default nextConfig;

@@ -1404,37 +1404,65 @@
      "day": 1,
      "title": "Land in Srinagar → the houseboat",
      "body": "Met at the airport and driven straight to Dal Lake. Your houseboat is booked whole — carved cedar, a private deck, and tea whenever you ask for it. The room is decorated for your arrival. Evening is deliberately empty: sit on the deck and watch the lake go orange.",
-     "image": "/images/houseboat.jpg"
+     "image": "/images/houseboat.jpg",
+     "meals": [
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 2,
      "title": "Sunrise shikara, then the old city",
      "body": "Out on the water by six, before the lake wakes up — this is the hour the photographs come from. Back for a long breakfast, then the Mughal gardens, Shalimar and Nishat, in the afternoon. Dinner back on the boat.",
-     "image": "/images/kashmir.jpg"
+     "image": "/images/kashmir.jpg",
+     "meals": [
+      "breakfast",
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 3,
      "title": "Gulmarg — above the treeline",
      "body": "A two-hour drive up to Gulmarg and the gondola over the pines. In summer it's meadow and wildflowers; in winter you step out into deep snow. Back down to Srinagar for the night, or stay up top if you'd rather — just tell your planner.",
-     "image": "/images/tw-snowfield.jpg"
+     "image": "/images/tw-snowfield.jpg",
+     "meals": [
+      "breakfast",
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 4,
      "title": "Down to Pahalgam",
      "body": "The drive follows the Lidder river past saffron fields and cricket-bat workshops. Pahalgam is the slow half of this trip: your room faces the valley, and the plan for the evening is intentionally nothing at all.",
-     "image": "/images/tw-g-forest1.jpg"
+     "image": "/images/tw-g-forest1.jpg",
+     "meals": [
+      "breakfast",
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 5,
      "title": "Betaab valley, and the candlelit dinner",
      "body": "Morning in the Betaab and Aru valleys — pine, meltwater, and very few people if you go early. The candlelit dinner is tonight, set up wherever the property has the best view.",
-     "image": "/images/tw-night-terrace.jpg"
+     "image": "/images/tw-night-terrace.jpg",
+     "meals": [
+      "breakfast",
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 6,
      "title": "Srinagar, and home",
      "body": "An unhurried morning, a stop for saffron and kahwa on the way, and your drop at Srinagar airport.",
-     "image": "/images/kashmir.jpg"
+     "image": "/images/kashmir.jpg",
+     "meals": [
+      "breakfast"
+     ],
+     "stay": false
     }
    ],
    "categories": [
@@ -1491,37 +1519,70 @@
      "day": 1,
      "title": "Kochi → Munnar",
      "body": "Picked up at Kochi and driven up through rubber and spice country. The last hour is all tea. Your room faces the valley; the evening is yours.",
-     "image": "/images/kerala.jpg"
+     "image": "/images/kerala.jpg",
+     "meals": [
+      "lunch",
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 2,
      "title": "Munnar, slowly",
      "body": "Tea estates, the Attukad falls, and Top Station if the sky is clear. Mornings here are genuinely cold — good excuse to stay in longer.",
-     "image": "/images/himalaya-sunrise.jpg"
+     "image": "/images/himalaya-sunrise.jpg",
+     "meals": [
+      "breakfast",
+      "lunch",
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 3,
      "title": "Thekkady and the spice trail",
      "body": "Down to Thekkady, a guided walk through cardamom, pepper and vanilla, and a quiet evening in the plantation belt.",
-     "image": "/images/tw-g-forest2.jpg"
+     "image": "/images/tw-g-forest2.jpg",
+     "meals": [
+      "breakfast",
+      "lunch",
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 4,
      "title": "The houseboat",
      "body": "Board your own houseboat at Alleppey around noon. The boat cruises the narrow canals, moors before sunset, and the crew cooks dinner on board. This is the night people remember.",
-     "image": "/images/houseboat.jpg"
+     "image": "/images/houseboat.jpg",
+     "meals": [
+      "breakfast",
+      "lunch",
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 5,
      "title": "Backwater morning → Kochi",
      "body": "Breakfast on the deck as the boat comes back in, then to Fort Kochi — the Chinese nets, the old streets, and tonight's candlelit dinner.",
-     "image": "/images/backwater-canoe.jpg"
+     "image": "/images/backwater-canoe.jpg",
+     "meals": [
+      "breakfast",
+      "lunch",
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 6,
      "title": "Home from Kochi",
      "body": "A slow breakfast and your drop at Kochi airport.",
-     "image": "/images/kerala.jpg"
+     "image": "/images/kerala.jpg",
+     "meals": [
+      "breakfast"
+     ],
+     "stay": false
     }
    ],
    "categories": [
@@ -1578,37 +1639,59 @@
      "day": 1,
      "title": "Port Blair, and the light show",
      "body": "Landing, transfer, and an easy evening — Corbyn's Cove, then the sound-and-light show at the Cellular Jail as it gets dark.",
-     "image": "/images/andaman.jpg"
+     "image": "/images/andaman.jpg",
+     "meals": [],
+     "stay": true
     },
     {
      "day": 2,
      "title": "Ferry to Havelock → Radhanagar",
      "body": "Morning ferry across. Check into a beach-facing room, then Radhanagar for sunset, which is the one everyone has seen a photo of and it still lands.",
-     "image": "/images/andaman.jpg"
+     "image": "/images/andaman.jpg",
+     "meals": [
+      "breakfast"
+     ],
+     "stay": true
     },
     {
      "day": 3,
      "title": "Havelock — water day",
      "body": "Elephant beach by boat for snorkelling, or your scuba dive if you've added it. Afternoon deliberately free.",
-     "image": "/images/tent-view.jpg"
+     "image": "/images/tent-view.jpg",
+     "meals": [
+      "breakfast"
+     ],
+     "stay": true
     },
     {
      "day": 4,
      "title": "Neil Island",
      "body": "A short ferry to the slow island. Bharatpur for the clear shallows, Laxmanpur for the sunset and the natural rock bridge at low tide.",
-     "image": "/images/andaman.jpg"
+     "image": "/images/andaman.jpg",
+     "meals": [
+      "breakfast"
+     ],
+     "stay": true
     },
     {
      "day": 5,
      "title": "Neil, and the beach dinner",
      "body": "Nothing scheduled until evening, which is the idea. Candlelit dinner set up on the sand tonight.",
-     "image": "/images/stars.jpg"
+     "image": "/images/stars.jpg",
+     "meals": [
+      "breakfast"
+     ],
+     "stay": true
     },
     {
      "day": 6,
      "title": "Back to Port Blair, and home",
      "body": "Morning ferry back and your airport drop.",
-     "image": "/images/andaman.jpg"
+     "image": "/images/andaman.jpg",
+     "meals": [
+      "breakfast"
+     ],
+     "stay": false
     }
    ],
    "categories": [
@@ -1664,25 +1747,39 @@
      "day": 1,
      "title": "Into the old city",
      "body": "Met and driven to your haveli in the lanes behind Gangaur Ghat. Evening walk to Ambrai ghat for the view back across the water.",
-     "image": "/images/rajasthan.jpg"
+     "image": "/images/rajasthan.jpg",
+     "meals": [],
+     "stay": true
     },
     {
      "day": 2,
      "title": "City Palace, then the private boat",
      "body": "The City Palace and Crystal Gallery in the morning, Saheliyon-ki-Bari after lunch, then your own boat on Pichola for sunset. Rooftop dinner booked for tonight.",
-     "image": "/images/tw-g-fountain.jpg"
+     "image": "/images/tw-g-fountain.jpg",
+     "meals": [
+      "breakfast"
+     ],
+     "stay": true
     },
     {
      "day": 3,
      "title": "Kumbhalgarh",
      "body": "Out early to the second-longest continuous wall in the world, and the Ranakpur marble temples on the way back. Back in Udaipur by evening.",
-     "image": "/images/tw-rajasthan-fort.jpg"
+     "image": "/images/tw-rajasthan-fort.jpg",
+     "meals": [
+      "breakfast"
+     ],
+     "stay": true
     },
     {
      "day": 4,
      "title": "Home",
      "body": "A last breakfast over the lake and your drop.",
-     "image": "/images/rajasthan.jpg"
+     "image": "/images/rajasthan.jpg",
+     "meals": [
+      "breakfast"
+     ],
+     "stay": false
     }
    ],
    "categories": [
@@ -1738,49 +1835,87 @@
      "day": 1,
      "title": "Delhi → Shimla (overnight drive)",
      "body": "Board in Delhi in the evening. Introductions happen in the first hour and the batch group chat has usually already been going for a week.",
-     "image": "/images/tw-g-nightbus1.jpg"
+     "image": "/images/tw-g-nightbus1.jpg",
+     "meals": [
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 2,
      "title": "Shimla → Chitkul",
      "body": "Up the Sutlej valley to the last inhabited village before the Tibet border. Cold, green, and very quiet. First night at altitude.",
-     "image": "/images/tw-hero-deodar.jpg"
+     "image": "/images/tw-hero-deodar.jpg",
+     "meals": [
+      "breakfast",
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 3,
      "title": "Chitkul → Kalpa → Nako",
      "body": "Kinnaur Kailash from Kalpa at sunrise if the clouds allow, then the landscape turns from pine to bare rock in the space of two hours. Night at Nako.",
-     "image": "/images/spiti.jpg"
+     "image": "/images/spiti.jpg",
+     "meals": [
+      "breakfast",
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 4,
      "title": "Nako → Tabo → Kaza",
      "body": "Tabo monastery — 1,000 years of continuous use — then Dhankar hanging above the confluence. Into Kaza by evening; this is your acclimatisation base.",
-     "image": "/images/ladakh.jpg"
+     "image": "/images/ladakh.jpg",
+     "meals": [
+      "breakfast",
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 5,
      "title": "Key, Kibber, Hikkim, Langza",
      "body": "The postcard day. Key monastery stacked up its hillside, the fossil village at Langza, and a postcard posted from Hikkim at 4,400m — it genuinely arrives.",
-     "image": "/images/spiti.jpg"
+     "image": "/images/spiti.jpg",
+     "meals": [
+      "breakfast",
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 6,
      "title": "Kaza → Chandratal",
      "body": "Over Kunzum La to the moon lake. No network, no buildings, a camp beside the water. Sleep late — the sky is the reason you came.",
-     "image": "/images/stars.jpg"
+     "image": "/images/stars.jpg",
+     "meals": [
+      "breakfast",
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 7,
      "title": "Chandratal → Manali",
      "body": "Down the Rohtang side through Batal and Gramphu — the roughest and most spectacular stretch of the whole loop. Warm shower and a real bed in Manali.",
-     "image": "/images/tw-snow-road.jpg"
+     "image": "/images/tw-snow-road.jpg",
+     "meals": [
+      "breakfast",
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 8,
      "title": "Manali → Delhi",
      "body": "Overnight drive back, arriving Delhi early morning. The group chat does not stop.",
-     "image": "/images/tw-g-nightbus2.jpg"
+     "image": "/images/tw-g-nightbus2.jpg",
+     "meals": [
+      "breakfast"
+     ],
+     "stay": false
     }
    ],
    "categories": [
@@ -1835,25 +1970,43 @@
      "day": 1,
      "title": "Delhi → Kasol (overnight)",
      "body": "Friday-night Volvo out of Delhi. You'll have met half the batch before Chandigarh.",
-     "image": "/images/tw-g-nightbus1.jpg"
+     "image": "/images/tw-g-nightbus1.jpg",
+     "meals": [
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 2,
      "title": "Kasol, Manikaran, Tosh",
      "body": "Arrive, breakfast by the river, then the hot springs and gurudwara at Manikaran. Afternoon walk up to Tosh for the valley view. Bonfire back in Kasol.",
-     "image": "/images/tw-manikaran.jpg"
+     "image": "/images/tw-manikaran.jpg",
+     "meals": [
+      "breakfast",
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 3,
      "title": "Kheerganga trek",
      "body": "12 km up through pine and waterfalls — four to five hours at an easy pace. The hot spring at the top is at 3,000m, and the camp is right beside it.",
-     "image": "/images/tw-g-forest3.jpg"
+     "image": "/images/tw-g-forest3.jpg",
+     "meals": [
+      "breakfast",
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 4,
      "title": "Down, and back to Delhi",
      "body": "Descend to Barshaini, lunch in Kasol, and the overnight bus home.",
-     "image": "/images/tw-g-kasol-huts.jpg"
+     "image": "/images/tw-g-kasol-huts.jpg",
+     "meals": [
+      "breakfast"
+     ],
+     "stay": false
     }
    ],
    "categories": [
@@ -1910,31 +2063,58 @@
      "day": 1,
      "title": "Dehradun → Sankri",
      "body": "A long, beautiful drive up the Tons valley. Gear check and briefing at the Sankri guesthouse in the evening.",
-     "image": "/images/tw-hero-deodar.jpg"
+     "image": "/images/tw-hero-deodar.jpg",
+     "meals": [
+      "lunch",
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 2,
      "title": "Sankri → Juda Ka Talab",
      "body": "Four hours through oak and pine to a frozen lake at 9,100 ft. First night in a tent, and the first proper snow for most of the batch.",
-     "image": "/images/snowtrek.jpg"
+     "image": "/images/snowtrek.jpg",
+     "meals": [
+      "breakfast",
+      "lunch",
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 3,
      "title": "Juda Ka Talab → Kedarkantha base",
      "body": "A shorter day up to 11,250 ft, so the afternoon is free for the snow fight that always happens. Early dinner — tomorrow starts in the dark.",
-     "image": "/images/tw-snow-throw.jpg"
+     "image": "/images/tw-snow-throw.jpg",
+     "meals": [
+      "breakfast",
+      "lunch",
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 4,
      "title": "Summit day → Hargaon",
      "body": "Head torches on at 3 AM. Three hours up in the cold and dark, and then the sun comes over Swargarohini while you're standing on the top. Down to Hargaon camp for the last night.",
-     "image": "/images/tw-snowfield.jpg"
+     "image": "/images/tw-snowfield.jpg",
+     "meals": [
+      "breakfast",
+      "lunch",
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 5,
      "title": "Down to Sankri → Dehradun",
      "body": "A knee-testing descent through the forest, lunch at Sankri, and the drive back to Dehradun by evening.",
-     "image": "/images/snowtrek.jpg"
+     "image": "/images/snowtrek.jpg",
+     "meals": [
+      "breakfast"
+     ],
+     "stay": false
     }
    ],
    "categories": [
@@ -1989,19 +2169,32 @@
      "day": 1,
      "title": "Delhi → Rishikesh (overnight)",
      "body": "Friday-night Volvo. Arrive at the camp by early morning.",
-     "image": "/images/tw-g-nightbus2.jpg"
+     "image": "/images/tw-g-nightbus2.jpg",
+     "meals": [
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 2,
      "title": "Rafting, waterfall, bonfire",
      "body": "16 km from Shivpuri with the big rapids in the middle, and the cliff jump if you're up for it. Neer waterfall in the afternoon, bonfire at night.",
-     "image": "/images/tw-rafting.jpg"
+     "image": "/images/tw-rafting.jpg",
+     "meals": [
+      "breakfast",
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 3,
      "title": "Aarti, then home",
      "body": "Laxman Jhula and the cafés in the morning, Ganga aarti at Triveni Ghat as it gets dark, then the overnight bus back.",
-     "image": "/images/rishikesh.jpg"
+     "image": "/images/rishikesh.jpg",
+     "meals": [
+      "breakfast"
+     ],
+     "stay": false
     }
    ],
    "categories": [
@@ -2056,37 +2249,65 @@
      "day": 1,
      "title": "Guwahati → Shillong",
      "body": "Picked up at Guwahati, then the drive up past Umiam lake. Evening on Police Bazaar, which is louder than you expect.",
-     "image": "/images/meghalaya.jpg"
+     "image": "/images/meghalaya.jpg",
+     "meals": [
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 2,
      "title": "Cherrapunji",
      "body": "Nohkalikai falls, Mawsmai cave and the Arwah caves with their fossils. Wettest place on earth, so a raincoat is not optional.",
-     "image": "/images/tw-waterfall-big.jpg"
+     "image": "/images/tw-waterfall-big.jpg",
+     "meals": [
+      "breakfast",
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 3,
      "title": "The double-decker root bridge",
      "body": "3,500 steps down to Nongriat, the double-decker living root bridge, and the blue pools past it. Homestay in the village — no cars, no noise.",
-     "image": "/images/tw-g-forest1.jpg"
+     "image": "/images/tw-g-forest1.jpg",
+     "meals": [
+      "breakfast",
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 4,
      "title": "Back up, and to Dawki",
      "body": "The climb back out, then Dawki on the Bangladesh border where the Umngot river is genuinely transparent. Boat ride in the afternoon.",
-     "image": "/images/backwater-canoe.jpg"
+     "image": "/images/backwater-canoe.jpg",
+     "meals": [
+      "breakfast",
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 5,
      "title": "Mawlynnong and back to Shillong",
      "body": "The cleanest village in Asia, the single-decker root bridge, and a last evening in Shillong.",
-     "image": "/images/meghalaya.jpg"
+     "image": "/images/meghalaya.jpg",
+     "meals": [
+      "breakfast",
+      "dinner"
+     ],
+     "stay": true
     },
     {
      "day": 6,
      "title": "Guwahati, and home",
      "body": "Drive down to Guwahati for your flight.",
-     "image": "/images/meghalaya.jpg"
+     "image": "/images/meghalaya.jpg",
+     "meals": [
+      "breakfast"
+     ],
+     "stay": false
     }
    ],
    "categories": [
@@ -5192,5 +5413,403 @@
   "footer.cue": "keep pulling ↓"
  },
  "faqs": [],
- "posts": []
+ "posts": [],
+ "creators": [
+  {
+   "slug": "naman",
+   "name": "Naman Soni",
+   "firstName": "Naman",
+   "handle": "@namanwaley",
+   "tagline": "Eleven Spiti loops. Same dhaba every time.",
+   "city": "Delhi",
+   "niche": "Himalayan road trips",
+   "accent": "gold",
+   "published": true,
+   "cutout": "",
+   "portrait": "/images/tw-captain-3.jpg",
+   "focal": "26% 44%",
+   "cover": "/images/tw-snow-road.jpg",
+   "bio": "I started posting road-trip videos because I kept getting the same DM: \"bhai, is it safe to drive to Spiti in a hatchback?\" (It is. Mostly.)\n\nFour years later I've done the Kaza loop eleven times and I still stop at the same dhaba in Nako for rajma chawal, still get altitude-dumb on day three, still cry a little at Chandratal.\n\nWhat I'm not: a guy who'll make you wake at 5 AM for content. We shoot when the light's good and sleep when it isn't.",
+   "quote": "I don't want fifteen people watching me make a video. I want fifteen people in the video.",
+   "socials": [
+    {
+     "platform": "instagram",
+     "handle": "@namanwaley",
+     "followers": "412K",
+     "url": "https://instagram.com/"
+    },
+    {
+     "platform": "youtube",
+     "handle": "Naman Waley",
+     "followers": "186K",
+     "url": "https://youtube.com/"
+    }
+   ],
+   "perks": [
+    "I'm on the bus the whole way — not flying in for a photo op on day four",
+    "Free reel edit of your trip: send me your clips, you get a cut back within two weeks",
+    "One night I take over the aux and nobody can stop me. This is a perk, not a warning",
+    "Camera help whenever you want it — settings, angles, or just someone to hold the phone properly"
+   ],
+   "qa": [
+    {
+     "q": "Do I need to be good at photos?",
+     "a": "No. Roughly half the people who come can't work their own camera app, and by day three they can. That's the whole point of me being there."
+    },
+    {
+     "q": "Is it weird if I'm not on Instagram?",
+     "a": "Genuinely no. Maybe a third of any batch doesn't post at all. Nobody's counting."
+    },
+    {
+     "q": "Will I actually get to talk to you?",
+     "a": "You'll get sick of me. It's a Tempo Traveller for eight days — there's nowhere to hide."
+    },
+    {
+     "q": "What if I've never done altitude?",
+     "a": "Neither had I. There's an acclimatisation night built into the Spiti route, and the captain watches everyone on day three. Drink more water than feels reasonable."
+    }
+   ],
+   "gallery": [
+    "/images/spiti.jpg",
+    "/images/tw-snow-road.jpg",
+    "/images/stars.jpg",
+    "/images/tw-manali-night.jpg",
+    "/images/tw-g-nightbus1.jpg",
+    "/images/tw-hero-deodar.jpg"
+   ],
+   "reel": "",
+   "epithet": "The Spiti Regular",
+   "trips": [
+    {
+     "packageSlug": "spiti-solo-circuit",
+     "headline": "Spiti, the long way round",
+     "pitch": "eleven loops in and Chandratal still gets me",
+     "price": 26500,
+     "heroMedia": "/images/spiti.jpg",
+     "dates": [
+      {
+       "date": "2026-08-15",
+       "seats": 16,
+       "seatsLeft": 4,
+       "hook": "the loop, done properly, with the Chandratal night"
+      },
+      {
+       "date": "2026-10-26",
+       "seats": 16,
+       "seatsLeft": 16,
+       "hook": "october Spiti — colder, emptier, better"
+      }
+     ],
+     "published": true,
+     "itinerary": [
+      {
+       "day": 1,
+       "title": "Delhi → Shimla (overnight drive)",
+       "body": "Board in Delhi with me. I do a proper gear check before we roll — half of you have packed wrong, and that's fine, we fix it at the first stop.",
+       "image": "/images/tw-g-nightbus1.jpg",
+       "meals": [
+        "dinner"
+       ],
+       "stay": true
+      },
+      {
+       "day": 2,
+       "title": "Shimla → Chitkul",
+       "body": "Up the Sutlej valley to the last inhabited village before the Tibet border. Cold, green, and very quiet. First night at altitude.",
+       "image": "/images/tw-hero-deodar.jpg",
+       "meals": [
+        "breakfast",
+        "dinner"
+       ],
+       "stay": true
+      },
+      {
+       "day": 3,
+       "title": "Chitkul → Kalpa → Nako",
+       "body": "Kinnaur Kailash from Kalpa at sunrise if the clouds allow, then the landscape turns from pine to bare rock in the space of two hours. Night at Nako.",
+       "image": "/images/spiti.jpg",
+       "meals": [
+        "breakfast",
+        "dinner"
+       ],
+       "stay": true
+      },
+      {
+       "day": 4,
+       "title": "Nako → Tabo → Kaza",
+       "body": "Tabo monastery — 1,000 years of continuous use — then Dhankar hanging above the confluence. Into Kaza by evening; this is your acclimatisation base.",
+       "image": "/images/ladakh.jpg",
+       "meals": [
+        "breakfast",
+        "dinner"
+       ],
+       "stay": true
+      },
+      {
+       "day": 5,
+       "title": "Key, Kibber, Hikkim, Langza",
+       "body": "The postcard day. Key monastery stacked up its hillside, the fossil village at Langza, and a postcard posted from Hikkim at 4,400m — it genuinely arrives.",
+       "image": "/images/spiti.jpg",
+       "meals": [
+        "breakfast",
+        "dinner"
+       ],
+       "stay": true
+      },
+      {
+       "day": 6,
+       "title": "Kaza → Chandratal",
+       "body": "Chandratal night. I shoot the sky here every single trip and I still set up two hours early. Bring the warm layer you think you won't need.",
+       "image": "/images/stars.jpg",
+       "meals": [
+        "breakfast",
+        "dinner"
+       ],
+       "stay": true
+      },
+      {
+       "day": 7,
+       "title": "Chandratal → Manali",
+       "body": "Down the Rohtang side through Batal and Gramphu — the roughest and most spectacular stretch of the whole loop. Warm shower and a real bed in Manali.",
+       "image": "/images/tw-snow-road.jpg",
+       "meals": [
+        "breakfast",
+        "dinner"
+       ],
+       "stay": true
+      },
+      {
+       "day": 8,
+       "title": "Manali → Delhi",
+       "body": "Overnight drive back, arriving Delhi early morning. The group chat does not stop.",
+       "image": "/images/tw-g-nightbus2.jpg",
+       "meals": [
+        "breakfast"
+       ],
+       "stay": false
+      }
+     ]
+    },
+    {
+     "packageSlug": "kasol-kheerganga-solo-batch",
+     "headline": "Kasol weekend, no planning required",
+     "pitch": "leave friday, be back monday, tell nobody",
+     "price": 8499,
+     "heroMedia": "/images/tw-g-kasol-huts.jpg",
+     "dates": [
+      {
+       "date": "2026-09-08",
+       "seats": 18,
+       "seatsLeft": 11,
+       "hook": "long weekend, hot spring, zero planning required"
+      }
+     ],
+     "published": true
+    },
+    {
+     "packageSlug": "kedarkantha-solo-winter-trek",
+     "headline": "First snow summit of the season",
+     "pitch": "the one where everybody cries at sunrise",
+     "price": 13499,
+     "heroMedia": "/images/snowtrek.jpg",
+     "dates": [
+      {
+       "date": "2026-11-20",
+       "seats": 15,
+       "seatsLeft": 0,
+       "hook": "first snow summit of the season"
+      }
+     ],
+     "published": true
+    }
+   ]
+  },
+  {
+   "slug": "meher",
+   "name": "Meher Kaul",
+   "firstName": "Meher",
+   "handle": "@meheroffgrid",
+   "tagline": "I map the routes I wish someone had mapped for me.",
+   "city": "Chandigarh",
+   "niche": "Solo-female routes, mostly north",
+   "accent": "brand",
+   "published": true,
+   "cutout": "",
+   "portrait": "/images/tw-captain-1.jpg",
+   "focal": "46% 54%",
+   "cover": "/images/tw-waterfall-big.jpg",
+   "bio": "My first solo trip was Kasol in 2021 and I spent most of it on the phone to my mother proving I was alive.\n\nNow I do this full time: I go somewhere, I work out exactly where a woman travelling alone can sleep, eat, walk after dark and get a bus out — and then I write it down properly, because when I needed that page it did not exist.\n\nI'm loud, I ask staff a lot of questions, and I will absolutely make everyone stop for momos.",
+   "quote": "Half my DMs are one question: will I be okay on my own? Come with me once and you'll stop asking.",
+   "socials": [
+    {
+     "platform": "instagram",
+     "handle": "@meheroffgrid",
+     "followers": "268K",
+     "url": "https://instagram.com/"
+    },
+    {
+     "platform": "youtube",
+     "handle": "Meher Off Grid",
+     "followers": "94K",
+     "url": "https://youtube.com/"
+    }
+   ],
+   "perks": [
+    "Women-only room matching sorted before you board — not negotiated at the hotel desk at midnight",
+    "I share the full route with your emergency contact if you want it, before we leave",
+    "A proper what-to-pack call the week before, on video, where you can hold things up and ask",
+    "I've slept in every stay on these routes. If I wouldn't put my sister there, it's not on the itinerary"
+   ],
+   "qa": [
+    {
+     "q": "I've never travelled alone. Is this a bad first attempt?",
+     "a": "It's the best one. You get the independence of going alone with fourteen people who also came alone, and a captain whose whole job is the boring logistics."
+    },
+    {
+     "q": "Are the batches women-only?",
+     "a": "The batches are mixed, the rooms are not. You'll share with women, matched by age. If you'd rather a women-only batch, message me — we run a few every season."
+    },
+    {
+     "q": "What if I hate everyone?",
+     "a": "Then you'll have a quiet week with good views, and that's allowed. Nobody makes you do the group games."
+    },
+    {
+     "q": "Periods, safety, all of it — can I ask you?",
+     "a": "Yes, and please do. That's most of what I get asked and none of it is awkward to me."
+    }
+   ],
+   "gallery": [
+    "/images/meghalaya.jpg",
+    "/images/tw-waterfall-big.jpg",
+    "/images/tw-g-forest1.jpg",
+    "/images/tw-g-kasol-huts.jpg",
+    "/images/backwater-canoe.jpg",
+    "/images/tw-g-shivacafe1.jpg"
+   ],
+   "reel": "",
+   "epithet": "The Route Mapper",
+   "trips": [
+    {
+     "packageSlug": "meghalaya-solo-explorer",
+     "headline": "Meghalaya, mapped for going alone",
+     "pitch": "the route I wish someone had written down for me",
+     "price": 28999,
+     "heroMedia": "/images/meghalaya.jpg",
+     "dates": [
+      {
+       "date": "2026-08-20",
+       "seats": 14,
+       "seatsLeft": 6,
+       "hook": "root bridges, and the 3,500 steps back up"
+      },
+      {
+       "date": "2026-10-07",
+       "seats": 14,
+       "seatsLeft": 14,
+       "hook": "post-monsoon Meghalaya, when the water is loudest"
+      }
+     ],
+     "published": true,
+     "itinerary": [
+      {
+       "day": 1,
+       "title": "Guwahati → Shillong",
+       "body": "Picked up at Guwahati, then the drive up past Umiam lake. Evening on Police Bazaar, which is louder than you expect.",
+       "image": "/images/meghalaya.jpg",
+       "meals": [
+        "dinner"
+       ],
+       "stay": true
+      },
+      {
+       "day": 2,
+       "title": "Cherrapunji",
+       "body": "Nohkalikai falls, Mawsmai cave and the Arwah caves with their fossils. Wettest place on earth, so a raincoat is not optional.",
+       "image": "/images/tw-waterfall-big.jpg",
+       "meals": [
+        "breakfast",
+        "dinner"
+       ],
+       "stay": true
+      },
+      {
+       "day": 3,
+       "title": "The double-decker root bridge",
+       "body": "3,500 steps down to Nongriat. I'll be at the back with whoever needs it — this is not a race and nobody gets left behind. The homestay at the bottom is one I've stayed in four times.",
+       "image": "/images/tw-g-forest1.jpg",
+       "meals": [
+        "breakfast",
+        "dinner"
+       ],
+       "stay": true
+      },
+      {
+       "day": 4,
+       "title": "Back up, and to Dawki",
+       "body": "The climb back out, then Dawki on the Bangladesh border where the Umngot river is genuinely transparent. Boat ride in the afternoon.",
+       "image": "/images/backwater-canoe.jpg",
+       "meals": [
+        "breakfast",
+        "dinner"
+       ],
+       "stay": true
+      },
+      {
+       "day": 5,
+       "title": "Mawlynnong and back to Shillong",
+       "body": "The cleanest village in Asia, the single-decker root bridge, and a last evening in Shillong.",
+       "image": "/images/meghalaya.jpg",
+       "meals": [
+        "breakfast",
+        "dinner"
+       ],
+       "stay": true
+      },
+      {
+       "day": 6,
+       "title": "Guwahati, and home",
+       "body": "Drive down to Guwahati for your flight.",
+       "image": "/images/meghalaya.jpg",
+       "meals": [
+        "breakfast"
+       ],
+       "stay": false
+      }
+     ]
+    },
+    {
+     "packageSlug": "kasol-kheerganga-solo-batch",
+     "headline": "Your first solo trip, with training wheels",
+     "pitch": "the exact route I did alone in 2021, but you get me",
+     "price": 8299,
+     "heroMedia": "/images/tw-g-shivacafe1.jpg",
+     "dates": [
+      {
+       "date": "2026-10-02",
+       "seats": 18,
+       "seatsLeft": 9,
+       "hook": "my first-solo-trip route, the one I still recommend"
+      }
+     ],
+     "published": true
+    },
+    {
+     "packageSlug": "spiti-solo-circuit",
+     "headline": "Spiti in November",
+     "pitch": "cold desert, colder nights, fewest people all year",
+     "price": 25999,
+     "heroMedia": "/images/ladakh.jpg",
+     "dates": [
+      {
+       "date": "2026-11-19",
+       "seats": 16,
+       "seatsLeft": 8,
+       "hook": "cold desert in november — bring the good jacket"
+      }
+     ],
+     "published": true
+    }
+   ]
+  }
+ ]
 }

@@ -5,8 +5,8 @@
  */
 
 import { readCatalog, readReviews } from "./store";
-import type { BlogPost, City, Departure, Faq, Package, PriceRule, Review, Settings, TripCategory, VideoTestimonial, WireEntry } from "./types";
-import { resolveSlot as resolveSlotPure, resolveContent as resolveContentPure, resolvePageSection, minRate, inCategory, DEFAULT_FAQS, DEFAULT_VIDEO_TESTIMONIAL } from "./types";
+import type { BlogPost, City, Creator, CreatorTrip, CreatorTripDate, Departure, Faq, Package, PriceRule, Review, Settings, TripCategory, VideoTestimonial, WireEntry } from "./types";
+import { resolveSlot as resolveSlotPure, resolveContent as resolveContentPure, resolvePageSection, minRate, inCategory, normalizeCreator, packageImages, DEFAULT_FAQS, DEFAULT_VIDEO_TESTIMONIAL } from "./types";
 import {
   collections as collectionDefaults,
   galleryPhotos as galleryDefaults,
@@ -137,6 +137,91 @@ export const getPackage = (slug: string): Package | undefined => {
 };
 
 export const getReviews = (): Review[] => readReviews();
+
+/* ------------------------------------------------ creators */
+
+export const getCreators = (): Creator[] =>
+  (readCatalog().creators ?? []).filter((c) => c.published).map(normalizeCreator);
+export const getAllCreators = (): Creator[] => (readCatalog().creators ?? []).map(normalizeCreator);
+export const getCreator = (slug: string): Creator | undefined =>
+  getCreators().find((c) => c.slug === slug);
+
+/**
+ * A creator trip with every field resolved: the creator's overrides win,
+ * otherwise it inherits the underlying package. Pages render this, so they
+ * never have to know which half a value came from.
+ */
+export interface CreatorTripView {
+  creator: Creator;
+  trip: CreatorTrip;
+  package: Package;
+  headline: string;
+  itinerary: Package["itinerary"];
+  inclusions: string[];
+  exclusions: string[];
+  gallery: string[];
+  heroMedia: string;
+  price?: number;
+  /** future dates only, soonest first */
+  dates: CreatorTripDate[];
+  nextDate?: CreatorTripDate;
+  seatsLeft: number;
+}
+
+function resolveTrip(creator: Creator, trip: CreatorTrip, floor: string): CreatorTripView | null {
+  const pkg = getPackage(trip.packageSlug);
+  if (!pkg || pkg.status !== "live") return null;
+  const dates = trip.dates.filter((d) => d.date >= floor).sort((a, b) => a.date.localeCompare(b.date));
+  const pick = <T,>(a: T[] | undefined, b: T[]): T[] => (a && a.length ? a : b);
+  return {
+    creator,
+    trip,
+    package: pkg,
+    headline: trip.headline?.trim() || pkg.name,
+    itinerary: pick(trip.itinerary, pkg.itinerary),
+    inclusions: pick(trip.inclusions, pkg.inclusions),
+    exclusions: pick(trip.exclusions, pkg.exclusions),
+    gallery: pick(trip.gallery, packageImages(pkg)),
+    heroMedia: trip.heroMedia || pkg.heroMedia || packageImages(pkg)[0],
+    price: trip.price ?? fromPrice(pkg.slug),
+    dates,
+    nextDate: dates[0],
+    seatsLeft: dates.reduce((n, d) => n + d.seatsLeft, 0),
+  };
+}
+
+/** every live trip a creator runs (or all creators when no slug given) */
+export function creatorTrips(opts: { creatorSlug?: string; from?: string; includeEmpty?: boolean } = {}): CreatorTripView[] {
+  const floor = opts.from ?? new Date().toISOString().slice(0, 10);
+  const out: CreatorTripView[] = [];
+  for (const creator of getCreators()) {
+    if (opts.creatorSlug && creator.slug !== opts.creatorSlug) continue;
+    for (const trip of creator.trips) {
+      if (!trip.published) continue;
+      const view = resolveTrip(creator, trip, floor);
+      if (!view) continue;
+      // a trip whose dates have all passed drops off the site by itself
+      if (!opts.includeEmpty && view.dates.length === 0) continue;
+      out.push(view);
+    }
+  }
+  return out.sort((a, b) => (a.nextDate?.date ?? "9999").localeCompare(b.nextDate?.date ?? "9999"));
+}
+
+export const creatorTrip = (creatorSlug: string, packageSlug: string): CreatorTripView | undefined =>
+  creatorTrips({ creatorSlug, includeEmpty: true }).find((t) => t.package.slug === packageSlug);
+
+/** flattened one-row-per-date view, for the tour calendar */
+export interface CreatorDateView {
+  creator: Creator;
+  date: CreatorTripDate;
+  view: CreatorTripView;
+}
+export function creatorDates(opts: { creatorSlug?: string; from?: string } = {}): CreatorDateView[] {
+  return creatorTrips(opts)
+    .flatMap((view) => view.dates.map((date) => ({ creator: view.creator, date, view })))
+    .sort((a, b) => a.date.date.localeCompare(b.date.date));
+}
 
 export function priceFor(packageSlug: string, citySlug: string): PriceRule | undefined {
   return readCatalog().prices.find((r) => r.packageSlug === packageSlug && r.citySlug === citySlug);
