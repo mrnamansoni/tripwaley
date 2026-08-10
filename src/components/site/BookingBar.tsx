@@ -10,6 +10,7 @@ import { useMemo, useState } from "react";
 import { gsap } from "@/lib/gsap";
 import { useCity } from "./CityProvider";
 import { inr, shortDate, weekday } from "@/lib/types";
+import { trackInitiateCheckout, trackLead } from "@/lib/analytics";
 
 export interface BarDeparture { date: string; citySlugs: string[] }
 export interface BarPrices { [citySlug: string]: { triple?: number; double?: number } }
@@ -52,6 +53,9 @@ export default function BookingBar({
   const openModal = () => {
     setErr("");
     setModal(true);
+    // the hold flow has genuinely started — this is the moment Meta's install
+    // doc means by "on the Hold a seat button click"
+    trackInitiateCheckout({ slug: packageSlug, name: packageName, price: seat });
   };
 
   /* step 2: confirm → capture lead WITH phone, then printer + WhatsApp */
@@ -73,6 +77,9 @@ export default function BookingBar({
       return;
     }
     setModal(false);
+    // the lead actually persisted (/api/lead returned ok) — the real
+    // conversion until payments exist
+    trackLead({ slug: packageSlug, name: packageName, price: seat });
     // the printer moment: a stub prints out of the bar, then WhatsApp opens
     gsap.fromTo("[data-bb-cta]", { scale: 0.94 }, { scale: 1, duration: 0.45, ease: "elastic.out(1.2,0.5)" });
     setStub(true);

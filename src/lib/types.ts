@@ -65,6 +65,10 @@ export interface Settings {
   seo?: Seo;
   socials?: Socials;
   videoTestimonial?: VideoTestimonial;
+  /** GA4 measurement ID, e.g. G-XXXXXXXXXX. Empty = analytics off. */
+  gaId?: string;
+  /** Meta Pixel / dataset ID. Empty = pixel off. */
+  metaPixelId?: string;
 }
 export interface City {
   slug: string;

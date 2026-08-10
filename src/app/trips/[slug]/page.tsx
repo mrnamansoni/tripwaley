@@ -13,6 +13,7 @@ import MoreTrips from "@/components/site/MoreTrips";
 import SiteMedia from "@/components/site/SiteMedia";
 import RichText from "@/components/site/RichText";
 import DownloadItinerary from "@/components/site/DownloadItinerary";
+import TrackTripView from "@/components/site/TrackTripView";
 import {
   getCities,
   getSettings,
@@ -80,6 +81,7 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
     <CityProvider cities={cities} defaultCity={settings.defaultCity}>
       <Navbar overDarkHero />
       <main className="bg-cream pb-28">
+        <TrackTripView slug={pkg.slug} name={pkg.name} price={minPrice} />
         {/* ---- header ---- */}
         <section className="relative min-h-[78vh] overflow-hidden">
           {/* heroMedia lets the owner set a dedicated banner — photo OR video */}

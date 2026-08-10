@@ -116,6 +116,19 @@ export default function SettingsEditor() {
           </div>
         </section>
 
+        {/* analytics & ads */}
+        <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+          <p className={label}>analytics &amp; ads</p>
+          <p className="mt-1 text-xs text-white/40">
+            Loaded site-wide. Clear a field to switch that tag off completely — nothing is injected
+            when it&apos;s empty.
+          </p>
+          <div className="mt-3 grid gap-4 sm:grid-cols-2">
+            <Field l="google analytics id (G-…)" v={s.gaId ?? ""} on={(v) => setS({ ...s, gaId: v })} />
+            <Field l="meta pixel id" v={s.metaPixelId ?? ""} on={(v) => setS({ ...s, metaPixelId: v })} />
+          </div>
+        </section>
+
         {/* SEO */}
         <section>
           <p className={label}>SEO &amp; sharing</p>

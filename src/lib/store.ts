@@ -16,7 +16,7 @@ import type { Booking, Catalog, Review } from "./types";
 /** Bump when src/data/catalog.json gains packages/prices/departures that an
  *  already-running install should receive. mergeSeedContent() then adds only
  *  the rows whose keys are missing — admin edits are never overwritten. */
-const SEED_VERSION = 4;
+const SEED_VERSION = 5;
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const SEED_CATALOG = path.join(process.cwd(), "src", "data", "catalog.json");
@@ -82,6 +82,15 @@ function backfill(next: Catalog, seed: Catalog): number {
     n++;
     return { ...live, itinerary };
   });
+
+  // settings is a single object that always exists live, so a genuinely new
+  // key (the analytics IDs) can only ever arrive through a backfill
+  for (const key of ["gaId", "metaPixelId"] as const) {
+    if (next.settings[key] === undefined && seed.settings?.[key] !== undefined) {
+      next.settings = { ...next.settings, [key]: seed.settings[key] };
+      n++;
+    }
+  }
 
   const seedCreators = new Map((seed.creators ?? []).map((c) => [c.slug, c]));
   if (next.creators?.length) {

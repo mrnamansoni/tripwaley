@@ -27,6 +27,16 @@ const nextConfig: NextConfig = {
       beforeFiles: [{ source: "/uploads/:path*", destination: "/api/uploads/:path*" }],
     };
   },
+  experimental: {
+    // src/proxy.ts gates every /api/admin/* request, and Next 16 buffers a
+    // proxied body to at most 10MB by default — silently: bytes past the
+    // limit are dropped with no error to the client, so a large upload just
+    // arrives truncated and fails multipart parsing downstream with a
+    // misleading "expected multipart form" error. MAX_VIDEO_BYTES in the
+    // media route is 25MB, so the default was already an outstanding latent
+    // bug for any video upload over 10MB, before this change touched it.
+    proxyClientMaxBodySize: "30mb",
+  },
 };
 
 export default nextConfig;

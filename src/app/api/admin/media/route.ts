@@ -9,6 +9,7 @@
 
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
+import sharp from "sharp";
 import { sameOrigin } from "@/lib/auth";
 import { listMedia, saveMedia } from "@/lib/store";
 
@@ -16,11 +17,40 @@ export async function GET() {
   return NextResponse.json({ media: listMedia() });
 }
 
-/* Photos are re-encoded to AVIF/WebP by the optimizer, so the source can stay
-   small. Video is served as-is to the visitor, so the cap is really a bandwidth
-   decision: 25 MB is roughly a 20-second 1080p background loop. */
-export const MAX_IMAGE_BYTES = 6 * 1024 * 1024;
+/* The public site was never the problem: next/image re-encodes every photo to
+   AVIF/WebP on the way out, so a visitor never downloads the raw upload. What
+   WAS uncompressed is the SOURCE sitting on the volume — a phone photo lands
+   here at 3-5 MB and stayed exactly that size forever, which is what "images
+   are uploading in high KB" actually meant (the admin library shows raw
+   bytes, and the volume was filling up with full-resolution originals).
+   compressImage() below fixes the source side; the accepted-size cap can be
+   generous now because compression, not rejection, is the answer to a big
+   photo. */
+export const MAX_IMAGE_BYTES = 12 * 1024 * 1024;
 export const MAX_VIDEO_BYTES = 25 * 1024 * 1024;
+
+/* Deliberately format-preserving — never changes the extension:
+   - saveMedia()'s replace-in-place path requires the new bytes to match the
+     existing file's extension, so switching format here would break Replace.
+   - a cutout PNG's alpha edges must survive uploading; recompressing PNG as
+     lossless (no palette reduction) can't degrade them, only shrink them.
+   The real win is the dimension cap: source photos over ~2560px on the long
+   edge cost real size for zero visual benefit — next.config.ts's optimizer
+   never serves wider than 1920px, so anything beyond ~2560px is pure waste. */
+async function compressImage(buf: Buffer, ext: "jpg" | "png" | "webp"): Promise<Buffer> {
+  const img = sharp(buf, { limitInputPixels: 268402689 }).rotate(); // .rotate() bakes in EXIF orientation
+  const resized = img.resize({ width: 2560, height: 2560, fit: "inside", withoutEnlargement: true });
+  switch (ext) {
+    case "jpg":
+      return resized.jpeg({ quality: 82, mozjpeg: true }).toBuffer();
+    case "webp":
+      return resized.webp({ quality: 82 }).toBuffer();
+    case "png":
+      // lossless recompression only (no `quality`/`palette`) — those quantize
+      // colour depth, which is exactly what would fray a cutout's edges
+      return resized.png({ compressionLevel: 9 }).toBuffer();
+  }
+}
 
 type Ext = "jpg" | "png" | "webp" | "mp4" | "webm" | "mov";
 
@@ -65,15 +95,26 @@ export async function POST(req: Request) {
     );
   }
 
+  let toStore: Buffer = buf;
+  if (sniffed.kind === "image") {
+    try {
+      toStore = await compressImage(buf, sniffed.ext as "jpg" | "png" | "webp");
+    } catch {
+      // a source sharp can't parse (truncated file, exotic colour profile) —
+      // fall back to the original bytes rather than fail the whole upload
+      toStore = buf;
+    }
+  }
+
   const replacePath = form.get("replacePath");
   try {
-    const path = saveMedia(buf, {
+    const path = saveMedia(toStore, {
       replacePath: typeof replacePath === "string" && replacePath ? replacePath : undefined,
       name: file.name,
       ext: sniffed.ext,
     });
     revalidatePath("/", "layout");
-    return NextResponse.json({ ok: true, path, kind: sniffed.kind });
+    return NextResponse.json({ ok: true, path, kind: sniffed.kind, bytes: toStore.length });
   } catch (e) {
     return NextResponse.json({ error: e instanceof Error ? e.message : "save failed" }, { status: 400 });
   }

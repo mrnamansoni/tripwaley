@@ -5,6 +5,7 @@ import SmoothScroll from "@/components/providers/SmoothScroll";
 import { BookingProvider } from "@/components/booking/BookingContext";
 import SiteChrome from "@/components/site/SiteChrome";
 import VideoAutoPause from "@/components/site/VideoAutoPause";
+import Analytics from "@/components/site/Analytics";
 import { SearchProvider, type SearchItem } from "@/components/site/SearchProvider";
 import {
   getSettings,
@@ -138,6 +139,7 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        <Analytics gaId={settings.gaId} metaPixelId={settings.metaPixelId} />
         <SiteChrome bar={settings.announcementBar} popup={settings.leadPopup} />
         <VideoAutoPause />
         <SmoothScroll>

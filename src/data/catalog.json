@@ -41,7 +41,9 @@
    "name": "A Tripwaley batch",
    "trip": "Winter snow batch · Himachal",
    "location": "boarding from Delhi"
-  }
+  },
+  "gaId": "G-HJ54VJ14WJ",
+  "metaPixelId": "1029194913307851"
  },
  "cities": [
   {

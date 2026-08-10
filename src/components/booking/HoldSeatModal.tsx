@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { formatINR } from "@/lib/data";
+import { trackInitiateCheckout, trackLead } from "@/lib/analytics";
 import type { BookingMode, BookingTrip } from "./BookingContext";
 
 type Phase = "form" | "submitting" | "held" | "paying" | "confirmed";
@@ -46,6 +47,18 @@ export default function HoldSeatModal({ mode, initialTrip, trips, onClose }: Pro
     };
   }, [onClose]);
 
+  // the modal only ever opens from a Hold-a-seat / Claim click, so mounting it
+  // is exactly the InitiateCheckout moment Meta's install doc describes
+  useEffect(() => {
+    trackInitiateCheckout({
+      slug: selected.slug,
+      name: selected.name,
+      price: selected.priceFrom,
+    });
+    // fire once per open, not on every trip re-pick inside the modal
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
@@ -76,6 +89,7 @@ export default function HoldSeatModal({ mode, initialTrip, trips, onClose }: Pro
         }),
       });
       if (!res.ok) throw new Error("lead failed");
+      trackLead({ slug: selected.slug, name: selected.name, price: selected.priceFrom });
       setPhase("held");
     } catch {
       setPhase("form");
