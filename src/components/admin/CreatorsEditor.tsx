@@ -15,7 +15,8 @@
 import { useState } from "react";
 import { useAdmin, Field, Area, Btn, Head, input, label, linesToArr, arrToLines } from "./ui";
 import MediaPicker from "./MediaPicker";
-import type { Creator, CreatorTrip, CreatorTripDate, ItineraryDay, Meal } from "@/lib/types";
+import { CREATOR_POSE_DEFS } from "@/lib/types";
+import type { Creator, CreatorFigures, CreatorPose, CreatorTrip, CreatorTripDate, ItineraryDay, Meal } from "@/lib/types";
 
 const MEALS: Meal[] = ["breakfast", "lunch", "dinner"];
 
@@ -31,6 +32,7 @@ const blankCreator = (n: number): Creator => ({
   niche: "",
   accent: "gold",
   cutout: "",
+  figures: {},
   portrait: "/images/tw-captain-1.jpg",
   focal: "50% 30%",
   cover: "/images/tw-snow-road.jpg",
@@ -167,6 +169,26 @@ export default function CreatorsEditor() {
           </div>
         </div>
 
+        {/* ---- figures just for this trip ---- */}
+        <div className="mt-8 max-w-5xl">
+          <p className={label}>figures for this trip only</p>
+          <p className="mt-1 text-xs text-white/40">
+            Set a different pose for this trip. Empty = use {creator.firstName}&apos;s figure for that placement.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-5">
+            {CREATOR_POSE_DEFS.filter((p) => p.key !== "hero").map((pose) => (
+              <div key={pose.key} className="w-52 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+                <MediaPicker
+                  label={pose.label}
+                  value={trip.figures?.[pose.key] ?? ""}
+                  onChange={(v) => updTrip({ figures: setFigure(trip.figures, pose.key, v) })}
+                />
+                <p className="mt-2 text-[0.62rem] leading-snug text-white/40">{pose.hint}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* ---- overrides ---- */}
         <div className="mt-8 max-w-5xl rounded-2xl border border-gold/25 bg-gold/[0.06] p-4">
           <p className="text-sm text-white/70">
@@ -297,6 +319,27 @@ export default function CreatorsEditor() {
         </div>
       </div>
 
+      {/* ---- a figure per placement ---- */}
+      <div className="mt-8 max-w-5xl">
+        <p className={label}>figures — a different pose for each place they appear</p>
+        <p className="mt-1 text-xs text-white/40">
+          Each takes a transparent PNG, a photo, or a video. Leave one empty and it falls back to the
+          default figure above, then to the portrait.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-5">
+          {CREATOR_POSE_DEFS.map((pose) => (
+            <div key={pose.key} className="w-52 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+              <MediaPicker
+                label={pose.label}
+                value={creator.figures?.[pose.key] ?? ""}
+                onChange={(v) => upd({ figures: setFigure(creator.figures, pose.key, v) })}
+              />
+              <p className="mt-2 text-[0.62rem] leading-snug text-white/40">{pose.hint}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* ---- socials ---- */}
       <div className="mt-8 max-w-5xl">
         <div className="mb-2 flex items-center justify-between">
@@ -419,6 +462,14 @@ export default function CreatorsEditor() {
       </div>
     </>
   );
+}
+
+/** set or clear one pose; clearing removes the key so it falls back cleanly */
+function setFigure(figures: CreatorFigures | undefined, pose: CreatorPose, value: string): CreatorFigures {
+  const next: CreatorFigures = { ...(figures ?? {}) };
+  if (value.trim()) next[pose] = value.trim();
+  else delete next[pose];
+  return next;
 }
 
 function Toggle({ on, onClick, children }: { on: boolean; onClick: () => void; children: React.ReactNode }) {

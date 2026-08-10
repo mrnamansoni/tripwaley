@@ -21,7 +21,7 @@
  */
 
 import SiteMedia from "@/components/site/SiteMedia";
-import { isVideoMedia } from "@/lib/types";
+import { isVideoMedia, normalizeMediaUrl } from "@/lib/types";
 
 export type FigureVariant = "hero" | "panel" | "flank";
 
@@ -42,13 +42,19 @@ export default function CreatorFigure({
   className?: string;
   priority?: boolean;
 }) {
-  const hasCutout = !!cutout && !isVideoMedia(cutout);
+  // A figure slot takes a cut-out PNG, an ordinary photo, or a video, and the
+  // right treatment differs. JPEG cannot carry transparency, so a .jpg here is
+  // definitely NOT a cut-out — rendering it bare would letterbox it inside the
+  // tall figure box. Anything that CAN be transparent (png/webp/avif/svg) or
+  // is a video gets the bare poster treatment; a jpg falls to the panel.
+  const ref = (cutout ?? "").trim();
+  const hasCutout = !!ref && (isVideoMedia(ref) || !/\.jpe?g(\?|#|$)/i.test(normalizeMediaUrl(ref)));
 
   if (hasCutout) {
     return (
       <div className={`relative ${className}`}>
         <SiteMedia
-          src={cutout!}
+          src={ref}
           alt={alt}
           fill
           sizes={variant === "hero" ? "(max-width:640px) 78vw, 42vw" : "(max-width:640px) 60vw, 30vw"}

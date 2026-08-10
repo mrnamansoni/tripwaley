@@ -174,7 +174,7 @@ export default async function CreatorTripPage({
 
             <div className="relative mx-auto h-[26rem] w-full max-w-[18rem] sm:h-[34rem] sm:max-w-[21rem] lg:h-[40rem] lg:max-w-none">
               <CreatorFigure
-                cutout={creator.cutout}
+                cutout={view.figure("tripHero")}
                 portrait={creator.portrait}
                 focal={creator.focal}
                 alt={creator.name}
@@ -268,6 +268,7 @@ export default async function CreatorTripPage({
         {view.itinerary.length > 0 && (
           <ItineraryBeside
             creator={creator}
+            figure={view.figure("itinerary")}
             packageName={view.headline}
             days={view.itinerary.map((d) => ({
               day: d.day,
@@ -279,9 +280,9 @@ export default async function CreatorTripPage({
           />
         )}
 
-        <InOutFlank creator={creator} inclusions={view.inclusions} exclusions={view.exclusions} />
+        <InOutFlank creator={creator} figure={view.figure("inout")} inclusions={view.inclusions} exclusions={view.exclusions} />
 
-        <PerksBand creator={creator} />
+        <PerksBand creator={creator} figure={view.figure("perks")} />
 
         <InTheirWords creator={creator} />
 

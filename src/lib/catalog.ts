@@ -5,8 +5,8 @@
  */
 
 import { readCatalog, readReviews } from "./store";
-import type { BlogPost, City, Creator, CreatorTrip, CreatorTripDate, Departure, Faq, Package, PriceRule, Review, Settings, TripCategory, VideoTestimonial, WireEntry } from "./types";
-import { resolveSlot as resolveSlotPure, resolveContent as resolveContentPure, resolvePageSection, minRate, inCategory, normalizeCreator, packageImages, DEFAULT_FAQS, DEFAULT_VIDEO_TESTIMONIAL } from "./types";
+import type { BlogPost, City, Creator, CreatorPose, CreatorTrip, CreatorTripDate, Departure, Faq, Package, PriceRule, Review, Settings, TripCategory, VideoTestimonial, WireEntry } from "./types";
+import { resolveSlot as resolveSlotPure, resolveContent as resolveContentPure, resolvePageSection, minRate, inCategory, normalizeCreator, packageImages, resolveFigure, DEFAULT_FAQS, DEFAULT_VIDEO_TESTIMONIAL } from "./types";
 import {
   collections as collectionDefaults,
   galleryPhotos as galleryDefaults,
@@ -166,6 +166,8 @@ export interface CreatorTripView {
   dates: CreatorTripDate[];
   nextDate?: CreatorTripDate;
   seatsLeft: number;
+  /** creator figure per placement, trip override winning over the creator's */
+  figure: (pose: CreatorPose) => string;
 }
 
 function resolveTrip(creator: Creator, trip: CreatorTrip, floor: string): CreatorTripView | null {
@@ -187,6 +189,7 @@ function resolveTrip(creator: Creator, trip: CreatorTrip, floor: string): Creato
     dates,
     nextDate: dates[0],
     seatsLeft: dates.reduce((n, d) => n + d.seatsLeft, 0),
+    figure: (pose) => resolveFigure(creator, pose, trip),
   };
 }
 

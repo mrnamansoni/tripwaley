@@ -7,7 +7,7 @@ import CurtainFooter from "@/components/site/CurtainFooter";
 import SiteMedia from "@/components/site/SiteMedia";
 import CreatorFigure from "@/components/creator/CreatorFigure";
 import { PerksBand, InTheirWords, CreatorGallery, CreatorTripCards } from "@/components/creator/CreatorSections";
-import { getCities, getSettings, getCreators, getCreator, creatorTrips, inr, minRate, shortDate } from "@/lib/catalog";
+import { getCities, getSettings, getCreators, getCreator, creatorTrips, inr, minRate, shortDate, resolveFigure } from "@/lib/catalog";
 
 export function generateStaticParams() {
   return getCreators().map((c) => ({ slug: c.slug }));
@@ -148,7 +148,7 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
 
             <div className="relative mx-auto h-[28rem] w-full max-w-[19rem] sm:h-[38rem] sm:max-w-[22rem] lg:h-[44rem] lg:max-w-none">
               <CreatorFigure
-                cutout={creator.cutout}
+                cutout={resolveFigure(creator, "hero")}
                 portrait={creator.portrait}
                 focal={creator.focal}
                 alt={creator.name}
@@ -175,7 +175,7 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
           }))}
         />
 
-        <PerksBand creator={creator} />
+        <PerksBand creator={creator} figure={resolveFigure(creator, "perks")} />
 
         <CreatorGallery creator={creator} />
 

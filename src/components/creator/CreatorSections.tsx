@@ -106,7 +106,7 @@ export function HowItWorks() {
 
 /* ------------------------------------------------ creator's perks ----- */
 
-export function PerksBand({ creator }: { creator: Creator }) {
+export function PerksBand({ creator, figure }: { creator: Creator; figure?: string }) {
   if (!creator.perks.length) return null;
   const accent = creator.accent === "brand" ? "text-brand" : "text-gold";
   return (
@@ -115,7 +115,7 @@ export function PerksBand({ creator }: { creator: Creator }) {
         {/* the "arms out" frame: figure centre-left, list flanking it */}
         <div className="relative mx-auto h-[26rem] w-full max-w-sm lg:h-[34rem]">
           <CreatorFigure
-            cutout={creator.cutout}
+            cutout={figure}
             portrait={creator.portrait}
             focal={creator.focal}
             alt={creator.name}
@@ -349,10 +349,12 @@ export interface CreatorTripCardData {
 
 export function ItineraryBeside({
   creator,
+  figure,
   packageName,
   days,
 }: {
   creator: Creator;
+  figure?: string;
   packageName: string;
   days: { day: number; title: string; body: string; meals?: Meal[]; stay?: boolean }[];
 }) {
@@ -375,7 +377,7 @@ export function ItineraryBeside({
           <span className={`mt-4 block h-px w-16 ${rule}`} aria-hidden="true" />
           <div className="relative mt-6 h-[24rem] w-full sm:h-[30rem]">
             <CreatorFigure
-              cutout={creator.cutout}
+              cutout={figure}
               portrait={creator.portrait}
               focal={creator.focal}
               alt={creator.name}
@@ -458,10 +460,12 @@ function FlankColumn({
 
 export function InOutFlank({
   creator,
+  figure,
   inclusions,
   exclusions,
 }: {
   creator: Creator;
+  figure?: string;
   inclusions: string[];
   exclusions: string[];
 }) {
@@ -483,7 +487,7 @@ export function InOutFlank({
 
           <div className="relative mx-auto h-[22rem] w-56 sm:h-[30rem] sm:w-72">
             <CreatorFigure
-              cutout={creator.cutout}
+              cutout={figure}
               portrait={creator.portrait}
               focal={creator.focal}
               alt={creator.name}

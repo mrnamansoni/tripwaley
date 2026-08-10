@@ -288,6 +288,37 @@ export interface CreatorSocial {
   url: string;
 }
 
+/* ---- where a creator figure appears -------------------------------------
+
+   Each placement wants a different pose: a wow face for the hero, a pointing
+   arm beside the itinerary, arms wide between the in/out columns. So every
+   placement is its own slot rather than one cutout reused five times.
+
+   Resolution cascade, most specific first:
+     trip.figures[pose] → creator.figures[pose] → creator.cutout → portrait
+   so a creator can set one figure and have it used everywhere, or a different
+   one per placement, or a different one again for a single trip.
+
+   Any slot takes a transparent PNG, an ordinary photo, or a video. */
+
+export type CreatorPose = "hero" | "tripHero" | "itinerary" | "inout" | "perks";
+
+export interface CreatorPoseDef {
+  key: CreatorPose;
+  label: string;
+  hint: string;
+}
+
+export const CREATOR_POSE_DEFS: CreatorPoseDef[] = [
+  { key: "hero", label: "Profile hero", hint: "The big figure on their own page — a wow / greeting pose works best" },
+  { key: "tripHero", label: "Trip page hero", hint: "Fronts each individual trip page" },
+  { key: "itinerary", label: "Beside the itinerary", hint: "Stands next to the day-by-day — a pointing or explaining pose" },
+  { key: "inout", label: "Between what's in / out", hint: "Centre figure with both arms out, framing the two lists" },
+  { key: "perks", label: "Perks band", hint: "Next to 'what you get because they're there'" },
+];
+
+export type CreatorFigures = Partial<Record<CreatorPose, string>>;
+
 /** one departure of a creator trip */
 export interface CreatorTripDate {
   date: string; // ISO yyyy-mm-dd
@@ -314,6 +345,8 @@ export interface CreatorTrip {
   pitch?: string;
   /** overrides the package hero on this page */
   heroMedia?: string;
+  /** per-placement creator figures, overriding the creator's own for this trip */
+  figures?: CreatorFigures;
   gallery?: string[];
   /** creator-led batches are often priced differently to the public batch */
   price?: number;
@@ -349,9 +382,11 @@ export interface Creator {
   niche: string;
   /** which brand accent this creator's page leans on — palette stays locked */
   accent: "gold" | "brand";
-  /** transparent-background PNG of the creator. When present the figure is
-   *  rendered bare (the poster look). Falls back to `portrait` when unset. */
+  /** default figure used by any placement without its own. Transparent PNG
+   *  renders bare (the poster look); a photo gets the panel treatment. */
   cutout?: string;
+  /** a different figure per placement — see CREATOR_POSE_DEFS */
+  figures?: CreatorFigures;
   /** ordinary photo of the creator, used when no cutout exists */
   portrait: string;
   /** object-position for `portrait`, so the face stays framed on any crop */
@@ -378,6 +413,15 @@ export const creatorSeatsLabel = (d: CreatorTripDate): string =>
 /** 0..1 — how full this departure is, for the seat meter */
 export const creatorFillRatio = (d: CreatorTripDate): number =>
   d.seats > 0 ? Math.min(1, Math.max(0, (d.seats - d.seatsLeft) / d.seats)) : 0;
+
+/** The figure to use for one placement, most specific source first. */
+export function resolveFigure(
+  creator: Pick<Creator, "figures" | "cutout">,
+  pose: CreatorPose,
+  trip?: Pick<CreatorTrip, "figures">
+): string {
+  return (trip?.figures?.[pose] || creator.figures?.[pose] || creator.cutout || "").trim();
+}
 
 /** Fold any legacy flat `departures` list into the `trips` shape, grouping
  *  by package. Lets old records keep working without a data migration. */

@@ -10,7 +10,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { sameOrigin } from "@/lib/auth";
 import { listMedia, readBookings, readCatalog, readReviews, writeCatalog, writeReviews } from "@/lib/store";
-import { SLOT_DEFS, CONTENT_DEFS, resolveSlot, PAGE_SECTION_DEFS, isValidMediaRef, CATEGORY_DEFS } from "@/lib/types";
+import { SLOT_DEFS, CONTENT_DEFS, resolveSlot, PAGE_SECTION_DEFS, isValidMediaRef, CATEGORY_DEFS, CREATOR_POSE_DEFS } from "@/lib/types";
 import type { BlogPost, Catalog, City, Creator, Departure, Faq, Package, PriceRule, Review, WireEntry } from "@/lib/types";
 
 export async function GET() {
@@ -27,6 +27,17 @@ export async function GET() {
 }
 
 const CATEGORY_KEYS = new Set<string>(CATEGORY_DEFS.map((c) => c.key));
+const POSE_KEYS = new Set<string>(CREATOR_POSE_DEFS.map((p) => p.key));
+/** every value in a figures map must be a real, known pose + valid media */
+const okFigures = (v: unknown, where: string): string | null => {
+  if (v == null) return null;
+  if (typeof v !== "object") return `invalid figures on ${where}`;
+  for (const [pose, ref] of Object.entries(v as Record<string, unknown>)) {
+    if (!POSE_KEYS.has(pose)) return `unknown figure placement "${pose}" on ${where}`;
+    if (!okMedia(ref)) return `invalid figure media for ${pose} on ${where}`;
+  }
+  return null;
+};
 
 const isStr = (v: unknown): v is string => typeof v === "string";
 /** optional media ref: unset/blank is fine, otherwise must be a real ref */
@@ -119,6 +130,8 @@ function validate(section: string, data: unknown): string | null {
         if (typeof c.published !== "boolean") return `creator ${c.slug} needs a published flag`;
         if (!okMedia(c.portrait) || !okMedia(c.cover) || !okMedia(c.cutout)) return `invalid media on creator ${c.slug}`;
         if (c.gallery != null && (!Array.isArray(c.gallery) || !c.gallery.every(okMedia))) return `invalid gallery on ${c.slug}`;
+        const figErr = okFigures(c.figures, c.slug);
+        if (figErr) return figErr;
         if (!Array.isArray(c.trips)) return `creator ${c.slug} needs a trips array`;
 
         const usedPkgs = new Set<string>();
@@ -129,6 +142,8 @@ function validate(section: string, data: unknown): string | null {
           if (typeof t.published !== "boolean") return `trip ${t.packageSlug} needs a published flag`;
           if (t.price != null && (!isNum(t.price) || t.price < 0)) return `invalid price on ${c.slug}/${t.packageSlug}`;
           if (!okMedia(t.heroMedia)) return `invalid hero on ${c.slug}/${t.packageSlug}`;
+          const tripFigErr = okFigures(t.figures, `${c.slug}/${t.packageSlug}`);
+          if (tripFigErr) return tripFigErr;
           if (!Array.isArray(t.dates)) return `trip ${t.packageSlug} needs a dates array`;
           for (const d of t.dates) {
             if (!isValidISODate(d.date)) return `invalid date on ${c.slug}/${t.packageSlug}`;
