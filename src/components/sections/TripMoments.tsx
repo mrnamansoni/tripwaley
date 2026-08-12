@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
+import SiteMedia from "@/components/site/SiteMedia";
 import { gsap } from "@/lib/gsap";
 import { moments as defaultMoments, type Moment } from "@/lib/data";
 
@@ -126,7 +126,7 @@ export default function TripMoments({ moments = defaultMoments }: { moments?: Mo
                     "flex 0.7s cubic-bezier(0.22,1,0.36,1), border-color 0.3s ease",
                 }}
               >
-                <Image
+                <SiteMedia
                   src={m.image}
                   alt=""
                   fill

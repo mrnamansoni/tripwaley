@@ -5,7 +5,7 @@
    package's imagery; velocity leans the strips as you scroll past. */
 
 import { useEffect, useRef } from "react";
-import Image from "next/image";
+import SiteMedia from "./SiteMedia";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 
 function Strip({ images, label, reverse, dur }: { images: string[]; label: string; reverse?: boolean; dur: number }) {
@@ -24,7 +24,7 @@ function Strip({ images, label, reverse, dur }: { images: string[]; label: strin
                   ))}
                 </div>
                 <div className="relative h-32 w-48 overflow-hidden sm:h-40 sm:w-60">
-                  <Image src={src} alt="" fill sizes="240px" className="object-cover" />
+                  <SiteMedia src={src} alt="" fill sizes="240px" className="object-cover" />
                   <span className="absolute bottom-1 right-1.5 font-mono text-[0.5rem] font-bold tracking-widest text-gold/80">
                     {label} · {String((i % images.length) + 1).padStart(2, "0")}A
                   </span>

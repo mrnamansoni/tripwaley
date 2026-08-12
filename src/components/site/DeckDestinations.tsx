@@ -7,7 +7,7 @@
    reflections; page scroll stays vertical and native. */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Image from "next/image";
+import SiteMedia from "./SiteMedia";
 import Link from "next/link";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { useMediaQuery } from "@/lib/useMediaQuery";
@@ -28,7 +28,7 @@ function CardFace({ c, sizes }: { c: DeckCard; sizes: string }) {
   return (
     <>
       <span className="relative block h-full w-full overflow-hidden rounded-xl border border-white/10 shadow-card-lg">
-        <Image src={c.image} alt={c.name} fill sizes={sizes} className="object-cover" />
+        <SiteMedia src={c.image} alt={c.name} fill sizes={sizes} className="object-cover" />
         <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/85 to-transparent p-3 pt-8">
           <span className="block truncate font-display text-sm font-extrabold text-white">{c.name}</span>
           <span className="text-[0.58rem] font-bold uppercase tracking-widest text-gold">{c.nightsLabel}</span>
@@ -40,7 +40,7 @@ function CardFace({ c, sizes }: { c: DeckCard; sizes: string }) {
         className="absolute left-0 top-full mt-2 block h-full w-full scale-y-[-1] overflow-hidden rounded-xl opacity-25"
         style={{ WebkitMaskImage: "linear-gradient(to top, transparent 60%, black 100%)", maskImage: "linear-gradient(to top, transparent 60%, black 100%)" }}
       >
-        <Image src={c.image} alt="" fill sizes={sizes} className="object-cover" />
+        <SiteMedia src={c.image} alt="" fill sizes={sizes} className="object-cover" />
       </span>
     </>
   );

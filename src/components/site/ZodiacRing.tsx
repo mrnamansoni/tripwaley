@@ -5,7 +5,7 @@
    to stay upright. Tap/hover holds the sky and links to that region below. */
 
 import { useState } from "react";
-import Image from "next/image";
+import SiteMedia from "./SiteMedia";
 
 export interface ZodiacItem {
   img: string;
@@ -73,7 +73,7 @@ export default function ZodiacRing({
                       onBlur={() => setHeld(null)}
                       className="relative block h-20 w-20 overflow-hidden rounded-full border-[3px] border-cream shadow-card-lg outline-offset-4 transition-transform duration-300 hover:scale-125 sm:h-24 sm:w-24"
                     >
-                      <Image src={it.img} alt={it.label} fill sizes="96px" className="object-cover" />
+                      <SiteMedia src={it.img} alt={it.label} fill sizes="96px" className="object-cover" />
                     </a>
                   </div>
                 </div>

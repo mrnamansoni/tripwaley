@@ -6,7 +6,7 @@
    the visitor's city and month. */
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
+import SiteMedia from "./SiteMedia";
 import Link from "next/link";
 import { useCity, CitySwitcher } from "./CityProvider";
 import { inr, shortDate, weekday } from "@/lib/types";
@@ -79,7 +79,7 @@ export default function TripsExplorer({ packages, departures, showRack = true, s
                 className="flex w-[19rem] shrink-0 snap-start overflow-hidden rounded-2xl bg-[#f4efe4] shadow-card-lg transition-transform hover:-translate-y-1"
               >
                 <div className="relative w-24 shrink-0">
-                  <Image src={s.image} alt="" fill sizes="100px" className="object-cover" />
+                  <SiteMedia src={s.image} alt="" fill sizes="100px" className="object-cover" />
                 </div>
                 <div className="relative flex flex-col items-center justify-around border-l-2 border-dashed border-ink/20 py-2" aria-hidden="true">
                   {Array.from({ length: 5 }).map((_, i) => (
@@ -137,7 +137,7 @@ export default function TripsExplorer({ packages, departures, showRack = true, s
               return (
                 <Link key={p.slug} href={`/trips/${p.slug}`} className="group overflow-hidden rounded-2xl border border-line bg-card shadow-sm transition-all hover:-translate-y-1 hover:shadow-card-lg sm:rounded-3xl">
                   <div className="relative aspect-[4/3] overflow-hidden">
-                    <Image src={p.image} alt={p.name} fill sizes="(max-width:640px) 46vw, 30vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.06]" />
+                    <SiteMedia src={p.image} alt={p.name} fill sizes="(max-width:640px) 46vw, 30vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.06]" />
                     {next && (
                       <span className="absolute left-2.5 top-2.5 rounded-full bg-ink/60 px-2.5 py-1 text-[0.54rem] font-bold uppercase tracking-wider text-white backdrop-blur-sm sm:left-4 sm:top-4 sm:px-3 sm:py-1.5 sm:text-[0.6rem]">
                         next · {shortDate(next.date)}

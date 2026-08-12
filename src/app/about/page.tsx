@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import SiteMedia from "@/components/site/SiteMedia";
 import Navbar from "@/components/sections/Navbar";
 import CityProvider from "@/components/site/CityProvider";
 import CurtainFooter from "@/components/site/CurtainFooter";
@@ -80,7 +80,7 @@ export default function AboutPage() {
 
         {/* the crew image band */}
         <section className="relative h-[52vh] overflow-hidden">
-          <Image src={slotOne("about.crew")} alt="A Tripwaley batch in the mountains" fill sizes="100vw" className="object-cover" />
+          <SiteMedia src={slotOne("about.crew")} alt="A Tripwaley batch in the mountains" fill sizes="100vw" className="object-cover" />
           <div className="absolute inset-0 bg-ink/35" aria-hidden="true" />
           <p className="absolute inset-x-0 bottom-10 text-center font-script text-3xl text-white drop-shadow-lg sm:text-4xl">
             strangers on day one. this, by day six.

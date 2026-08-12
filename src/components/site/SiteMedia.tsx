@@ -30,9 +30,13 @@ export interface SiteMediaProps {
   poster?: string;
   /** inline style — mainly object-position, to keep a face framed on crop */
   style?: React.CSSProperties;
+  /** false on draggable-UI photos (atlas cards, the day/night slider handle) */
+  draggable?: boolean;
 }
 
 const FILL_CLS = "absolute inset-0 h-full w-full";
+/** the caller already chose a fit, so don't bolt object-cover on top of it */
+const HAS_FIT = /\bobject-(contain|cover|fill|none|scale-down)\b/;
 
 export default function SiteMedia({
   src,
@@ -45,6 +49,7 @@ export default function SiteMedia({
   priority,
   poster,
   style,
+  draggable,
 }: SiteMediaProps) {
   const url = normalizeMediaUrl(src ?? "");
   if (!url) return null;
@@ -75,7 +80,7 @@ export default function SiteMedia({
   /* ---- uploaded photo: full AVIF/WebP + resize pipeline ---- */
   if (isLocalMedia(url)) {
     return fill ? (
-      <Image src={url} alt={alt} fill sizes={sizes} priority={priority} className={className} style={style} />
+      <Image src={url} alt={alt} fill sizes={sizes} priority={priority} className={className} style={style} draggable={draggable} />
     ) : (
       <Image
         src={url}
@@ -86,6 +91,7 @@ export default function SiteMedia({
         priority={priority}
         className={className}
         style={style}
+        draggable={draggable}
       />
     );
   }
@@ -100,8 +106,9 @@ export default function SiteMedia({
       height={fill ? undefined : height}
       loading={priority ? "eager" : "lazy"}
       decoding="async"
-      className={`${fill ? `${FILL_CLS} object-cover` : ""} ${className}`.trim()}
+      className={`${fill ? `${FILL_CLS}${HAS_FIT.test(className) ? "" : " object-cover"}` : ""} ${className}`.trim()}
       style={style}
+      draggable={draggable}
     />
   );
 }

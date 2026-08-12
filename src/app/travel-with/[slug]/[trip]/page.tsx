@@ -18,6 +18,7 @@ import {
   shortDate,
   weekday,
   nightsLabel,
+  normalizeMediaUrl,
 } from "@/lib/catalog";
 
 export function generateStaticParams() {
@@ -41,8 +42,8 @@ export async function generateMetadata({
   return {
     title,
     description,
-    openGraph: { title, description, images: [{ url: view.heroMedia }], type: "website" },
-    twitter: { card: "summary_large_image", title, description, images: [view.heroMedia] },
+    openGraph: { title, description, images: [{ url: normalizeMediaUrl(view.heroMedia) }], type: "website" },
+    twitter: { card: "summary_large_image", title, description, images: [normalizeMediaUrl(view.heroMedia)] },
   };
 }
 

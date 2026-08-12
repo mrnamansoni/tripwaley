@@ -6,7 +6,7 @@
    2. LeadPopup — a timed lead-capture modal that fires after N seconds and
       posts to /api/lead (same pipeline as the booking bar). */
 
-import Image from "next/image";
+import SiteMedia from "./SiteMedia";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import type { AnnouncementBar as BarCfg, LeadPopup as PopupCfg } from "@/lib/types";
@@ -114,7 +114,7 @@ function LeadPopup({ popup }: { popup: PopupCfg }) {
         <button type="button" aria-label="Close" onClick={close} className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-ink/10 text-ink/60 hover:bg-ink/20 hover:text-ink">✕</button>
 
         <div className="relative hidden min-h-[18rem] sm:block">
-          <Image src={popup.image} alt="" fill sizes="360px" className="object-cover" />
+          <SiteMedia src={popup.image} alt="" fill sizes="360px" className="object-cover" />
           <span className="absolute inset-0 bg-gradient-to-t from-ink/40 to-transparent" aria-hidden="true" />
         </div>
 

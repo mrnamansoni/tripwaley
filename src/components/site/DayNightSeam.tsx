@@ -4,7 +4,7 @@
    Day and night photos split by a draggable brass seam. */
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
+import SiteMedia from "./SiteMedia";
 
 export default function DayNightSeam({
   day,
@@ -77,13 +77,13 @@ export default function DayNightSeam({
           aria-valuemin={0}
           aria-valuemax={100}
         >
-          <Image src={day} alt="By day" fill sizes="92vw" className="pointer-events-none object-cover" draggable={false} />
+          <SiteMedia src={day} alt="By day" fill sizes="92vw" className="pointer-events-none object-cover" draggable={false} />
           <p className="absolute left-4 top-4 rounded-full bg-ink/45 px-3.5 py-1.5 text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white backdrop-blur-sm sm:left-5 sm:top-5">
             {dayLabel}
           </p>
 
           <div ref={nightRef} className="absolute inset-0" style={{ clipPath: "inset(0 0 0 50%)" }}>
-            <Image src={night} alt="By night" fill sizes="92vw" className="pointer-events-none object-cover" draggable={false} />
+            <SiteMedia src={night} alt="By night" fill sizes="92vw" className="pointer-events-none object-cover" draggable={false} />
             <p className="absolute right-4 top-4 rounded-full bg-white/12 px-3.5 py-1.5 text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white backdrop-blur-sm sm:right-5 sm:top-5">
               {nightLabel}
             </p>

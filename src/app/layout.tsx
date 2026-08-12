@@ -16,6 +16,7 @@ import {
   nightsLabel,
   packageImages,
   packageCategories,
+  normalizeMediaUrl,
 } from "@/lib/catalog";
 
 // every page reads admin-edited data (catalog.json, media, settings) straight
@@ -48,7 +49,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const seo = getSettings().seo;
   const title = seo?.title?.trim() || DEFAULT_TITLE;
   const description = seo?.description?.trim() || DEFAULT_DESC;
-  const ogImage = seo?.ogImage || "/images/ladakh.jpg";
+  // a pasted Drive/Dropbox share link is an HTML page, and every scraper
+  // (WhatsApp, Facebook, X) would silently drop the preview — normalise to the
+  // direct-file form the same way the on-page renderer does
+  const ogImage = normalizeMediaUrl(seo?.ogImage || "") || "/images/ladakh.jpg";
   return {
     metadataBase: new URL("https://tripwaley.com"),
     title,

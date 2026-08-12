@@ -2,7 +2,7 @@
    vibe-check, about). Server components — the only client child is the live
    WeatherNow card. */
 
-import Image from "next/image";
+import SiteMedia from "./SiteMedia";
 import Link from "next/link";
 import WeatherNow from "./WeatherNow";
 import { slot } from "@/lib/catalog";
@@ -90,7 +90,7 @@ export function CaptainsBand() {
           {CAPTAINS.map((c, i) => (
             <figure key={c.name} className="group overflow-hidden rounded-3xl border border-line bg-card shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-card-lg">
               <div className="relative h-44 overflow-hidden">
-                <Image src={captainImgs[i] ?? c.img} alt="" fill sizes="(max-width:640px) 92vw, 30vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.06]" />
+                <SiteMedia src={captainImgs[i] ?? c.img} alt="" fill sizes="(max-width:640px) 92vw, 30vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.06]" />
                 <span className="absolute bottom-3 left-4 rounded-full bg-ink/60 px-3 py-1 font-mono text-[0.56rem] font-bold uppercase tracking-widest text-white backdrop-blur-sm">
                   {c.trips} trips led
                 </span>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import SiteMedia from "@/components/site/SiteMedia";
 import Link from "next/link";
 import Navbar from "@/components/sections/Navbar";
 import CityProvider from "@/components/site/CityProvider";
@@ -70,7 +70,7 @@ export default function DestinationsPage() {
               <div className="grid gap-8 lg:grid-cols-[1fr_1.6fr]">
                 {/* region marquee tile */}
                 <div className="relative min-h-[20rem] overflow-hidden rounded-[2rem] shadow-card-lg">
-                  <Image src={g.image} alt={g.name} fill sizes="(max-width:1024px) 92vw, 36vw" className="object-cover" />
+                  <SiteMedia src={g.image} alt={g.name} fill sizes="(max-width:1024px) 92vw, 36vw" className="object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/15 to-transparent" aria-hidden="true" />
                   <div className="absolute bottom-0 p-7">
                     <p className="font-script text-2xl text-gold">{g.tag}</p>

@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import SiteMedia from "@/components/site/SiteMedia";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/sections/Navbar";
 import CurtainFooter from "@/components/site/CurtainFooter";
-import { getPost, getPosts, getSettings, shortDate } from "@/lib/catalog";
+import { getPost, getPosts, getSettings, shortDate, normalizeMediaUrl } from "@/lib/catalog";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: `${post.title} | Tripwaley Stories`,
     description: post.excerpt,
-    openGraph: { title: post.title, description: post.excerpt, images: [{ url: post.cover }], type: "article" },
+    openGraph: { title: post.title, description: post.excerpt, images: [{ url: normalizeMediaUrl(post.cover) }], type: "article" },
   };
 }
 
@@ -32,7 +32,7 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
       <main className="bg-cream">
         {/* cover */}
         <section className="relative h-[52vh] min-h-[22rem] w-full overflow-hidden">
-          <Image src={post.cover} alt="" fill priority sizes="100vw" className="object-cover" />
+          <SiteMedia src={post.cover} alt="" fill priority sizes="100vw" className="object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-ink/20" aria-hidden="true" />
           <div className="absolute inset-x-0 bottom-0 mx-auto w-full max-w-3xl px-5 pb-10 sm:px-8">
             <div className="mb-3 flex flex-wrap gap-2">
@@ -64,7 +64,7 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
               {more.map((p) => (
                 <Link key={p.slug} href={`/stories/${p.slug}`} className="group overflow-hidden rounded-2xl border border-line bg-card shadow-card transition-transform hover:-translate-y-1">
                   <div className="relative aspect-[16/10] overflow-hidden">
-                    <Image src={p.cover} alt="" fill sizes="30vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                    <SiteMedia src={p.cover} alt="" fill sizes="30vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
                   </div>
                   <div className="p-4">
                     <h3 className="font-display text-base font-extrabold leading-tight text-ink group-hover:text-brand">{p.title}</h3>

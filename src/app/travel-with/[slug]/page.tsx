@@ -7,7 +7,7 @@ import CurtainFooter from "@/components/site/CurtainFooter";
 import SiteMedia from "@/components/site/SiteMedia";
 import CreatorFigure from "@/components/creator/CreatorFigure";
 import { PerksBand, InTheirWords, CreatorGallery, CreatorTripCards } from "@/components/creator/CreatorSections";
-import { getCities, getSettings, getCreators, getCreator, creatorTrips, inr, minRate, shortDate, resolveFigure } from "@/lib/catalog";
+import { getCities, getSettings, getCreators, getCreator, creatorTrips, inr, minRate, shortDate, resolveFigure, normalizeMediaUrl } from "@/lib/catalog";
 
 export function generateStaticParams() {
   return getCreators().map((c) => ({ slug: c.slug }));
@@ -22,8 +22,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title,
     description,
-    openGraph: { title, description, images: [{ url: c.cover }], type: "profile" },
-    twitter: { card: "summary_large_image", title, description, images: [c.cover] },
+    openGraph: { title, description, images: [{ url: normalizeMediaUrl(c.cover) }], type: "profile" },
+    twitter: { card: "summary_large_image", title, description, images: [normalizeMediaUrl(c.cover)] },
   };
 }
 

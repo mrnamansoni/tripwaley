@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import Image from "next/image";
+import SiteMedia from "@/components/site/SiteMedia";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { galleryPhotos } from "@/lib/data";
 
@@ -197,7 +197,7 @@ export default function MemoryArc({
           <div className="mt-10 grid grid-cols-3 gap-3 sm:grid-cols-5 md:grid-cols-7">
             {photos.map((ph) => (
               <div key={ph.src} className="relative aspect-[3/4] overflow-hidden rounded-xl shadow-card">
-                <Image src={ph.src} alt={ph.label} fill sizes="160px" className="object-cover" />
+                <SiteMedia src={ph.src} alt={ph.label} fill sizes="160px" className="object-cover" />
               </div>
             ))}
           </div>
@@ -252,7 +252,7 @@ every frame shot by a real traveller
               <div className="arc-flip relative h-full w-full">
                 {/* front: the photo */}
                 <div className="absolute inset-0 overflow-hidden rounded-lg shadow-card [backface-visibility:hidden]">
-                  <Image src={ph.src} alt="" fill sizes="128px" className="object-cover" />
+                  <SiteMedia src={ph.src} alt="" fill sizes="128px" className="object-cover" />
                 </div>
                 {/* back: brand card */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5 overflow-hidden rounded-lg bg-brand p-1 text-center shadow-card [backface-visibility:hidden] [transform:rotateY(180deg)]">

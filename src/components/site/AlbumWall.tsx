@@ -5,7 +5,7 @@
    runs against the grain. Captions in the batch's own words. */
 
 import { useEffect, useRef } from "react";
-import Image from "next/image";
+import SiteMedia from "./SiteMedia";
 import { gsap } from "@/lib/gsap";
 
 const SPEEDS = [-8, 14, -14];
@@ -63,7 +63,7 @@ export default function AlbumWall({
             {lane.map((item) => (
               <figure key={item.src} className="group overflow-hidden rounded-2xl bg-white p-2.5 pb-4 shadow-card-lg">
                 <div className="relative aspect-[4/5] overflow-hidden rounded-xl">
-                  <Image src={item.src} alt={item.note} fill sizes="(max-width:640px) 46vw, 30vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.06]" />
+                  <SiteMedia src={item.src} alt={item.note} fill sizes="(max-width:640px) 46vw, 30vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.06]" />
                 </div>
                 <figcaption className="pt-3 text-center font-script text-base leading-tight text-ink/70">{item.note}</figcaption>
               </figure>

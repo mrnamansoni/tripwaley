@@ -5,7 +5,7 @@
    auto-rotates, drag to spin, tap to open. One GPU transform total. */
 
 import { useState } from "react";
-import Image from "next/image";
+import SiteMedia from "./SiteMedia";
 import Link from "next/link";
 import SpinCarousel from "./SpinCarousel";
 import { inr } from "@/lib/types";
@@ -47,7 +47,7 @@ export default function MoreTrips({ trips }: { trips: MoreTrip[] }) {
         {trips.map((t) => (
           <Link key={t.slug} href={`/trips/${t.slug}`} aria-label={t.name} className="relative block h-full w-full" draggable={false}>
             <span className="relative block h-full w-full overflow-hidden rounded-xl border border-white/10 shadow-card-lg">
-              <Image src={t.image} alt={t.name} fill sizes="38vw" className="object-cover" />
+              <SiteMedia src={t.image} alt={t.name} fill sizes="38vw" className="object-cover" />
               <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/90 to-transparent p-2.5 pt-8">
                 <span className="block truncate font-display text-xs font-extrabold text-white sm:text-sm">{t.name}</span>
                 <span className="text-[0.52rem] font-bold uppercase tracking-widest text-gold">{t.nightsLabel}</span>

@@ -5,7 +5,7 @@
    data-lenis-prevent + touch-none keep the drag entirely native. */
 
 import { useEffect, useRef } from "react";
-import Image from "next/image";
+import SiteMedia from "./SiteMedia";
 import { gsap } from "@/lib/gsap";
 
 export default function AtlasTable({
@@ -104,7 +104,7 @@ export default function AtlasTable({
         <div ref={sheetRef} className="grid w-max grid-cols-4 gap-4 p-6 will-change-transform">
           {tiles.map((t, i) => (
             <figure key={`${t.img}-${i}`} className={`relative overflow-hidden rounded-2xl ${i % 3 === 0 ? "h-56 w-72 sm:h-72 sm:w-96" : "h-56 w-56 sm:h-72 sm:w-72"}`}>
-              <Image src={t.img} alt={t.label} fill sizes="400px" className="pointer-events-none object-cover" draggable={false} />
+              <SiteMedia src={t.img} alt={t.label} fill sizes="400px" className="pointer-events-none object-cover" draggable={false} />
               <figcaption className="absolute bottom-3 left-3 rounded-full bg-ink/55 px-3.5 py-1.5 font-mono text-[0.6rem] font-bold uppercase tracking-widest text-white backdrop-blur-sm">
                 {t.label}
               </figcaption>

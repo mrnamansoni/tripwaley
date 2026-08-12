@@ -8,7 +8,7 @@
    with a progress ring. Degrades to a still, composed frame under
    prefers-reduced-motion. Admin-editable via Settings → Video testimonial. */
 
-import Image from "next/image";
+import SiteMedia from "./SiteMedia";
 import { useEffect, useRef, useState } from "react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import type { VideoTestimonial } from "@/lib/types";
@@ -251,7 +251,7 @@ export default function VideoReel({ vt }: { vt: VideoTestimonial }) {
                 />
               ) : (
                 <div className={`h-full w-full ${reduced ? "" : "reel-kenburns"}`}>
-                  <Image src={vt.poster} alt={`${vt.name} on a Tripwaley batch`} fill sizes="(max-width:768px) 92vw, 768px" className="object-cover" />
+                  <SiteMedia src={vt.poster} alt={`${vt.name} on a Tripwaley batch`} fill sizes="(max-width:768px) 92vw, 768px" className="object-cover" />
                 </div>
               )}
               {/* legibility scrim */}

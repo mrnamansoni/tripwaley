@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import SiteMedia from "@/components/site/SiteMedia";
 import Link from "next/link";
 import Navbar from "@/components/sections/Navbar";
 import CurtainFooter from "@/components/site/CurtainFooter";
@@ -35,7 +35,7 @@ export default function StoriesPage() {
               {posts.map((p) => (
                 <Link key={p.slug} href={`/stories/${p.slug}`} className="group flex flex-col overflow-hidden rounded-3xl border border-line bg-card shadow-card transition-transform hover:-translate-y-1">
                   <div className="relative aspect-[16/10] overflow-hidden">
-                    <Image src={p.cover} alt="" fill sizes="(max-width:640px) 92vw, 30vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                    <SiteMedia src={p.cover} alt="" fill sizes="(max-width:640px) 92vw, 30vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
                   </div>
                   <div className="flex flex-1 flex-col p-5">
                     <div className="mb-2 flex flex-wrap gap-2">

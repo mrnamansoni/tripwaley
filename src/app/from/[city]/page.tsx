@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import SiteMedia from "@/components/site/SiteMedia";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/sections/Navbar";
@@ -106,7 +106,7 @@ export default async function FromCityPage({ params }: { params: Promise<{ city:
             {priced.map(({ pkg, price }) => (
               <Link key={pkg.slug} href={`/trips/${pkg.slug}`} className="group overflow-hidden rounded-3xl border border-line bg-card shadow-sm transition-all hover:-translate-y-1 hover:shadow-card-lg">
                 <div className="relative aspect-[4/3] overflow-hidden">
-                  <Image src={packageImages(pkg)[0]} alt={pkg.name} fill sizes="30vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.06]" />
+                  <SiteMedia src={packageImages(pkg)[0]} alt={pkg.name} fill sizes="30vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.06]" />
                 </div>
                 <div className="p-5">
                   <p className="text-[0.6rem] font-bold uppercase tracking-[0.25em] text-ink/45">{nightsLabel(pkg)}</p>

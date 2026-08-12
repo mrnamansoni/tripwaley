@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Image from "next/image";
+import SiteMedia from "@/components/site/SiteMedia";
 import { gsap } from "@/lib/gsap";
 import { collections as defaultCollections, formatINR, type Collection } from "@/lib/data";
 
@@ -96,7 +96,7 @@ export default function Collections({ items = defaultCollections }: { items?: Co
                 aria-label={`${c.title} — ${c.trips} trips from ${formatINR(c.from)}`}
                 className="group relative block h-[26rem] w-[76vw] shrink-0 snap-center overflow-hidden rounded-3xl bg-ink shadow-card transition-shadow duration-500 hover:shadow-card-lg sm:h-[30rem] sm:w-[24rem]"
               >
-                <Image
+                <SiteMedia
                   src={c.image}
                   alt=""
                   fill

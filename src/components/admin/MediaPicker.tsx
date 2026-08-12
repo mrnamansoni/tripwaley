@@ -22,6 +22,11 @@ const bust = (src: string, v: string | number = "p") =>
 
 export function Thumb({ src, cacheKey }: { src: string; cacheKey?: string | number }) {
   const url = bust(src, cacheKey);
+  // A pasted link can be perfectly well-formed and still never render — a Drive
+  // file left on "Restricted" returns a sign-in page to everyone but the owner,
+  // who sees it fine in their own browser. Without this the slot just looks
+  // empty in the panel and the breakage is only discovered on the live site.
+  const [failed, setFailed] = useState(false);
   if (isVideoMedia(src)) {
     return (
       <>
@@ -32,8 +37,27 @@ export function Thumb({ src, cacheKey }: { src: string; cacheKey?: string | numb
       </>
     );
   }
-  // eslint-disable-next-line @next/next/no-img-element
-  return <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" decoding="async" />;
+  return (
+    <>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={url}
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover"
+        loading="lazy"
+        decoding="async"
+        onError={() => setFailed(true)}
+        onLoad={() => setFailed(false)}
+      />
+      {failed && (
+        <span className="absolute inset-0 flex flex-col items-center justify-center gap-0.5 bg-brand/85 px-1 text-center text-[0.5rem] font-bold uppercase leading-tight tracking-wider text-white">
+          <span aria-hidden="true">⚠</span>
+          won&apos;t load
+          {isExternalMedia(src) && <span className="font-normal normal-case tracking-normal opacity-90">check link sharing</span>}
+        </span>
+      )}
+    </>
+  );
 }
 
 export default function MediaPicker({

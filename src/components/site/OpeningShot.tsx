@@ -9,7 +9,7 @@
    Separate landscape / portrait compositions keep phones cinematic. */
 
 import { useEffect, useRef } from "react";
-import Image from "next/image";
+import SiteMedia from "./SiteMedia";
 import Link from "next/link";
 import { gsap } from "@/lib/gsap";
 import { useCity, CitySwitcher } from "./CityProvider";
@@ -118,7 +118,7 @@ export default function OpeningShot({
       <div className="sticky top-0 h-screen overflow-hidden">
         {/* footage living inside the letters */}
         <div className="absolute inset-0 z-10">
-          <Image
+          <SiteMedia
             src={heroBg}
             alt=""
             fill
@@ -187,7 +187,7 @@ export default function OpeningShot({
           <div className="relative aspect-video w-full max-w-6xl overflow-hidden bg-black">
             {film.map((f, i) => (
               <div key={`${f.src}-${i}`} data-os-frame className="absolute inset-0 opacity-0 will-change-transform">
-                <Image src={f.src} alt="" fill sizes="90vw" className="object-cover" />
+                <SiteMedia src={f.src} alt="" fill sizes="90vw" className="object-cover" />
               </div>
             ))}
             <div className="noise absolute inset-0" aria-hidden="true" />
@@ -210,15 +210,15 @@ export default function OpeningShot({
             Each slat shows one seventh of the same photo. This used to be a CSS
             background-image, which meant the browser fetched the ORIGINAL file
             (1.5 MB here) seven times over — CSS backgrounds can't go through
-            next/image. Rendering a real <Image> that is 700% wide and offset
-            per slat gives the identical composition from a single optimized
-            AVIF/WebP download. */}
+            the image optimizer. Rendering a real element that is 700% wide and
+            offset per slat gives the identical composition from a single
+            optimized AVIF/WebP download. */}
         <div className="absolute inset-0 z-50 flex" aria-hidden="true">
           {Array.from({ length: 7 }).map((_, i) => (
             <div key={i} className="relative h-full overflow-hidden" style={{ width: `${100 / 7}%` }}>
               <div data-os-slat className="absolute inset-0" style={{ transform: `translateY(${i % 2 === 0 ? 104 : -104}%)` }}>
                 <div className="absolute inset-0 overflow-hidden">
-                  <Image
+                  <SiteMedia
                     src={heroBlinds}
                     alt=""
                     fill
