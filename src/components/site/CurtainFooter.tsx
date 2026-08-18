@@ -12,7 +12,7 @@ import { gsap } from "@/lib/gsap";
 const COLS = [
   { head: "Trips", links: [["All departures", "/trips"], ["Himachal", "/trips"], ["Uttarakhand", "/trips"], ["Kashmir", "/trips"]] },
   { head: "Company", links: [["About us", "/about"], ["Reviews", "/#reviews"], ["Contact", "/contact"], ["Stories", "/stories"]] },
-  { head: "Help", links: [["WhatsApp us", "wa"], ["FAQs", "/about#faqs"], ["Privacy", "/policies"], ["Terms", "/policies"]] },
+  { head: "Help", links: [["WhatsApp us", "wa"], ["FAQs", "/about#faqs"], ["Cancellation", "/refund-policy"], ["Privacy", "/privacy"], ["Terms", "/terms"], ["Policies", "/policies"]] },
 ];
 
 export default function CurtainFooter({

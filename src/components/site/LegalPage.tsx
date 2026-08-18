@@ -1,0 +1,165 @@
+import type { ReactNode } from "react";
+import Link from "next/link";
+import Navbar from "@/components/sections/Navbar";
+import CityProvider from "@/components/site/CityProvider";
+import CurtainFooter from "@/components/site/CurtainFooter";
+import { getCities, getSettings } from "@/lib/catalog";
+
+/* LEGAL PAGE SHELL — one layout for every policy document.
+ *
+ * These pages exist for two audiences at once: a traveller checking what
+ * happens if they cancel, and a payment-gateway reviewer checking that the
+ * business is real and its terms are stated plainly. Both want the same
+ * thing — concrete numbers, a named entity, and a way to reach a human —
+ * so everything here reads from Settings rather than being hardcoded, and
+ * stays correct when the owner changes the advance % or the address.
+ */
+
+export const LEGAL_PAGES: { href: string; label: string; blurb: string }[] = [
+  { href: "/terms", label: "Terms & Conditions", blurb: "The agreement between you and Tripwaley when you book a trip." },
+  { href: "/privacy", label: "Privacy Policy", blurb: "What we collect, why, and who it is shared with." },
+  { href: "/refund-policy", label: "Cancellation & Refund Policy", blurb: "Cancellation windows, refund amounts and how long money takes to return." },
+  { href: "/shipping-policy", label: "Service Delivery Policy", blurb: "How your booking confirmation and trip documents reach you." },
+  { href: "/return-policy", label: "Return Policy", blurb: "Why a travel booking is cancelled rather than returned." },
+  { href: "/contact", label: "Contact Us", blurb: "Phone, WhatsApp, email and registered address." },
+];
+
+/** One numbered clause. */
+export function Clause({ n, title, children }: { n: number; title: string; children: ReactNode }) {
+  return (
+    <section className="border-t border-line py-7 first:border-t-0 first:pt-0">
+      <h2 className="flex gap-3 font-display text-lg font-extrabold leading-snug text-ink sm:text-xl">
+        <span className="shrink-0 font-mono text-sm text-brand" aria-hidden="true">
+          {String(n).padStart(2, "0")}
+        </span>
+        {title}
+      </h2>
+      <div className="mt-3 space-y-3 pl-0 text-[0.95rem] leading-relaxed text-ink/70 sm:pl-9 [&_a]:font-bold [&_a]:text-brand [&_a:hover]:underline [&_li]:leading-relaxed [&_strong]:text-ink [&_ul]:list-disc [&_ul]:space-y-1.5 [&_ul]:pl-5">
+        {children}
+      </div>
+    </section>
+  );
+}
+
+/** Contact block — every policy page ends with a reachable human. */
+export function LegalContact() {
+  const s = getSettings();
+  const tel = s.whatsapp?.replace(/[^\d]/g, "");
+  return (
+    <section className="mt-10 rounded-3xl border border-line bg-card p-6 shadow-sm sm:p-8">
+      <p className="font-script text-2xl text-brand">questions on this page?</p>
+      <h2 className="mt-1 font-display text-2xl font-extrabold text-ink">Talk to a human.</h2>
+      <dl className="mt-5 grid gap-4 text-[0.95rem] sm:grid-cols-2">
+        {s.legalName && (
+          <div>
+            <dt className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-ink/40">registered entity</dt>
+            <dd className="mt-1 font-bold text-ink">{s.legalName}</dd>
+          </div>
+        )}
+        {s.gstin && (
+          <div>
+            <dt className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-ink/40">GSTIN</dt>
+            <dd className="mt-1 font-mono text-ink">{s.gstin}</dd>
+          </div>
+        )}
+        {tel && (
+          <div>
+            <dt className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-ink/40">phone / whatsapp</dt>
+            <dd className="mt-1 font-bold text-ink">
+              <a href={`tel:+${tel}`} className="hover:text-brand">
+                +{tel}
+              </a>
+            </dd>
+          </div>
+        )}
+        {s.email && (
+          <div>
+            <dt className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-ink/40">email</dt>
+            <dd className="mt-1 font-bold break-words text-ink">
+              <a href={`mailto:${s.email}`} className="hover:text-brand">
+                {s.email}
+              </a>
+            </dd>
+          </div>
+        )}
+        {s.address && (
+          <div className="sm:col-span-2">
+            <dt className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-ink/40">registered address</dt>
+            <dd className="mt-1 text-ink/80">{s.address}</dd>
+          </div>
+        )}
+        {s.supportHours && (
+          <div className="sm:col-span-2">
+            <dt className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-ink/40">support hours</dt>
+            <dd className="mt-1 text-ink/80">{s.supportHours}</dd>
+          </div>
+        )}
+      </dl>
+    </section>
+  );
+}
+
+export default function LegalPage({
+  title,
+  kicker,
+  updated,
+  intro,
+  children,
+}: {
+  title: string;
+  kicker: string;
+  /** ISO date the document last changed — gateways look for this */
+  updated: string;
+  intro: string;
+  children: ReactNode;
+}) {
+  const settings = getSettings();
+  const updatedLabel = new Date(updated).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+
+  return (
+    <CityProvider cities={getCities()} defaultCity={settings.defaultCity}>
+      <Navbar overDarkHero />
+      <main className="bg-cream">
+        <section className="bg-ink px-5 pb-14 pt-36 sm:px-8">
+          <div className="mx-auto w-full max-w-4xl">
+            <p className="font-script text-2xl text-gold sm:text-3xl">{kicker}</p>
+            <h1 className="mt-2 font-display text-4xl font-extrabold leading-[1.02] tracking-tight text-white sm:text-6xl">
+              {title}
+            </h1>
+            <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/60">{intro}</p>
+            <p className="mt-6 font-mono text-[0.6rem] uppercase tracking-[0.25em] text-white/40">
+              last updated · {updatedLabel}
+            </p>
+          </div>
+        </section>
+
+        <div className="mx-auto w-full max-w-4xl px-5 py-14 sm:px-8">
+          <article className="rounded-3xl border border-line bg-card p-6 shadow-sm sm:p-10">{children}</article>
+
+          <LegalContact />
+
+          <nav className="mt-10" aria-label="Other policies">
+            <p className="font-mono text-[0.6rem] uppercase tracking-[0.25em] text-ink/40">other policies</p>
+            <ul className="mt-3 flex flex-wrap gap-2">
+              {LEGAL_PAGES.map((p) => (
+                <li key={p.href}>
+                  <Link
+                    href={p.href}
+                    className="inline-flex rounded-full border border-line bg-card px-4 py-2 text-[0.8rem] font-bold text-ink/70 transition-colors hover:border-brand hover:text-brand"
+                  >
+                    {p.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </div>
+      </main>
+      <CurtainFooter whatsappLink={settings.whatsappLink} announcement={settings.announcement} />
+    </CityProvider>
+  );
+}

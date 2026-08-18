@@ -116,6 +116,22 @@ export default function SettingsEditor() {
           </div>
         </section>
 
+        {/* legal identity — printed on the policy pages */}
+        <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+          <p className={label}>legal identity</p>
+          <p className="mt-1 text-xs text-white/40">
+            Shown on /terms, /privacy, /refund-policy and /contact. A payment gateway checks these during
+            onboarding — fill them in before submitting your application. Blank fields are simply hidden.
+          </p>
+          <div className="mt-3 grid gap-4 sm:grid-cols-2">
+            <Field l="registered entity name" v={s.legalName ?? ""} on={(v) => setS({ ...s, legalName: v })} />
+            <Field l="GSTIN (optional)" v={s.gstin ?? ""} on={(v) => setS({ ...s, gstin: v })} />
+            <div className="sm:col-span-2">
+              <Field l="support hours, e.g. Mon–Sat, 10am–7pm IST" v={s.supportHours ?? ""} on={(v) => setS({ ...s, supportHours: v })} />
+            </div>
+          </div>
+        </section>
+
         {/* analytics & ads */}
         <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
           <p className={label}>analytics &amp; ads</p>

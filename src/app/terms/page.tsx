@@ -1,0 +1,180 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import LegalPage, { Clause } from "@/components/site/LegalPage";
+import { getSettings } from "@/lib/catalog";
+
+export const metadata: Metadata = {
+  title: "Terms & Conditions | Tripwaley",
+  description:
+    "The terms that apply when you book a Tripwaley group departure — booking and payment, cancellation, conduct, liability and governing law.",
+};
+
+const UPDATED = "2026-08-18";
+
+export default function TermsPage() {
+  const s = getSettings();
+  const entity = s.legalName || s.brand;
+  const advance = s.advancePercent;
+
+  return (
+    <LegalPage
+      kicker="the boring but important bit"
+      title="Terms & Conditions"
+      updated={UPDATED}
+      intro={`These terms govern your booking with ${entity}. By holding a seat, paying an advance or travelling on one of our departures, you agree to what is written here.`}
+    >
+      <Clause n={1} title="Who we are">
+        <p>
+          {entity} (&ldquo;{s.brand}&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;) operates fixed-date group
+          departures across India, sold through this website. &ldquo;You&rdquo; means the person making the
+          booking and every traveller named on it.
+        </p>
+        <p>
+          You must be at least 18 years old to make a booking. Travellers under 18 may join only when
+          accompanied by a parent or guardian on the same departure, or with written consent shared with us
+          in advance.
+        </p>
+      </Clause>
+
+      <Clause n={2} title="What a booking includes">
+        <p>
+          Every trip page lists exactly what is included and excluded for that departure. As a rule, the seat
+          price covers stays, the meals named on the itinerary, transport from your boarding city, permits
+          where applicable, and a trip captain.
+        </p>
+        <p>
+          Anything not listed as included is excluded — typically airfare to the boarding city, personal
+          expenses, optional activities, travel insurance, and costs arising from events outside our control.
+        </p>
+      </Clause>
+
+      <Clause n={3} title="Holding a seat, and confirming it">
+        <ul>
+          <li>
+            <strong>Holding is free.</strong> A hold blocks your seat for 24 hours. No payment is taken and no
+            contract is formed by a hold alone.
+          </li>
+          <li>
+            <strong>An advance confirms it.</strong> A booking is confirmed only when we receive the advance
+            of <strong>{advance}% of the total trip cost</strong> and issue a written confirmation by email or
+            WhatsApp.
+          </li>
+          <li>
+            <strong>The balance is due before departure.</strong> The remaining {100 - advance}% must be paid
+            by the date stated on your confirmation. Unpaid balances may result in the seat being released
+            under clause 6.
+          </li>
+        </ul>
+        <p>
+          All prices are in Indian Rupees (INR) and include applicable taxes unless the trip page says
+          otherwise. Prices quoted on the site may change until a booking is confirmed; once confirmed, your
+          price is locked.
+        </p>
+      </Clause>
+
+      <Clause n={4} title="Payments">
+        <p>
+          Payments are collected through a licensed third-party payment gateway. We never see or store your
+          full card, UPI or bank credentials. The amount payable is always calculated by us from the published
+          trip price — never from anything entered in your browser.
+        </p>
+        <p>
+          If a payment fails, is reversed, or is disputed with your bank, the booking is not confirmed and the
+          seat returns to inventory.
+        </p>
+      </Clause>
+
+      <Clause n={5} title="Cancellation and refunds">
+        <p>
+          Cancellations by you, refund slabs, and how long a refund takes are set out in full in our{" "}
+          <Link href="/refund-policy">Cancellation &amp; Refund Policy</Link>, which forms part of these terms.
+        </p>
+      </Clause>
+
+      <Clause n={6} title="Changes and cancellation by us">
+        <p>
+          Group travel in the Himalayas and other remote regions is weather-dependent. We may adjust an
+          itinerary, stay, or route where safety, road conditions, permits or local restrictions require it.
+          We will always tell you as soon as we know.
+        </p>
+        <p>
+          If <strong>we</strong> cancel a departure outright, you may choose a full refund of everything paid,
+          or a transfer of the full amount to another departure. We are not liable for costs you incurred
+          separately, such as flights booked to reach the boarding city — travel insurance is strongly
+          recommended.
+        </p>
+      </Clause>
+
+      <Clause n={7} title="Your responsibilities on a trip">
+        <ul>
+          <li>Carry valid government photo ID, and any permit documents we ask for, for the whole trip.</li>
+          <li>Disclose medical conditions, allergies or fitness limits that could affect you at altitude or on a trek, before you travel.</li>
+          <li>Follow the trip captain&apos;s instructions on safety, timings and restricted areas.</li>
+          <li>Respect local communities, property and the environment at every stop.</li>
+        </ul>
+        <p>
+          We may remove a traveller from a departure, without refund, for conduct that endangers themselves or
+          others, for possession of illegal substances, or for behaviour that persistently disrupts the group.
+        </p>
+      </Clause>
+
+      <Clause n={8} title="Health, fitness and risk">
+        <p>
+          Several of our departures involve high altitude, long road journeys and trekking. These carry
+          inherent risk that cannot be removed. You confirm that each traveller is medically fit for the
+          itinerary booked, and you accept those inherent risks.
+        </p>
+        <p>
+          We are not medical providers. Where evacuation or treatment is needed, we will assist in arranging
+          it, but the cost is yours.
+        </p>
+      </Clause>
+
+      <Clause n={9} title="Liability">
+        <p>
+          We take responsibility for the services we directly provide, and we select our stays, drivers and
+          captains with care. We are not liable for loss, delay or injury caused by events beyond our
+          reasonable control — including weather, landslides, roadblocks, strikes, accidents, acts of
+          government, or the failure of an independent third-party supplier.
+        </p>
+        <p>
+          Where we are found liable, our total liability is limited to the amount you paid us for the
+          affected booking. Nothing in these terms limits liability that cannot be limited under Indian law.
+        </p>
+      </Clause>
+
+      <Clause n={10} title="Photography and media">
+        <p>
+          Our captains photograph batches during trips, and we may use those images to promote future
+          departures. If you would rather not appear, tell your trip captain or write to us and we will
+          exclude you.
+        </p>
+      </Clause>
+
+      <Clause n={11} title="Content on this site">
+        <p>
+          The text, photographs, itineraries and design on this website belong to us or are used with
+          permission. You may not copy or republish them commercially without written consent.
+        </p>
+      </Clause>
+
+      <Clause n={12} title="Governing law and disputes">
+        <p>
+          These terms are governed by the laws of India. Any dispute is subject to the exclusive jurisdiction
+          of the courts at our registered place of business.
+        </p>
+        <p>
+          Before escalating, please write to us — most issues are resolved the same week. Contact details are
+          below and on our <Link href="/contact">Contact page</Link>.
+        </p>
+      </Clause>
+
+      <Clause n={13} title="Changes to these terms">
+        <p>
+          We may update these terms as the business changes. The version on this page at the time you book is
+          the one that applies to your booking. The last-updated date is shown at the top.
+        </p>
+      </Clause>
+    </LegalPage>
+  );
+}

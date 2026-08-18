@@ -69,6 +69,15 @@ export interface Settings {
   gaId?: string;
   /** Meta Pixel / dataset ID. Empty = pixel off. */
   metaPixelId?: string;
+  /* ---- legal identity: shown on the policy pages a payment gateway reviews.
+     Kept separate from `brand` because the registered entity is often not the
+     trading name, and a gateway checks the registered one. ---- */
+  /** registered entity, e.g. "Tripwaley Travels Pvt Ltd" */
+  legalName?: string;
+  /** GSTIN, printed on the policy pages when set */
+  gstin?: string;
+  /** grievance/support contact hours, e.g. "Mon–Sat, 10am–7pm IST" */
+  supportHours?: string;
 }
 export interface City {
   slug: string;
