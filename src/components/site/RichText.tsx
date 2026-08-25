@@ -79,6 +79,9 @@ export default function RichText({
   text,
   /** above this many characters the block starts collapsed */
   collapseOver = 900,
+  /** how much shows while collapsed — the creator pages want a tighter
+   *  preview than a full trip brief, so it can't be a fixed 16rem */
+  collapsedHeight = "16rem",
   className = "",
   tone = "light",
   moreLabel = "Read the full brief",
@@ -86,6 +89,7 @@ export default function RichText({
 }: {
   text: string;
   collapseOver?: number;
+  collapsedHeight?: string;
   className?: string;
   tone?: "light" | "dark";
   moreLabel?: string;
@@ -110,7 +114,7 @@ export default function RichText({
     <div className={className}>
       <div
         className={`relative overflow-hidden transition-[max-height] duration-500 ease-out`}
-        style={{ maxHeight: collapsible && !open ? "16rem" : "none" }}
+        style={{ maxHeight: collapsible && !open ? collapsedHeight : "none" }}
       >
         {blocks.map((b, i) => {
           if (b.kind === "heading") {

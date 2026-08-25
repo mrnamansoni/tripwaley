@@ -130,7 +130,7 @@ export default function ContactPage() {
           </section>
         </div>
       </main>
-      <CurtainFooter whatsappLink={s.whatsappLink} announcement={s.announcement} />
+      <CurtainFooter whatsappLink={s.whatsappLink} whatsapp={s.whatsapp} announcement={s.announcement} />
     </CityProvider>
   );
 }

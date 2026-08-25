@@ -128,7 +128,7 @@ export default function SoloPage() {
           script="you'll know everyone by day two"
         />
       </main>
-      <CurtainFooter whatsappLink={settings.whatsappLink} announcement={settings.announcement} />
+      <CurtainFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
     </CityProvider>
   );
 }

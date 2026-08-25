@@ -15,8 +15,18 @@ const COLS = [
   { head: "Help", links: [["WhatsApp us", "wa"], ["FAQs", "/about#faqs"], ["Cancellation", "/refund-policy"], ["Privacy", "/privacy"], ["Terms", "/terms"], ["Policies", "/policies"]] },
 ];
 
+/** 919625330270 → +91 96253 30270, so the footer never drifts from Settings */
+function prettyPhone(raw: string): string {
+  const d = (raw ?? "").replace(/[^\d]/g, "");
+  if (!d) return "";
+  const ten = d.length > 10 ? d.slice(-10) : d;
+  const cc = d.length > 10 ? d.slice(0, d.length - 10) : "91";
+  return ten.length === 10 ? `+${cc} ${ten.slice(0, 5)} ${ten.slice(5)}` : `+${d}`;
+}
+
 export default function CurtainFooter({
   whatsappLink,
+  whatsapp = "",
   announcement,
   eyebrow = "the end of the page",
   headline = "…not of the map.",
@@ -24,6 +34,8 @@ export default function CurtainFooter({
   cue = "keep pulling ↓",
 }: {
   whatsappLink: string;
+  /** digits from Settings; the visible number is derived from this, never typed */
+  whatsapp?: string;
   announcement: string;
   eyebrow?: string;
   headline?: string;
@@ -57,7 +69,7 @@ export default function CurtainFooter({
               <p className="mt-2 max-w-xs text-xs leading-relaxed text-white/45 sm:mt-3 sm:text-sm">{announcement}</p>
               <a href={whatsappLink} target="_blank" rel="noreferrer" className="mt-3.5 inline-flex min-h-10 items-center gap-2.5 rounded-full bg-success px-5 py-2.5 text-xs font-bold text-white transition-transform hover:scale-[1.03] sm:mt-5 sm:min-h-11 sm:px-6 sm:py-3 sm:text-sm">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.66 15L2 22l5.16-1.3A10 10 0 1 0 12 2Z" /></svg>
-                +91 96253 30270
+                {prettyPhone(whatsapp) || "WhatsApp us"}
               </a>
             </div>
             {COLS.map((col) => (

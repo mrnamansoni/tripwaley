@@ -120,6 +120,7 @@ export default function Home() {
           heroBg={slotOne("hero.bg")}
           heroFilm={slot("hero.film")}
           heroBlinds={slotOne("hero.blinds")}
+          whatsappLink={settings.whatsappLink}
           eyebrow={text("hero.eyebrow")}
           headline={text("hero.headline")}
           headlineAccent={text("hero.headlineAccent")}
@@ -154,7 +155,7 @@ export default function Home() {
         <MagnetChant whatsappLink={settings.whatsappLink} />
       </main>
       <CurtainFooter
-        whatsappLink={settings.whatsappLink}
+        whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp}
         announcement={settings.announcement}
         eyebrow={text("footer.eyebrow")}
         headline={text("footer.headline")}

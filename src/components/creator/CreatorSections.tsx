@@ -3,10 +3,11 @@
 
 import Link from "next/link";
 import SiteMedia from "@/components/site/SiteMedia";
+import ItineraryRibbon from "@/components/site/ItineraryRibbon";
 import CreatorFigure, { CreatorAvatar } from "./CreatorFigure";
 import DayChips from "@/components/site/DayChips";
 import { inr } from "@/lib/types";
-import type { Creator, Meal } from "@/lib/types";
+import type { Creator, ItineraryDay, Meal } from "@/lib/types";
 
 /* ------------------------------------------------ the roster ---------- */
 
@@ -111,9 +112,10 @@ export function PerksBand({ creator, figure }: { creator: Creator; figure?: stri
   const accent = creator.accent === "brand" ? "text-brand" : "text-gold";
   return (
     <section className="bg-blush py-[10vh]">
-      <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-5 sm:px-8 lg:grid-cols-[0.85fr_1.15fr]">
-        {/* the "arms out" frame: figure centre-left, list flanking it */}
-        <div className="relative mx-auto h-[26rem] w-full max-w-sm lg:h-[34rem]">
+      <div className="mx-auto grid w-full max-w-6xl items-center gap-6 px-5 sm:px-8 lg:grid-cols-[0.85fr_1.15fr] lg:gap-10">
+        {/* the "arms out" frame: figure centre-left, list flanking it. On
+            phones it collapses into a headline row so the perks stay in view. */}
+        <div className="relative mx-auto hidden h-[26rem] w-full max-w-sm lg:block lg:h-[34rem]">
           <CreatorFigure
             cutout={figure}
             portrait={creator.portrait}
@@ -124,11 +126,25 @@ export function PerksBand({ creator, figure }: { creator: Creator; figure?: stri
           />
         </div>
         <div>
+          <div className="flex items-center gap-4 lg:block">
+            <div className="relative h-28 w-24 shrink-0 lg:hidden">
+              <CreatorFigure
+                cutout={figure}
+                portrait={creator.portrait}
+                focal={creator.focal}
+                alt={creator.name}
+                variant="panel"
+                className="h-full w-full"
+              />
+            </div>
+            <div className="min-w-0">
           <p className="font-script text-2xl text-brand sm:text-3xl">why it&apos;s different with them</p>
-          <h2 className="mt-1 font-display text-3xl font-extrabold leading-tight tracking-tight text-ink sm:text-5xl">
+          <h2 className="mt-1 font-display text-2xl font-extrabold leading-tight tracking-tight text-ink sm:text-3xl lg:text-5xl">
             What you actually get<br />
             <span className={accent}>because {creator.firstName}&apos;s there.</span>
           </h2>
+            </div>
+          </div>
           <ul className="mt-8 space-y-4">
             {creator.perks.map((p, i) => (
               <li key={p} className="flex gap-4 rounded-2xl border border-ink/8 bg-card p-4 shadow-sm">
@@ -352,30 +368,33 @@ export function ItineraryBeside({
   figure,
   packageName,
   days,
+  images,
 }: {
   creator: Creator;
   figure?: string;
   packageName: string;
-  days: { day: number; title: string; body: string; meals?: Meal[]; stay?: boolean }[];
+  days: ItineraryDay[];
+  images?: string[];
 }) {
   if (!days.length) return null;
-  const accent = creator.accent === "brand" ? "text-brand" : "text-gold";
   const rule = creator.accent === "brand" ? "bg-brand" : "bg-gold";
+  const accent = creator.accent === "brand" ? "text-brand" : "text-gold";
 
+  /* The creator fronts the route, then the same winding road the public trip
+     pages use carries the days — including its per-day "Read the full day"
+     collapse, which is what stops a 6-day itinerary running off the screen.
+
+     The header is a two-column row from the smallest screen up: the old
+     stacked layout pushed a 24rem figure above the content, so phones opened
+     on a photo with the itinerary somewhere below the fold. */
   return (
-    <section className="relative overflow-hidden bg-ink py-[10vh]">
-      <div className="noise absolute inset-0" aria-hidden="true" />
-      <div className="relative mx-auto grid w-full max-w-7xl gap-10 px-5 sm:px-8 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
-        {/* the figure — sticky on desktop, a normal block on phones */}
-        <div className="lg:sticky lg:top-24 lg:self-start">
-          <p className="font-mono text-[0.56rem] uppercase tracking-[0.35em] text-white/40">
-            {creator.firstName} walks you through
-          </p>
-          <h2 className="mt-2 font-display text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-4xl">
-            {packageName}
-          </h2>
-          <span className={`mt-4 block h-px w-16 ${rule}`} aria-hidden="true" />
-          <div className="relative mt-6 h-[24rem] w-full sm:h-[30rem]">
+    <ItineraryRibbon
+      days={days}
+      images={images ?? []}
+      dayCollapse={{ over: 190, height: "5.5rem" }}
+      header={
+        <div className="mx-auto flex w-full max-w-5xl items-center gap-4 px-5 sm:gap-8 sm:px-8">
+          <div className="relative h-28 w-24 shrink-0 sm:h-56 sm:w-48">
             <CreatorFigure
               cutout={figure}
               portrait={creator.portrait}
@@ -385,27 +404,18 @@ export function ItineraryBeside({
               className="h-full w-full"
             />
           </div>
+          <div className="min-w-0">
+            <p className={`font-mono text-[0.54rem] uppercase tracking-[0.3em] sm:text-[0.6rem] sm:tracking-[0.35em] ${accent}`}>
+              {creator.firstName} walks you through
+            </p>
+            <h2 className="mt-1.5 font-display text-2xl font-extrabold leading-[1.05] tracking-tight text-ink sm:mt-3 sm:text-5xl">
+              {packageName}
+            </h2>
+            <span className={`mt-3 block h-px w-12 sm:mt-5 sm:w-20 ${rule}`} aria-hidden="true" />
+          </div>
         </div>
-
-        {/* the days */}
-        <ol className="space-y-4">
-          {days.map((d) => (
-            <li key={d.day} className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition-colors hover:border-white/25 sm:p-6">
-              <div className="flex items-baseline gap-4">
-                <span className={`font-display text-2xl font-extrabold leading-none ${accent}`}>
-                  {String(d.day).padStart(2, "0")}
-                </span>
-                <h3 className="font-display text-lg font-extrabold leading-snug text-white">{d.title}</h3>
-              </div>
-              <DayChips meals={d.meals} stay={d.stay} tone="dark" className="mt-3 pl-10" />
-              {d.body && (
-                <p className="mt-2.5 whitespace-pre-line pl-10 text-sm leading-relaxed text-white/55">{d.body}</p>
-              )}
-            </li>
-          ))}
-        </ol>
-      </div>
-    </section>
+      }
+    />
   );
 }
 
@@ -485,7 +495,7 @@ export function InOutFlank({
         <div className="mt-14 grid items-center gap-10 lg:grid-cols-[1fr_auto_1fr]">
           <FlankColumn items={inclusions} label="covered" tone="in" align="right" />
 
-          <div className="relative mx-auto h-[22rem] w-56 sm:h-[30rem] sm:w-72">
+          <div className="relative mx-auto order-first h-40 w-32 sm:h-52 sm:w-40 lg:order-none lg:h-[30rem] lg:w-72">
             <CreatorFigure
               cutout={figure}
               portrait={creator.portrait}

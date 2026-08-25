@@ -118,7 +118,7 @@ export default async function FromCityPage({ params }: { params: Promise<{ city:
           </div>
         </section>
       </main>
-      <CurtainFooter whatsappLink={settings.whatsappLink} announcement={settings.announcement} />
+      <CurtainFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
     </CityProvider>
   );
 }

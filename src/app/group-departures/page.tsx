@@ -102,7 +102,7 @@ export default function GroupDeparturesPage() {
           script="see you at the boarding point"
         />
       </main>
-      <CurtainFooter whatsappLink={settings.whatsappLink} announcement={settings.announcement} />
+      <CurtainFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
     </CityProvider>
   );
 }

@@ -69,7 +69,7 @@ export default function VibeCheckPage() {
           title="Found your vibe? Board with it."
         />
       </main>
-      <CurtainFooter whatsappLink={settings.whatsappLink} announcement={settings.announcement} />
+      <CurtainFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
     </CityProvider>
   );
 }

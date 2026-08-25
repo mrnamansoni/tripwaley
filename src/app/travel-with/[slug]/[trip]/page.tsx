@@ -19,6 +19,7 @@ import {
   weekday,
   nightsLabel,
   normalizeMediaUrl,
+  packageImages,
 } from "@/lib/catalog";
 
 export function generateStaticParams() {
@@ -79,13 +80,18 @@ export default async function CreatorTripPage({
       <main>
         {/* ---------------- hero: the trip, fronted by the creator ------- */}
         <section className="relative overflow-hidden bg-ink pt-28 sm:pt-32">
-          <div aria-hidden="true" className="absolute inset-0 opacity-30">
+          <div aria-hidden="true" className="absolute inset-0 opacity-[0.62]">
             <SiteMedia src={view.heroMedia} alt="" fill priority sizes="100vw" className="object-cover" />
           </div>
           <div
             aria-hidden="true"
             className="absolute inset-0"
-            style={{ background: "linear-gradient(to bottom, rgba(26,22,20,0.82), rgba(26,22,20,0.9) 55%, #1a1614 100%)" }}
+            style={{ background: "linear-gradient(to bottom, rgba(26,22,20,0.55) 0%, rgba(26,22,20,0.38) 38%, rgba(26,22,20,0.82) 76%, #1a1614 100%)" }}
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0"
+            style={{ background: "linear-gradient(to right, rgba(26,22,20,0.78) 0%, rgba(26,22,20,0.45) 46%, rgba(26,22,20,0.12) 72%, rgba(26,22,20,0) 100%)" }}
           />
           <div className="noise absolute inset-0" aria-hidden="true" />
 
@@ -271,13 +277,8 @@ export default async function CreatorTripPage({
             creator={creator}
             figure={view.figure("itinerary")}
             packageName={view.headline}
-            days={view.itinerary.map((d) => ({
-              day: d.day,
-              title: d.title,
-              body: d.body,
-              meals: d.meals,
-              stay: d.stay,
-            }))}
+            days={view.itinerary}
+            images={packageImages(view.package)}
           />
         )}
 
@@ -346,7 +347,7 @@ export default async function CreatorTripPage({
           </div>
         </section>
       </main>
-      <CurtainFooter whatsappLink={settings.whatsappLink} announcement={settings.announcement} />
+      <CurtainFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
     </CityProvider>
   );
 }

@@ -57,13 +57,18 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
       <main>
         {/* ---------------- the poster ---------------- */}
         <section className="relative overflow-hidden bg-ink pt-28 sm:pt-32">
-          <div aria-hidden="true" className="absolute inset-0 opacity-[0.28]">
+          <div aria-hidden="true" className="absolute inset-0 opacity-[0.62]">
             <SiteMedia src={creator.cover} alt="" fill priority sizes="100vw" className="object-cover" />
           </div>
           <div
             aria-hidden="true"
             className="absolute inset-0"
-            style={{ background: "linear-gradient(to bottom, rgba(26,22,20,0.8), rgba(26,22,20,0.9) 55%, #1a1614 100%)" }}
+            style={{ background: "linear-gradient(to bottom, rgba(26,22,20,0.55) 0%, rgba(26,22,20,0.38) 38%, rgba(26,22,20,0.82) 76%, #1a1614 100%)" }}
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0"
+            style={{ background: "linear-gradient(to right, rgba(26,22,20,0.78) 0%, rgba(26,22,20,0.45) 46%, rgba(26,22,20,0.12) 72%, rgba(26,22,20,0) 100%)" }}
           />
           <div className="noise absolute inset-0" aria-hidden="true" />
 
@@ -217,7 +222,7 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
           </div>
         </section>
       </main>
-      <CurtainFooter whatsappLink={settings.whatsappLink} announcement={settings.announcement} />
+      <CurtainFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
     </CityProvider>
   );
 }

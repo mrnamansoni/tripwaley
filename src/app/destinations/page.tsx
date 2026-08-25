@@ -133,7 +133,7 @@ export default function DestinationsPage() {
           title="Pick a direction. We pack the rest."
         />}
       </main>
-      <CurtainFooter whatsappLink={settings.whatsappLink} announcement={settings.announcement} />
+      <CurtainFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
     </CityProvider>
   );
 }

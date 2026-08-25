@@ -55,7 +55,7 @@ export default function PoliciesPage() {
           </ul>
         </div>
       </main>
-      <CurtainFooter whatsappLink={s.whatsappLink} announcement={s.announcement} />
+      <CurtainFooter whatsappLink={s.whatsappLink} whatsapp={s.whatsapp} announcement={s.announcement} />
     </CityProvider>
   );
 }

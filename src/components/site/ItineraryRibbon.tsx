@@ -22,7 +22,21 @@ import DayChips from "./DayChips";
 import { gsap } from "@/lib/gsap";
 import type { ItineraryDay } from "@/lib/types";
 
-export default function ItineraryRibbon({ days, images }: { days: ItineraryDay[]; images: string[] }) {
+export default function ItineraryRibbon({
+  days,
+  images,
+  header,
+  dayCollapse,
+}: {
+  days: ItineraryDay[];
+  images: string[];
+  /** tighter day preview for the creator pages, where the same route sits
+   *  under a creator's framing and a 9-line card makes the page endless */
+  dayCollapse?: { over: number; height: string };
+  /** replaces the centred title block — the creator pages front their own
+   *  framing ("Naman walks you through…") above the same road. */
+  header?: React.ReactNode;
+}) {
   const rootRef = useRef<HTMLElement>(null);
   const railRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -157,12 +171,14 @@ export default function ItineraryRibbon({ days, images }: { days: ItineraryDay[]
 
   return (
     <section ref={rootRef} className="overflow-hidden bg-cream py-[10vh]">
-      <div className="mx-auto max-w-2xl px-5 text-center">
-        <p className="text-[0.62rem] font-bold uppercase tracking-[0.5em] text-brand">the route · day by day</p>
-        <h2 className="mt-3 font-display text-4xl font-extrabold tracking-tight sm:text-6xl">
-          Read it like a <span className="text-brand">boarding call.</span>
-        </h2>
-      </div>
+      {header ?? (
+        <div className="mx-auto max-w-2xl px-5 text-center">
+          <p className="text-[0.62rem] font-bold uppercase tracking-[0.5em] text-brand">the route · day by day</p>
+          <h2 className="mt-3 font-display text-4xl font-extrabold tracking-tight sm:text-6xl">
+            Read it like a <span className="text-brand">boarding call.</span>
+          </h2>
+        </div>
+      )}
 
       <div ref={railRef} className="relative mx-auto mt-14 w-full max-w-5xl px-5 pb-10 sm:px-8">
         {/* the road */}
@@ -245,7 +261,8 @@ export default function ItineraryRibbon({ days, images }: { days: ItineraryDay[]
                   {day.body && (
                     <RichText
                       text={day.body}
-                      collapseOver={340}
+                      collapseOver={dayCollapse?.over ?? 340}
+                      collapsedHeight={dayCollapse?.height ?? "16rem"}
                       className="mt-1.5"
                       moreLabel="Read the full day"
                       lessLabel="Show less"

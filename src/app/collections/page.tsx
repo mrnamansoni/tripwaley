@@ -41,7 +41,7 @@ export default function CollectionsPage() {
           title="Tell us the mood. We'll name the mountain."
         />
       </main>
-      <CurtainFooter whatsappLink={settings.whatsappLink} announcement={settings.announcement} />
+      <CurtainFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
     </CityProvider>
   );
 }

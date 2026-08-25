@@ -75,7 +75,7 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
           </section>
         )}
       </main>
-      <CurtainFooter whatsappLink={settings.whatsappLink} announcement={settings.announcement} />
+      <CurtainFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
     </>
   );
 }

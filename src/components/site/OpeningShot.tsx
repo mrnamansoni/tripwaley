@@ -34,6 +34,7 @@ export default function OpeningShot({
   heroBg,
   heroFilm,
   heroBlinds,
+  whatsappLink,
   eyebrow = "tripwaley presents · a film by you",
   headline = "Your city. Your crew.",
   headlineAccent = "Your opening shot.",
@@ -46,6 +47,8 @@ export default function OpeningShot({
   heroBg: string;
   heroFilm: string[];
   heroBlinds: string;
+  /** from Settings — never hardcode the number, it changes */
+  whatsappLink: string;
   eyebrow?: string;
   headline?: string;
   headlineAccent?: string;
@@ -268,7 +271,7 @@ export default function OpeningShot({
               <Link href="/trips" className="inline-flex min-h-11 items-center rounded-full bg-brand px-6 py-3 text-sm font-bold text-white shadow-red transition-colors hover:bg-brand-bright sm:min-h-12 sm:px-8 sm:py-4 sm:text-base">
                 All departures →
               </Link>
-              <a href="https://wa.me/919625330270" target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/25 px-5 py-3 text-sm font-bold text-white transition-colors hover:border-gold hover:text-gold sm:min-h-12 sm:px-7 sm:py-4 sm:text-base">
+              <a href={whatsappLink} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/25 px-5 py-3 text-sm font-bold text-white transition-colors hover:border-gold hover:text-gold sm:min-h-12 sm:px-7 sm:py-4 sm:text-base">
                 WhatsApp us
               </a>
             </div>

@@ -53,7 +53,7 @@ export default function StoriesPage() {
           )}
         </section>
       </main>
-      <CurtainFooter whatsappLink={settings.whatsappLink} announcement={settings.announcement} />
+      <CurtainFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
     </>
   );
 }

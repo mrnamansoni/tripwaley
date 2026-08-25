@@ -111,7 +111,7 @@ export default function AboutPage() {
           title="Come see who we are on a Tuesday at 4,000m."
         />
       </main>
-      <CurtainFooter whatsappLink={settings.whatsappLink} announcement={settings.announcement} />
+      <CurtainFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
     </CityProvider>
   );
 }
