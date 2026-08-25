@@ -4,11 +4,13 @@
    City-aware live quote → batch picker → one tap: the lead is captured
    via /api/book (→ n8n → CRM) and the visitor lands in WhatsApp with a
    pre-written message. Payment (Razorpay, 40% advance) plugs into this
-   same flow at deploy time. */
+   same flow at deploy time. A coupon, when applied, is priced by the
+   server — see CouponField and /api/coupon. */
 
 import { useMemo, useState } from "react";
 import { gsap } from "@/lib/gsap";
 import { useCity } from "./CityProvider";
+import CouponField, { type AppliedCoupon } from "./CouponField";
 import { inr, shortDate, weekday } from "@/lib/types";
 import { trackInitiateCheckout, trackLead } from "@/lib/analytics";
 
@@ -37,6 +39,7 @@ export default function BookingBar({
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [err, setErr] = useState("");
+  const [coupon, setCoupon] = useState<AppliedCoupon | null>(null);
 
   const cityDeps = useMemo(() => {
     const mine = departures.filter((d) => d.citySlugs.includes(city.slug));
@@ -69,7 +72,7 @@ export default function BookingBar({
     const res = await fetch("/api/lead", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ name, phone, package: packageSlug, city: city.slug, date: chosen, occupancy: occ, price: seat ?? null, source: "booking-bar" }),
+      body: JSON.stringify({ name, phone, package: packageSlug, city: city.slug, date: chosen, occupancy: occ, price: coupon?.total ?? seat ?? null, source: coupon ? `booking-bar coupon:${coupon.code}` : "booking-bar" }),
     }).catch(() => null);
     if (!res || !res.ok) {
       setErr("Couldn't hold the seat — check the number and retry.");
@@ -88,7 +91,7 @@ export default function BookingBar({
       gsap.fromTo("[data-bb-stamp]", { autoAlpha: 0, scale: 2.4, rotate: 12 }, { autoAlpha: 1, scale: 1, rotate: -7, duration: 0.35, ease: "power4.in", delay: 0.75 });
     });
     const msg = encodeURIComponent(
-      `Hi Tripwaley! Hold a seat for me:\n• ${packageName}\n• From ${city.name}\n• ${chosen ? `${weekday(chosen)}, ${shortDate(chosen)}` : "next batch"}\n• ${occ} sharing${seat != null ? ` — ${inr(seat)}/seat` : ""}${name ? `\n• Name: ${name}` : ""}\n• Mobile: ${phone.replace(/[^\d]/g, "").slice(-10)}`
+      `Hi Tripwaley! Hold a seat for me:\n• ${packageName}\n• From ${city.name}\n• ${chosen ? `${weekday(chosen)}, ${shortDate(chosen)}` : "next batch"}\n• ${occ} sharing${seat != null ? ` — ${inr(seat)}/seat` : ""}${coupon ? `\n• Coupon: ${coupon.code} (${coupon.label}) — ${inr(coupon.total)}` : ""}${name ? `\n• Name: ${name}` : ""}\n• Mobile: ${phone.replace(/[^\d]/g, "").slice(-10)}`
     );
     setTimeout(() => {
       window.open(`https://wa.me/${whatsapp}?text=${msg}`, "_blank", "noopener");
@@ -140,6 +143,31 @@ export default function BookingBar({
                 />
               </div>
             </label>
+            {seat != null && (
+              <>
+                <CouponField
+                  packageSlug={packageSlug}
+                  citySlug={city.slug}
+                  occupancy={occ}
+                  pax={1}
+                  applied={coupon}
+                  onApply={setCoupon}
+                  onClear={() => setCoupon(null)}
+                />
+                {coupon && (
+                  <div className="mt-3 flex items-baseline justify-between border-t border-white/10 pt-3">
+                    <span className="text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white/45">
+                      your price
+                    </span>
+                    <span className="font-display text-xl font-extrabold text-white">
+                      {inr(coupon.total)}
+                      <span className="ml-2 text-sm font-bold text-white/35 line-through">{inr(seat)}</span>
+                    </span>
+                  </div>
+                )}
+              </>
+            )}
+
             {err && <p className="mt-2.5 text-sm font-semibold text-brand-bright">{err}</p>}
 
             <button

@@ -212,6 +212,10 @@ export interface Catalog {
   wire?: WireEntry[];
   /** creator collabs (Travel with a Creator pages) */
   creators?: Creator[];
+  /** college batches already run — the proof wall on /college-trips */
+  colleges?: CollegeTrip[];
+  /** discount codes applied at booking (admin Coupons tab) */
+  coupons?: Coupon[];
   /** highest seed batch already merged in — see mergeSeedContent() in store.ts */
   seedVersion?: number;
 }
@@ -459,7 +463,7 @@ export function normalizeCreator(c: Creator): Creator {
    default, so a package with no categories set still shows up exactly where
    it always did. */
 
-export type TripCategory = "group" | "honeymoon" | "solo";
+export type TripCategory = "group" | "honeymoon" | "solo" | "college";
 
 export interface CategoryDef {
   key: TripCategory;
@@ -473,6 +477,7 @@ export const CATEGORY_DEFS: CategoryDef[] = [
   { key: "group", label: "Group departures", href: "/group-departures", rateLabel: "per seat" },
   { key: "honeymoon", label: "Honeymoon", href: "/honeymoon", rateLabel: "per couple" },
   { key: "solo", label: "Solo", href: "/solo", rateLabel: "per seat" },
+  { key: "college", label: "College trips", href: "/college-trips", rateLabel: "per student" },
 ];
 
 const CATEGORY_KEYS = new Set<string>(CATEGORY_DEFS.map((c) => c.key));
@@ -571,6 +576,10 @@ export const SLOT_DEFS: SlotDef[] = [
   { key: "honeymoon.gallery", group: "Honeymoon page", label: "Moments gallery", hint: "Arched photo band — keep these couple/scenery shots, not group photos. Captions in Content.", kind: "list", defaults: ["/images/kashmir.jpg", "/images/backwater-canoe.jpg", "/images/andaman.jpg", "/images/tent-view.jpg", "/images/kerala.jpg", "/images/stars.jpg"], max: 12 },
   { key: "honeymoon.suite", group: "Honeymoon page", label: "Private-suite feature photo", hint: "Large feature image beside the inclusions", kind: "single", defaults: ["/images/tent-view.jpg"] },
 
+  { key: "college.hero", group: "College page", label: "Hero background", hint: "Photo or video behind the page title", kind: "single", defaults: ["/images/tw-hero-huddle.jpg"] },
+  { key: "college.gallery", group: "College page", label: "Campus gallery", hint: "The wall of previous college batches", kind: "list", defaults: ["/images/group-trek.jpg", "/images/tw-bonfire-dog.jpg", "/images/tw-g-bench.jpg", "/images/camp-tents.jpg", "/images/tw-dhaba.jpg", "/images/group-mountains.jpg"], max: 12 },
+  { key: "college.safety", group: "College page", label: "Safety band photo", hint: "Beside the what-we-handle list", kind: "single", defaults: ["/images/tw-captain-1.jpg"] },
+  { key: "college.quote", group: "College page", label: "Quote band photo", hint: "Behind the coordinator testimonial", kind: "single", defaults: ["/images/tw-bus-banner.jpg"] },
   { key: "solo.hero", group: "Solo page", label: "Hero background", hint: "Photo or video behind the page title", kind: "single", defaults: ["/images/traveller-street.jpg"] },
   { key: "solo.gallery", group: "Solo page", label: "Crew gallery", hint: "Strangers-to-friends photo band", kind: "list", defaults: ["/images/tw-hero-huddle.jpg", "/images/group-trek.jpg", "/images/tw-bonfire-dog.jpg", "/images/tw-g-bench.jpg", "/images/tw-dhaba.jpg", "/images/tw-g-forest2.jpg"], max: 12 },
   { key: "solo.safety", group: "Solo page", label: "Safety band photo", hint: "Beside the solo-safety promises", kind: "single", defaults: ["/images/tw-captain-1.jpg"] },
@@ -676,6 +685,21 @@ export const CONTENT_DEFS: ContentDef[] = [
   { key: "honeymoon.suiteList", group: "Honeymoon page", label: "Feature block list (one per line)", kind: "multiline", default: "Flower-decorated room on the night you arrive\nCandlelit dinner for two, one evening of the trip\nPrivate cab for the whole route — never a shared coach\nA welcome cake, because somebody should bake you one\nLate checkout wherever the property allows it" },
 
   /* ---- Solo page ---- */
+  { key: "college.eyebrow", group: "College page", label: "Eyebrow (script)", kind: "line", default: "one bus ✦ forty of your people" },
+  { key: "college.headline", group: "College page", label: "Headline", kind: "line", default: "The trip your batch" },
+  { key: "college.accent", group: "College page", label: "Headline accent (gold)", kind: "line", default: "still talks about." },
+  { key: "college.sub", group: "College page", label: "Sub-line", kind: "multiline", default: "Industrial visits, farewell trips, adventure weeks and fest getaways — planned for whole batches, priced per student, and run by captains who have taken 200+ college groups into the mountains." },
+  { key: "college.promises", group: "College page", label: "Promise cards (one per line — title | detail)", kind: "multiline", default: "Priced per student | Transparent per-head pricing with the group size written into the quote. No surprise per-bus surcharges at the end.\nOne coordinator, one number | You get a single point of contact from quote to return, not a call centre. Faculty get a live location link for the whole trip.\nFree recce for 60+ groups | For larger batches we run the route first and send back photos of the exact stays your students will sleep in.\nParent-ready paperwork | Consent forms, itinerary PDFs, insurance and an emergency contact sheet — formatted for the college office, not improvised." },
+  { key: "college.stepsTitle", group: "College page", label: "How-it-works title", kind: "line", default: "From group chat to boarding gate." },
+  { key: "college.steps", group: "College page", label: "How it works (one per line — title | detail)", kind: "multiline", default: "Tell us the batch size | Numbers, rough dates and a budget per student. A ballpark is fine at this stage.\nWe send three routes | Costed per student at your exact group size, with the trade-offs spelled out.\nLock it with a deposit | The batch is blocked, stays are confirmed, and the paperwork pack goes to your office.\nWe run it | Captains, transport, permits and a 24/7 ops number for faculty from departure to return." },
+  { key: "college.galleryEyebrow", group: "College page", label: "Gallery eyebrow", kind: "line", default: "shot on previous college batches" },
+  { key: "college.galleryHeadline", group: "College page", label: "Gallery headline", kind: "line", default: "Attendance was" },
+  { key: "college.galleryAccent", group: "College page", label: "Gallery accent (gold)", kind: "line", default: "unusually high." },
+  { key: "college.safetyTitle", group: "College page", label: "Safety block title", kind: "line", default: "What the college office asks — answered." },
+  { key: "college.safetyList", group: "College page", label: "Safety block list (one per line)", kind: "multiline", default: "Verified stays only — our team sleeps in every property before a batch does\nLive bus tracking shared with faculty and parents for the whole route\nCertified, first-aid trained captain travelling with every 20 students\nWomen-only rooms and women captains on request, on every batch\nWritten consent, insurance and emergency-contact pack sent before departure\n24×7 ops number that reaches a human, not a queue" },
+  { key: "college.formTitle", group: "College page", label: "Quote form title", kind: "line", default: "Get a quote for your batch." },
+  { key: "college.formSub", group: "College page", label: "Quote form sub-line", kind: "multiline", default: "Tell us the numbers and we'll come back within one working day with three costed routes. No deposit, no obligation." },
+  { key: "college.markers", group: "College page", label: "Stat markers (one per line — label | value | note)", kind: "multiline", default: "students carried | 4,200+  | Across engineering, management and design campuses.\nlargest single batch | 180  | Four buses, one itinerary, zero students left behind.\ncaptain to student | 1:20  | Every twenty students travel with their own certified captain.\nrepeat colleges | 68%  | Most campuses book us again the following year." },
   { key: "solo.eyebrow", group: "Solo page", label: "Eyebrow (script)", kind: "line", default: "book for one ✦ arrive to fifteen" },
   { key: "solo.headline", group: "Solo page", label: "Headline", kind: "line", default: "Go alone." },
   { key: "solo.accent", group: "Solo page", label: "Headline accent (gold)", kind: "line", default: "Come back with a crew." },
@@ -719,6 +743,163 @@ export function packageImages(p: Package): string[] {
   }
   return ["/images/group-mountains.jpg", "/images/himalaya-sunrise.jpg", "/images/camp-tents.jpg"];
 }
+
+
+/* ------------------------------------------------ college trips
+
+   A college trip is sold to a coordinator, not an individual, so the record
+   here is the *batch we already ran* — proof for the next campus rather than
+   an inventory item. Bookable college packages are ordinary Packages tagged
+   with the "college" category; this is the wall of who has already gone. */
+
+export interface CollegeTrip {
+  slug: string;
+  /** the institution, e.g. "IIT Roorkee" */
+  college: string;
+  /** campus city, shown under the name */
+  city: string;
+  destination: string;
+  /** days on the road, same meaning as Package.nights */
+  nights: number;
+  /** how many students actually travelled */
+  students: number;
+  pricePerStudent?: number;
+  /** e.g. "2025" or "Mar 2025" — free text, it's a label not a date */
+  year: string;
+  cover: string;
+  gallery: string[];
+  /** what the trip lead said afterwards */
+  quote?: string;
+  quoteBy?: string;
+  published: boolean;
+}
+
+export function normalizeCollegeTrip(c: Partial<CollegeTrip>): CollegeTrip {
+  return {
+    slug: c.slug ?? "",
+    college: c.college ?? "",
+    city: c.city ?? "",
+    destination: c.destination ?? "",
+    nights: typeof c.nights === "number" ? c.nights : 0,
+    students: typeof c.students === "number" ? c.students : 0,
+    pricePerStudent: c.pricePerStudent,
+    year: c.year ?? "",
+    cover: c.cover ?? "",
+    gallery: c.gallery ?? [],
+    quote: c.quote,
+    quoteBy: c.quoteBy,
+    published: c.published ?? false,
+  };
+}
+
+
+/* ------------------------------------------------ coupons
+
+   Discount codes applied at booking. The shape is deliberately small and the
+   maths lives in one pure function, because the SERVER must be the only thing
+   that ever decides what a booking costs — the browser may display a discount
+   but never gets to assert one. */
+
+export interface Coupon {
+  /** stored and compared uppercase; what the traveller types */
+  code: string;
+  kind: "percent" | "flat";
+  /** percent: 1-100. flat: rupees off. */
+  value: number;
+  /** booking total must reach this before the code applies */
+  minAmount?: number;
+  /** ceiling on a percent discount, in rupees */
+  maxDiscount?: number;
+  /** ISO yyyy-mm-dd; the code stops working after this day ends */
+  expiresAt?: string;
+  /** total redemptions allowed across all customers */
+  usageLimit?: number;
+  usedCount?: number;
+  /** empty = every trip; otherwise only these package slugs */
+  packageSlugs?: string[];
+  /** empty = every category; otherwise only these landing-page categories */
+  categories?: TripCategory[];
+  active: boolean;
+  /** admin-only memo, never shown to travellers */
+  note?: string;
+}
+
+export type CouponFailure =
+  | "unknown" | "inactive" | "expired" | "used-up" | "min-amount" | "not-eligible";
+
+export const COUPON_ERROR: Record<CouponFailure, string> = {
+  unknown: "That code isn't recognised.",
+  inactive: "That code is no longer active.",
+  expired: "That code has expired.",
+  "used-up": "That code has been fully claimed.",
+  "min-amount": "Your booking doesn't reach this code's minimum.",
+  "not-eligible": "That code doesn't apply to this trip.",
+};
+
+export interface CouponResult {
+  ok: boolean;
+  code: string;
+  /** rupees off the total — always an integer, never negative */
+  discount: number;
+  /** total after the discount, floored at 0 */
+  total: number;
+  reason?: CouponFailure;
+  label?: string;
+}
+
+/**
+ * The single source of truth for what a code is worth.
+ *
+ * Pure and shared so the admin preview, the booking UI and the payment
+ * endpoint can never disagree — but only the server's call counts. `today`
+ * is injected rather than read from the clock so the result is testable and
+ * so a client's wrong system date can't resurrect an expired code.
+ */
+export function applyCoupon(
+  coupon: Coupon | undefined,
+  ctx: { total: number; packageSlug?: string; categories?: TripCategory[]; today: string }
+): CouponResult {
+  const base = Math.max(0, Math.round(ctx.total));
+  const fail = (reason: CouponFailure): CouponResult => ({
+    ok: false, code: coupon?.code ?? "", discount: 0, total: base, reason,
+  });
+
+  if (!coupon) return fail("unknown");
+  if (!coupon.active) return fail("inactive");
+  if (coupon.expiresAt && ctx.today > coupon.expiresAt) return fail("expired");
+  if (coupon.usageLimit != null && (coupon.usedCount ?? 0) >= coupon.usageLimit) return fail("used-up");
+  if (coupon.minAmount != null && base < coupon.minAmount) return fail("min-amount");
+
+  if (coupon.packageSlugs?.length) {
+    if (!ctx.packageSlug || !coupon.packageSlugs.includes(ctx.packageSlug)) return fail("not-eligible");
+  }
+  if (coupon.categories?.length) {
+    const cats = ctx.categories ?? [];
+    if (!cats.some((c) => coupon.categories!.includes(c))) return fail("not-eligible");
+  }
+
+  let discount =
+    coupon.kind === "percent"
+      ? Math.round((base * Math.min(100, Math.max(0, coupon.value))) / 100)
+      : Math.round(Math.max(0, coupon.value));
+
+  if (coupon.kind === "percent" && coupon.maxDiscount != null) {
+    discount = Math.min(discount, Math.round(coupon.maxDiscount));
+  }
+  // never pay a negative price, and never discount more than the booking
+  discount = Math.min(discount, base);
+
+  return {
+    ok: true,
+    code: coupon.code,
+    discount,
+    total: base - discount,
+    label: coupon.kind === "percent" ? `${coupon.value}% off` : `${inr(coupon.value)} off`,
+  };
+}
+
+export const normalizeCouponCode = (raw: string): string =>
+  (raw ?? "").trim().toUpperCase().replace(/\s+/g, "");
 
 /* ------------------------------------------------ formatting */
 

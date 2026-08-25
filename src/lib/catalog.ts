@@ -5,8 +5,8 @@
  */
 
 import { readCatalog, readReviews } from "./store";
-import type { BlogPost, City, Creator, CreatorPose, CreatorTrip, CreatorTripDate, Departure, Faq, Package, PriceRule, Review, Settings, TripCategory, VideoTestimonial, WireEntry } from "./types";
-import { resolveSlot as resolveSlotPure, resolveContent as resolveContentPure, resolvePageSection, minRate, inCategory, normalizeCreator, packageImages, resolveFigure, DEFAULT_FAQS, DEFAULT_VIDEO_TESTIMONIAL } from "./types";
+import type { BlogPost, City, CollegeTrip, Coupon, Creator, CreatorPose, CreatorTrip, CreatorTripDate, Departure, Faq, Package, PriceRule, Review, Settings, TripCategory, VideoTestimonial, WireEntry } from "./types";
+import { normalizeCollegeTrip, normalizeCouponCode, resolveSlot as resolveSlotPure, resolveContent as resolveContentPure, resolvePageSection, minRate, inCategory, normalizeCreator, packageImages, resolveFigure, DEFAULT_FAQS, DEFAULT_VIDEO_TESTIMONIAL } from "./types";
 import {
   collections as collectionDefaults,
   galleryPhotos as galleryDefaults,
@@ -145,6 +145,38 @@ export const getCreators = (): Creator[] =>
 export const getAllCreators = (): Creator[] => (readCatalog().creators ?? []).map(normalizeCreator);
 export const getCreator = (slug: string): Creator | undefined =>
   getCreators().find((c) => c.slug === slug);
+
+/* ------------------------------------------------ college trips */
+
+export const getCollegeTrips = (): CollegeTrip[] =>
+  (readCatalog().colleges ?? []).filter((c) => c.published).map(normalizeCollegeTrip);
+export const getAllCollegeTrips = (): CollegeTrip[] =>
+  (readCatalog().colleges ?? []).map(normalizeCollegeTrip);
+
+/** headline counters for the college page, derived from real batches */
+export function collegeStats() {
+  const runs = getCollegeTrips();
+  return {
+    batches: runs.length,
+    students: runs.reduce((n, r) => n + (r.students || 0), 0),
+    colleges: new Set(runs.map((r) => r.college.trim().toLowerCase()).filter(Boolean)).size,
+    destinations: new Set(runs.map((r) => r.destination.trim().toLowerCase()).filter(Boolean)).size,
+  };
+}
+
+/* ------------------------------------------------ coupons
+
+   SERVER ONLY on purpose: the list of live codes (and their limits) is not
+   something the public bundle should carry. The site validates a typed code
+   through /api/coupon, which returns only the outcome for that one code. */
+
+export const getCoupons = (): Coupon[] => readCatalog().coupons ?? [];
+
+export const findCoupon = (code: string): Coupon | undefined => {
+  const want = normalizeCouponCode(code);
+  if (!want) return undefined;
+  return getCoupons().find((c) => normalizeCouponCode(c.code) === want);
+};
 
 /**
  * A creator trip with every field resolved: the creator's overrides win,

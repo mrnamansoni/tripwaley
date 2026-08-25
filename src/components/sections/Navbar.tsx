@@ -66,13 +66,13 @@ export default function Navbar({ overDarkHero = false }: { overDarkHero?: boolea
           <LogoLockup inverted={overDark} />
         </Link>
 
-        <ul className="hidden items-center gap-6 xl:flex">
+        <ul className="hidden items-center gap-4 xl:flex 2xl:gap-6">
           {navLinks.map((l) => (
             <li key={l.href}>
               {/* invert over a dark hero — ink-on-dark was near-invisible */}
               <a
                 href={l.href}
-                className={`link-sweep text-[0.95rem] font-semibold transition-colors ${
+                className={`link-sweep whitespace-nowrap text-[0.95rem] font-semibold transition-colors ${
                   overDark ? "text-white/85 hover:text-gold" : "text-ink/75 hover:text-ink"
                 }`}
               >
@@ -82,7 +82,7 @@ export default function Navbar({ overDarkHero = false }: { overDarkHero?: boolea
           ))}
         </ul>
 
-        <div className="hidden items-center gap-2.5 xl:flex">
+        <div className="hidden items-center gap-2 xl:flex 2xl:gap-2.5">
           <button
             onClick={openSearch}
             aria-label="Search trips"

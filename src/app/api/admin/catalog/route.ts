@@ -11,7 +11,7 @@ import { revalidatePath } from "next/cache";
 import { sameOrigin } from "@/lib/auth";
 import { listMedia, readBookings, readCatalog, readReviews, writeCatalog, writeReviews } from "@/lib/store";
 import { SLOT_DEFS, CONTENT_DEFS, resolveSlot, PAGE_SECTION_DEFS, isValidMediaRef, CATEGORY_DEFS, CREATOR_POSE_DEFS } from "@/lib/types";
-import type { BlogPost, Catalog, City, Creator, Departure, Faq, Package, PriceRule, Review, WireEntry } from "@/lib/types";
+import type { BlogPost, CollegeTrip, Coupon, Catalog, City, Creator, Departure, Faq, Package, PriceRule, Review, WireEntry } from "@/lib/types";
 
 export async function GET() {
   const cat = readCatalog();
@@ -159,6 +159,34 @@ function validate(section: string, data: unknown): string | null {
       }
       return null;
     }
+    case "colleges":
+      return (data as CollegeTrip[]).every(
+        (c) =>
+          isStr(c.slug) && c.slug && isStr(c.college) &&
+          isNum(c.nights) && isNum(c.students) &&
+          okMedia(c.cover) &&
+          (c.gallery == null || (Array.isArray(c.gallery) && c.gallery.every(okMedia))) &&
+          typeof c.published === "boolean"
+      ) ? null : "invalid college row";
+    case "coupons": {
+      const rows = data as Coupon[];
+      const seen = new Set<string>();
+      for (const c of rows) {
+        const code = (c.code ?? "").trim().toUpperCase();
+        if (!code) return "every coupon needs a code";
+        if (!/^[A-Z0-9_-]{3,40}$/.test(code)) return `${code}: use 3-40 letters, digits, - or _`;
+        if (seen.has(code)) return `duplicate coupon code ${code}`;
+        seen.add(code);
+        if (c.kind !== "percent" && c.kind !== "flat") return `${code}: kind must be percent or flat`;
+        if (!isNum(c.value) || c.value <= 0) return `${code}: value must be a positive number`;
+        // a >100% code would invert the price; applyCoupon clamps, but reject
+        // it here too so the mistake never reaches the catalog at all
+        if (c.kind === "percent" && c.value > 100) return `${code}: percent cannot exceed 100`;
+        if (c.expiresAt && !/^\d{4}-\d{2}-\d{2}$/.test(c.expiresAt)) return `${code}: expiry must be yyyy-mm-dd`;
+        if (typeof c.active !== "boolean") return `${code}: active must be true or false`;
+      }
+      return null;
+    }
     case "wire":
       return (data as WireEntry[]).every((w) => isStr(w.name) && isStr(w.city) && isStr(w.act) && isStr(w.trip)) ? null : "invalid wire row";
     case "posts":
@@ -201,6 +229,9 @@ export async function PUT(req: Request) {
     if (section === "pageSections") cat.pageSections = data as Record<string, Record<string, boolean>>;
     if (section === "wire") cat.wire = data as WireEntry[];
     if (section === "creators") cat.creators = data as Creator[];
+    if (section === "colleges") cat.colleges = data as CollegeTrip[];
+    // codes are stored uppercase so lookup can be a plain equality check
+    if (section === "coupons") cat.coupons = (data as Coupon[]).map((c) => ({ ...c, code: c.code.trim().toUpperCase() }));
     writeCatalog(cat);
   }
 

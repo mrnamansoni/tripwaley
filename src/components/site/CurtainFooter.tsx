@@ -10,7 +10,7 @@ import Link from "next/link";
 import { gsap } from "@/lib/gsap";
 
 const COLS = [
-  { head: "Trips", links: [["All departures", "/trips"], ["Himachal", "/trips"], ["Uttarakhand", "/trips"], ["Kashmir", "/trips"]] },
+  { head: "Trips", links: [["All departures", "/trips"], ["College trips", "/college-trips"], ["Honeymoon", "/honeymoon"], ["Solo", "/solo"]] },
   { head: "Company", links: [["About us", "/about"], ["Reviews", "/#reviews"], ["Contact", "/contact"], ["Stories", "/stories"]] },
   { head: "Help", links: [["WhatsApp us", "wa"], ["FAQs", "/about#faqs"], ["Cancellation", "/refund-policy"], ["Privacy", "/privacy"], ["Terms", "/terms"], ["Policies", "/policies"]] },
 ];

@@ -13,11 +13,13 @@ import PagesEditor from "./PagesEditor";
 import FaqEditor from "./FaqEditor";
 import StoriesEditor from "./StoriesEditor";
 import CreatorsEditor from "./CreatorsEditor";
+import CollegesEditor from "./CollegesEditor";
+import CouponsEditor from "./CouponsEditor";
 import SettingsEditor from "./SettingsEditor";
 import { inr, shortDate } from "@/lib/types";
 import type { City, Departure, PriceRule, Review } from "@/lib/types";
 
-const TABS = ["Dashboard", "Content", "Pages", "Packages", "Creators", "Prices", "Departures", "Cities", "Media", "Reviews", "FAQ", "Stories", "Settings", "Bookings"] as const;
+const TABS = ["Dashboard", "Content", "Pages", "Packages", "Creators", "Colleges", "Coupons", "Prices", "Departures", "Cities", "Media", "Reviews", "FAQ", "Stories", "Settings", "Bookings"] as const;
 type Tab = (typeof TABS)[number];
 
 export default function AdminApp() {
@@ -66,6 +68,8 @@ function Shell() {
         {tab === "Pages" && <PagesEditor />}
         {tab === "Packages" && <PackagesEditor />}
         {tab === "Creators" && <CreatorsEditor />}
+        {tab === "Colleges" && <CollegesEditor />}
+        {tab === "Coupons" && <CouponsEditor />}
         {tab === "Prices" && <PricesEditor />}
         {tab === "Departures" && <DeparturesEditor />}
         {tab === "Cities" && <CitiesEditor />}

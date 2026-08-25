@@ -16,7 +16,7 @@ import type { Booking, Catalog, Review } from "./types";
 /** Bump when src/data/catalog.json gains packages/prices/departures that an
  *  already-running install should receive. mergeSeedContent() then adds only
  *  the rows whose keys are missing — admin edits are never overwritten. */
-const SEED_VERSION = 5;
+const SEED_VERSION = 6;
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const SEED_CATALOG = path.join(process.cwd(), "src", "data", "catalog.json");
@@ -139,6 +139,14 @@ function mergeSeedContent() {
     const haveDeps = new Set(live.departures.map(depKey));
     const newDeps = (seed.departures ?? []).filter((d) => !haveDeps.has(depKey(d)));
     if (newDeps.length) { next.departures = [...live.departures, ...newDeps]; added += newDeps.length; }
+
+    const haveColleges = new Set((live.colleges ?? []).map((c) => c.slug));
+    const newColleges = (seed.colleges ?? []).filter((c) => !haveColleges.has(c.slug));
+    if (newColleges.length) { next.colleges = [...(live.colleges ?? []), ...newColleges]; added += newColleges.length; }
+
+    const haveCoupons = new Set((live.coupons ?? []).map((c) => c.code.toUpperCase()));
+    const newCoupons = (seed.coupons ?? []).filter((c) => !haveCoupons.has(c.code.toUpperCase()));
+    if (newCoupons.length) { next.coupons = [...(live.coupons ?? []), ...newCoupons]; added += newCoupons.length; }
 
     const haveCreators = new Set((live.creators ?? []).map((c) => c.slug));
     const newCreators = (seed.creators ?? []).filter((c) => !haveCreators.has(c.slug));
