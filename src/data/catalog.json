@@ -43,7 +43,17 @@
    "location": "boarding from Delhi"
   },
   "gaId": "G-HJ54VJ14WJ",
-  "metaPixelId": "1029194913307851"
+  "metaPixelId": "1029194913307851",
+  "legalName": "Tripwaley",
+  "entityType": "a sole proprietorship registered as a Micro, Small and Medium Enterprise (MSME)",
+  "address": "A27-Block, Park Back Side Portion, Rajouri Garden, New Delhi 110027",
+  "grievance": {
+   "name": "Akshay Verma",
+   "designation": "Grievance Officer",
+   "email": "grievance@tripwaley.com",
+   "phone": "+917982745377",
+   "hours": "Monday - Friday (9:00 - 18:00 IST)"
+  }
  },
  "cities": [
   {
@@ -5925,7 +5935,7 @@
    "published": true
   }
  ],
- "seedVersion": 6,
+ "seedVersion": 7,
  "coupons": [
   {
    "code": "FIRSTTRIP",

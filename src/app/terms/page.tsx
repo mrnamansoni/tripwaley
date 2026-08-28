@@ -34,11 +34,12 @@ export default function TermsPage() {
           Rule 3(1) of the Information Technology (Intermediaries Guidelines) Rules, 2011.
         </p>
         <p>
-          {entity} (&ldquo;{s.brand}&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;) operates fixed-date group
-          departures across India, sold through <strong>www.tripwaley.com</strong> (the
-          &ldquo;Platform&rdquo;)
-          {s.address ? <>, from its registered office at {s.address}</> : null}. &ldquo;You&rdquo; means the
-          person making the booking and every traveller named on it.
+          {entity} (&ldquo;{s.brand}&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;)
+          {s.entityType ? <>, {s.entityType},</> : null} operates fixed-date group departures across India,
+          sold through <strong>www.tripwaley.com</strong>{" "}
+          (the &ldquo;Platform&rdquo;)
+          {s.address ? <>, from its principal place of business at {s.address}</> : null}.
+          &ldquo;You&rdquo; means the person making the booking and every traveller named on it.
         </p>
         <p>
           Accessing, browsing or otherwise using the Platform indicates your agreement to these terms, so

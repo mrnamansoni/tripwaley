@@ -148,6 +148,14 @@ export default function SettingsEditor() {
           <div className="mt-3 grid gap-4 sm:grid-cols-2">
             <Field l="registered entity name" v={s.legalName ?? ""} on={(v) => setS({ ...s, legalName: v })} />
             <Field l="GSTIN (optional)" v={s.gstin ?? ""} on={(v) => setS({ ...s, gstin: v })} />
+            <Field l="Udyam / MSME number (optional)" v={s.udyam ?? ""} on={(v) => setS({ ...s, udyam: v })} />
+            <div className="sm:col-span-2">
+              <Field
+                l="legal form — must match your KYC (e.g. a sole proprietorship registered as an MSME)"
+                v={s.entityType ?? ""}
+                on={(v) => setS({ ...s, entityType: v })}
+              />
+            </div>
             <div className="sm:col-span-2">
               <Field l="support hours, e.g. Mon–Sat, 10am–7pm IST" v={s.supportHours ?? ""} on={(v) => setS({ ...s, supportHours: v })} />
             </div>

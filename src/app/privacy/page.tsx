@@ -51,13 +51,17 @@ export default function PrivacyPage() {
           This document is published in accordance with the provisions of Rule 3(1) of the Information
           Technology (Intermediaries Guidelines) Rules, 2011, which require publishing the rules and
           regulations, privacy policy and terms of use for access to or usage of{" "}
-          <strong>www.tripwaley.com</strong> (the &ldquo;Platform&rdquo;), including any related mobile site
+          <strong>www.tripwaley.com</strong>{" "}
+          (the &ldquo;Platform&rdquo;), including any related mobile site
           or application.
         </p>
         <p>
           The Platform is owned and operated by <strong>{entity}</strong>
-          {s.address ? <> , having its registered office at {s.address}</> : null} (referred to as
-          &ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo; or &ldquo;{s.brand}&rdquo;).
+          {s.entityType ? <>, {s.entityType}</> : null}
+          {s.address ? <>, having its principal place of business at {s.address}</> : null}{" "}
+          (referred to as &ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo; or &ldquo;{s.brand}&rdquo;)
+          {s.udyam ? <>. Udyam registration number: {s.udyam}</> : null}
+          {s.gstin ? <>. GSTIN: {s.gstin}</> : null}.
         </p>
       </Clause>
 

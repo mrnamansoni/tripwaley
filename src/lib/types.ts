@@ -76,6 +76,12 @@ export interface Settings {
   legalName?: string;
   /** GSTIN, printed on the policy pages when set */
   gstin?: string;
+  /** legal form, e.g. "a sole proprietorship registered as an MSME". Printed
+   *  in clause 1 of the policies — a gateway matches this against your KYC,
+   *  and the wrong form (e.g. claiming to be a company) is a rejection. */
+  entityType?: string;
+  /** Udyam / MSME registration number, printed when set */
+  udyam?: string;
   /** grievance/support contact hours, e.g. "Mon–Sat, 10am–7pm IST" */
   supportHours?: string;
   /** Grievance Officer — MANDATORY under Rule 5(9) of the IT (Reasonable
