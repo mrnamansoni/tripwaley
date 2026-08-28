@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import LegalPage, { Clause } from "@/components/site/LegalPage";
+import LegalPage, { Clause, PolicyPreamble } from "@/components/site/LegalPage";
 import { getSettings } from "@/lib/catalog";
 
 export const metadata: Metadata = {
@@ -35,9 +35,20 @@ export default function RefundPolicyPage() {
       kicker="plans change, we know"
       title="Cancellation & Refund Policy"
       updated={UPDATED}
+      grievance
       intro={`How to cancel a booking with ${entity}, exactly how much comes back to you, and how long it takes to reach your account.`}
     >
-      <Clause n={1} title="How to cancel">
+      <PolicyPreamble what="refund and cancellation policy" />
+
+      <Clause n={1} title="What this policy covers">
+        <p>
+          This refund and cancellation policy outlines how you can cancel, or seek a refund for, a service
+          that you have purchased through the Platform. The service sold on this Platform is a seat on a
+          fixed-date group departure. Under this policy:
+        </p>
+      </Clause>
+
+      <Clause n={2} title="How to cancel">
         <p>
           Write to us on WhatsApp or email using the contact details at the bottom of this page, from the
           number or address used to book. Tell us the booking ID and the departure date.
@@ -49,7 +60,7 @@ export default function RefundPolicyPage() {
         </p>
       </Clause>
 
-      <Clause n={2} title="Refund slab">
+      <Clause n={3} title="Refund slab">
         <p>
           The percentage below applies to the <strong>total trip cost</strong> for the traveller being
           cancelled — not just the advance paid.
@@ -88,7 +99,7 @@ export default function RefundPolicyPage() {
         </p>
       </Clause>
 
-      <Clause n={3} title="How refunds are paid">
+      <Clause n={4} title="How refunds are paid">
         <ul>
           <li>
             Refunds go back to the <strong>original payment method</strong> — the same card, UPI ID or bank
@@ -105,7 +116,7 @@ export default function RefundPolicyPage() {
         </ul>
       </Clause>
 
-      <Clause n={4} title="If we cancel the departure">
+      <Clause n={5} title="If we cancel the departure">
         <p>
           If <strong>we</strong> cancel a batch — insufficient group size, unsafe road or weather conditions,
           permit refusal, or any reason on our side — you choose either:
@@ -120,16 +131,16 @@ export default function RefundPolicyPage() {
         </p>
       </Clause>
 
-      <Clause n={5} title="Changing your date instead of cancelling">
+      <Clause n={6} title="Changing your date instead of cancelling">
         <p>
           A one-time date change to another departure of the same trip is free if requested{" "}
           <strong>7 or more days before</strong> your original departure, subject to seats being available.
-          Inside 7 days, the slab in clause 2 applies instead.
+          Inside 7 days, the slab in clause 3 applies instead.
         </p>
         <p>If the new departure costs more, you pay the difference. If it costs less, we refund the difference.</p>
       </Clause>
 
-      <Clause n={6} title="Partly used trips and no-shows">
+      <Clause n={7} title="Partly used trips and no-shows">
         <p>
           Once a departure has begun, unused portions — a skipped stay, a meal not taken, an activity you opt
           out of, or leaving the trip early — are not refundable, because those costs are already committed on
@@ -141,7 +152,7 @@ export default function RefundPolicyPage() {
         </p>
       </Clause>
 
-      <Clause n={7} title="Removal from a trip">
+      <Clause n={8} title="Removal from a trip">
         <p>
           Where a traveller is removed from a departure under clause 7 of our{" "}
           <Link href="/terms">Terms &amp; Conditions</Link> — conduct endangering the group, illegal
@@ -150,7 +161,20 @@ export default function RefundPolicyPage() {
         </p>
       </Clause>
 
-      <Clause n={8} title="Grievances">
+      <Clause n={9} title="If the trip was not as described">
+        <p>
+          If an inclusion listed on your trip page was not delivered — a stay category, a named meal, or
+          transport we committed to — report it to our customer service team within{" "}
+          <strong>7 days</strong> of returning, quoting your booking ID.
+        </p>
+        <p>
+          We investigate with the supplier concerned and take an appropriate decision. Where we got it wrong,
+          we refund the value of the missing inclusion to your original payment method. This is separate from
+          the cancellation slab in clause 3.
+        </p>
+      </Clause>
+
+      <Clause n={10} title="Grievances">
         <p>
           If a refund has not reached you within the timelines above, write to us with your booking ID and we
           will trace it with the payment gateway and respond within 5 working days. Contact details are below.

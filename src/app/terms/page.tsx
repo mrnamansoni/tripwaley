@@ -21,6 +21,7 @@ export default function TermsPage() {
       kicker="the boring but important bit"
       title="Terms & Conditions"
       updated={UPDATED}
+      grievance
       intro={`These terms govern your booking with ${entity}. By holding a seat, paying an advance or travelling on one of our departures, you agree to what is written here.`}
     >
       <Clause n={1} title="Who we are">
