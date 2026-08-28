@@ -99,12 +99,77 @@ export function LegalContact() {
   );
 }
 
+/**
+ * Grievance Officer block.
+ *
+ * Rule 5(9) of the IT (Reasonable Security Practices and Procedures and
+ * Sensitive Personal Data or Information) Rules, 2011 requires a body
+ * corporate to PUBLISH the name and contact details of a Grievance Officer
+ * on its website. Payment gateways check for this specifically, and its
+ * absence is a standard rejection reason — so this renders a visible
+ * placeholder when unset rather than silently disappearing.
+ */
+export function GrievanceBlock() {
+  const s = getSettings();
+  const g = s.grievance;
+  const address = s.address;
+  const entity = s.legalName || s.brand;
+
+  const rows: [string, string][] = [
+    ["Name", g?.name ?? ""],
+    ["Designation", g?.designation || "Grievance Officer"],
+    ["Company", entity],
+    ["Address", address ?? ""],
+    ["Email", g?.email || s.email || ""],
+    ["Phone", g?.phone || (s.whatsapp ? `+${s.whatsapp.replace(/[^\d]/g, "")}` : "")],
+    ["Time", g?.hours || "Monday - Friday (9:00 - 18:00 IST)"],
+  ];
+
+  return (
+    <section className="mt-10 rounded-3xl border-2 border-brand/30 bg-card p-6 shadow-sm sm:p-8">
+      <p className="font-mono text-[0.6rem] uppercase tracking-[0.25em] text-brand">
+        as required under the IT Act, 2000
+      </p>
+      <h2 className="mt-2 font-display text-2xl font-extrabold text-ink">Grievance Officer</h2>
+      <p className="mt-3 text-[0.95rem] leading-relaxed text-ink/70">
+        In accordance with the Information Technology Act, 2000 and the rules made thereunder, and the
+        Consumer Protection (E-Commerce) Rules, 2020, the name and contact details of our Grievance Officer
+        are published below. Any complaint about the collection or use of your personal data, or about any
+        service on this Platform, may be sent to them and will be acknowledged within 48 hours and resolved
+        within one month of receipt.
+      </p>
+
+      <dl className="mt-6 divide-y divide-line rounded-2xl border border-line">
+        {rows.map(([k, v]) => (
+          <div key={k} className="grid grid-cols-[6.5rem_1fr] gap-3 px-4 py-3 sm:grid-cols-[9rem_1fr]">
+            <dt className="font-mono text-[0.6rem] uppercase tracking-[0.18em] text-ink/40">{k}</dt>
+            <dd className="break-words text-[0.92rem] text-ink/80">
+              {v ? (
+                k === "Email" ? (
+                  <a href={`mailto:${v}`} className="font-bold text-brand hover:underline">{v}</a>
+                ) : k === "Phone" ? (
+                  <a href={`tel:${v.replace(/\s/g, "")}`} className="font-bold text-brand hover:underline">{v}</a>
+                ) : (
+                  v
+                )
+              ) : (
+                <span className="font-bold text-brand/70">To be published — set this in admin Settings</span>
+              )}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  );
+}
+
 export default function LegalPage({
   title,
   kicker,
   updated,
   intro,
   children,
+  grievance,
 }: {
   title: string;
   kicker: string;
@@ -112,6 +177,8 @@ export default function LegalPage({
   updated: string;
   intro: string;
   children: ReactNode;
+  /** privacy policy publishes the statutory Grievance Officer details */
+  grievance?: boolean;
 }) {
   const settings = getSettings();
   const updatedLabel = new Date(updated).toLocaleDateString("en-IN", {
@@ -139,6 +206,8 @@ export default function LegalPage({
 
         <div className="mx-auto w-full max-w-4xl px-5 py-14 sm:px-8">
           <article className="rounded-3xl border border-line bg-card p-6 shadow-sm sm:p-10">{children}</article>
+
+          {grievance && <GrievanceBlock />}
 
           <LegalContact />
 

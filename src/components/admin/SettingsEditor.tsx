@@ -7,8 +7,8 @@
 import { useState } from "react";
 import { useAdmin, Btn, Head, Field, Area, input, label } from "./ui";
 import MediaPicker from "./MediaPicker";
-import type { AnnouncementBar, LeadPopup, Seo, Socials, Settings, VideoTestimonial } from "@/lib/types";
-import { DEFAULT_VIDEO_TESTIMONIAL } from "@/lib/types";
+import type { AnnouncementBar, GrievanceOfficer, LeadPopup, Seo, Socials, Settings, VideoTestimonial } from "@/lib/types";
+import { DEFAULT_GRIEVANCE, DEFAULT_VIDEO_TESTIMONIAL } from "@/lib/types";
 
 const DEF_BAR: AnnouncementBar = { enabled: false, text: "Monsoon batches are filling fast — hold a seat free for 24h.", href: "/trips", emoji: "🎒" };
 const DEF_POPUP: LeadPopup = { enabled: false, delaySeconds: 15, title: "Wait — grab your seat", subtitle: "Drop your number and we'll send this week's departures + a first-timer discount.", incentive: "₹500 off your first batch", cta: "Send me departures", image: "/images/group-mountains.jpg" };
@@ -27,6 +27,7 @@ export default function SettingsEditor() {
     seo: data.catalog.settings.seo ?? DEF_SEO,
     socials: data.catalog.settings.socials ?? DEF_SOCIALS,
     videoTestimonial: data.catalog.settings.videoTestimonial ?? DEFAULT_VIDEO_TESTIMONIAL,
+    grievance: data.catalog.settings.grievance ?? DEFAULT_GRIEVANCE,
   }));
 
   const bar = s.announcementBar!;
@@ -34,11 +35,13 @@ export default function SettingsEditor() {
   const seo = s.seo!;
   const socials = s.socials!;
   const vt = s.videoTestimonial!;
+  const gr = s.grievance!;
   const setBar = (p: Partial<AnnouncementBar>) => setS((x) => ({ ...x, announcementBar: { ...bar, ...p } }));
   const setPopup = (p: Partial<LeadPopup>) => setS((x) => ({ ...x, leadPopup: { ...popup, ...p } }));
   const setSeo = (p: Partial<Seo>) => setS((x) => ({ ...x, seo: { ...seo, ...p } }));
   const setSocials = (p: Partial<Socials>) => setS((x) => ({ ...x, socials: { ...socials, ...p } }));
   const setVt = (p: Partial<VideoTestimonial>) => setS((x) => ({ ...x, videoTestimonial: { ...vt, ...p } }));
+  const setGr = (p: Partial<GrievanceOfficer>) => setS((x) => ({ ...x, grievance: { ...gr, ...p } }));
 
   return (
     <>
@@ -113,6 +116,25 @@ export default function SettingsEditor() {
               <div className="sm:col-span-2"><Area l="subtitle" v={popup.subtitle} on={(v) => setPopup({ subtitle: v })} rows={2} /></div>
             </div>
             <MediaPicker label="popup image" value={popup.image} onChange={(p) => setPopup({ image: p })} />
+          </div>
+        </section>
+
+        {/* grievance officer — statutory, and the usual gateway rejection */}
+        <section className="rounded-2xl border-2 border-brand/40 bg-brand/[0.06] p-5">
+          <p className={label}>grievance officer — required by law</p>
+          <p className="mt-1 text-xs leading-relaxed text-white/55">
+            Rule 5(9) of the IT (SPDI) Rules, 2011 requires these details to be <b>published</b> on the site.
+            A payment gateway checks for them by name, and a missing Grievance Officer is the single most
+            common reason a privacy policy is rejected. They appear on /privacy — fill every field.
+          </p>
+          <div className="mt-3 grid gap-4 sm:grid-cols-2">
+            <Field l="officer name" v={gr.name} on={(v) => setGr({ name: v })} />
+            <Field l="designation" v={gr.designation} on={(v) => setGr({ designation: v })} />
+            <Field l="email" v={gr.email} on={(v) => setGr({ email: v })} />
+            <Field l="phone (with +91)" v={gr.phone} on={(v) => setGr({ phone: v })} />
+            <div className="sm:col-span-2">
+              <Field l="contactable hours" v={gr.hours} on={(v) => setGr({ hours: v })} />
+            </div>
           </div>
         </section>
 

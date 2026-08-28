@@ -78,7 +78,30 @@ export interface Settings {
   gstin?: string;
   /** grievance/support contact hours, e.g. "Mon–Sat, 10am–7pm IST" */
   supportHours?: string;
+  /** Grievance Officer — MANDATORY under Rule 5(9) of the IT (Reasonable
+   *  Security Practices and Procedures and Sensitive Personal Data or
+   *  Information) Rules, 2011, and the first thing a payment gateway looks
+   *  for on a privacy policy. Name, designation and a reachable channel must
+   *  all be published. */
+  grievance?: GrievanceOfficer;
 }
+
+export interface GrievanceOfficer {
+  name: string;
+  designation: string;
+  email: string;
+  phone: string;
+  /** e.g. "Monday - Friday (9:00 - 18:00 IST)" */
+  hours: string;
+}
+
+export const DEFAULT_GRIEVANCE: GrievanceOfficer = {
+  name: "",
+  designation: "Grievance Officer",
+  email: "",
+  phone: "",
+  hours: "Monday - Friday (9:00 - 18:00 IST)",
+};
 export interface City {
   slug: string;
   name: string;
