@@ -72,8 +72,25 @@ export function sameOrigin(req: Request): boolean {
   }
 }
 
-export const clientIp = (req: Request) =>
-  (req.headers.get("x-forwarded-for") ?? "local").split(",")[0].trim();
+/**
+ * The visitor's IP, for rate limiting and login throttling.
+ *
+ * Order matters. Behind Cloudflare, `cf-connecting-ip` is set by the edge on
+ * every request and cannot be forged by a client — Cloudflare overwrites
+ * whatever the client sent. `x-forwarded-for` becomes a chain once there are
+ * two proxies, and its FIRST entry is client-controlled at any hop that does
+ * not sanitise it.
+ *
+ * The origin proxy currently does sanitise it (verified: rotating a fake
+ * X-Forwarded-For did not create fresh rate-limit buckets), so this is correct
+ * today either way — but the moment a CDN is in front, preferring the edge's
+ * own header is what keeps it correct.
+ */
+export const clientIp = (req: Request) => {
+  const cf = req.headers.get("cf-connecting-ip")?.trim();
+  if (cf) return cf;
+  return (req.headers.get("x-forwarded-for") ?? "local").split(",")[0].trim();
+};
 
 /* ---------------------------------------------- public endpoint throttling
 
