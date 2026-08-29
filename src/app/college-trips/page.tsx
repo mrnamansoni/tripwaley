@@ -40,7 +40,7 @@ export default function CollegeTripsPage() {
   return (
     <CityProvider cities={getCities()} defaultCity={settings.defaultCity}>
       <Navbar overDarkHero />
-      <main>
+      <main id="main">
         <TripTypeHero
           media={slotOne("college.hero")}
           eyebrow={text("college.eyebrow")}

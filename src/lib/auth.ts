@@ -74,3 +74,41 @@ export function sameOrigin(req: Request): boolean {
 
 export const clientIp = (req: Request) =>
   (req.headers.get("x-forwarded-for") ?? "local").split(",")[0].trim();
+
+/* ---------------------------------------------- public endpoint throttling
+
+   Deliberately NOT rateLimit() above: that one counts *failed* logins, so a
+   successful request never increments it. A lead or coupon endpoint has to
+   count every request, successful or not — otherwise a script that submits
+   valid rows is unlimited, which is exactly the abuse case.
+
+   In-memory, so it resets on deploy and is per-instance. That is fine for a
+   single VPS; a CDN in front would enforce this at the edge instead. */
+
+const hits = new Map<string, { n: number; resetAt: number }>();
+
+export function publicRateLimit(
+  ip: string,
+  bucket: string,
+  max = 12,
+  windowMs = 60_000
+): { blocked: boolean; retryAfter?: number } {
+  const now = Date.now();
+  const key = `${bucket}:${ip}`;
+  const rec = hits.get(key);
+
+  if (!rec || rec.resetAt <= now) {
+    hits.set(key, { n: 1, resetAt: now + windowMs });
+    // opportunistic sweep so the map cannot grow without bound
+    if (hits.size > 5000) {
+      for (const [k, v] of hits) if (v.resetAt <= now) hits.delete(k);
+    }
+    return { blocked: false };
+  }
+
+  rec.n += 1;
+  if (rec.n > max) {
+    return { blocked: true, retryAfter: Math.ceil((rec.resetAt - now) / 1000) };
+  }
+  return { blocked: false };
+}

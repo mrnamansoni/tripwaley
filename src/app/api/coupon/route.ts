@@ -12,6 +12,7 @@
  */
 
 import { NextResponse } from "next/server";
+import { clientIp, publicRateLimit } from "@/lib/auth";
 import { findCoupon, getPackage, priceFor } from "@/lib/catalog";
 import { applyCoupon, COUPON_ERROR, normalizeCouponCode, packageCategories } from "@/lib/types";
 
@@ -23,6 +24,15 @@ function istToday(): string {
 }
 
 export async function POST(req: Request) {
+  const ip = clientIp(req);
+  const limit = publicRateLimit(ip, "coupon", 20);
+  if (limit.blocked) {
+    return NextResponse.json(
+      { error: "Too many requests — please wait a moment." },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfter ?? 60) } }
+    );
+  }
+
   let body: Record<string, unknown>;
   try {
     body = await req.json();

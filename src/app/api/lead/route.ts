@@ -6,6 +6,7 @@
  */
 
 import { NextResponse } from "next/server";
+import { clientIp, publicRateLimit } from "@/lib/auth";
 import { appendBooking } from "@/lib/store";
 
 /** accept Indian mobiles: 10 digits starting 6–9, optional +91 / 0 prefix */
@@ -16,6 +17,15 @@ function normalizePhone(raw: string): string | null {
 }
 
 export async function POST(req: Request) {
+  const ip = clientIp(req);
+  const limit = publicRateLimit(ip, "lead", 8);
+  if (limit.blocked) {
+    return NextResponse.json(
+      { error: "Too many requests — please wait a moment." },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfter ?? 60) } }
+    );
+  }
+
   let body: Record<string, unknown>;
   try {
     body = await req.json();

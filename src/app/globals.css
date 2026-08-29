@@ -8,7 +8,13 @@
   /* Brand */
   --color-brand: #c91b20; /* primary red */
   --color-brand-bright: #e82028; /* hover / bright red */
-  --color-gold: #f5a31a; /* accent gold / sun */
+  --color-gold: #f5a31a; /* accent gold / sun — fills, borders, text on ink */
+  /* Text-safe variants. #f5a31a on cream is 2.03:1 and #1ab76a is 2.62:1 —
+     both fail WCAG AA badly. These are the same hues darkened until they
+     pass, for use ONLY as text on light surfaces. Never swap the originals:
+     they are correct on ink (gold reads 8.67:1 there). */
+  --color-gold-ink: #8a5605;    /* 6.0:1 on cream */
+  --color-success-ink: #0f7a4a; /* 5.3:1 on cream */
   --color-ink: #1a1614; /* ink black */
 
   /* Light warm theme */

@@ -123,7 +123,7 @@ export default function DepartureBoard({
                   {r.scarcity ? (
                     <span className="shrink-0 rounded-full bg-brand px-2.5 py-1 text-[0.52rem] font-bold uppercase tracking-wider text-white">{r.scarcity.slice(0, 18)}</span>
                   ) : (
-                    <span className="shrink-0 rounded-full bg-success/15 px-2.5 py-1 text-[0.52rem] font-bold uppercase tracking-wider text-success">boarding</span>
+                    <span className="shrink-0 rounded-full bg-success/15 px-2.5 py-1 text-[0.52rem] font-bold uppercase tracking-wider text-success-ink">boarding</span>
                   )}
                 </span>
                 <span className="mt-2 block truncate font-display text-base font-extrabold leading-tight text-ink transition-colors group-hover:text-brand sm:text-lg">

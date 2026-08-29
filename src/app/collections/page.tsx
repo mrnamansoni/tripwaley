@@ -16,7 +16,7 @@ export default function CollectionsPage() {
   return (
     <CityProvider cities={getCities()} defaultCity={settings.defaultCity}>
       <Navbar overDarkHero />
-      <main className="bg-cream">
+      <main id="main" className="bg-cream">
         {/* editorial opener */}
         <section className="bg-ink px-5 pb-14 pt-36 sm:px-8">
           <div className="mx-auto w-full max-w-7xl">

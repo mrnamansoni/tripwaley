@@ -3,6 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // self-contained server bundle for Docker / Dokploy deploys
   output: "standalone",
+  // the version banner is free reconnaissance for anyone scanning
+  poweredByHeader: false,
   images: {
     // AVIF first (≈20-30% smaller than WebP on photos), WebP as the fallback
     // for older browsers. AVIF encodes are CPU-heavy, but the persistent
@@ -18,6 +20,39 @@ const nextConfig: NextConfig = {
     // for that whole window. 60s still dedupes re-encoding across the burst
     // of requests a single page load fans out to, without masking a replace.
     minimumCacheTTL: 60,
+  },
+  async headers() {
+    return [
+      {
+        // Applied to everything, including /admin/login — which collects the
+        // password controlling all pricing, media and booking data, and was
+        // framable by any origin before this.
+        source: "/:path*",
+        headers: [
+          { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), interest-cohort=()" },
+          // Deliberately NOT a full CSP yet: the inline JSON-LD, the GA4 and
+          // Meta bootstrap scripts and Google Fonts all need allowing for, and
+          // a wrong CSP breaks the site silently. Report-only first, separately.
+        ],
+      },
+    ];
+  },
+  async redirects() {
+    return [
+      {
+        // www served a complete second copy of ~60 pages with no canonical
+        // signal deciding which was real. Apex wins; metadataBase already
+        // points there.
+        source: "/:path*",
+        has: [{ type: "host", value: "www.tripwaley.com" }],
+        destination: "https://tripwaley.com/:path*",
+        permanent: true,
+      },
+    ];
   },
   async rewrites() {
     return {

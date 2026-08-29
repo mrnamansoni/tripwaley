@@ -77,7 +77,7 @@ export default async function CreatorTripPage({
   return (
     <CityProvider cities={getCities()} defaultCity={settings.defaultCity}>
       <Navbar overDarkHero />
-      <main>
+      <main id="main">
         {/* ---------------- hero: the trip, fronted by the creator ------- */}
         <section className="relative overflow-hidden bg-ink pt-28 sm:pt-32">
           <div aria-hidden="true" className="absolute inset-0 opacity-[0.62]">

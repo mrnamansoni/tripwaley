@@ -55,6 +55,9 @@ export async function generateMetadata(): Promise<Metadata> {
   const ogImage = normalizeMediaUrl(seo?.ogImage || "") || "/images/ladakh.jpg";
   return {
     metadataBase: new URL("https://tripwaley.com"),
+    // www served a full duplicate of the site; this plus the 301 in
+    // next.config.ts tells Google which copy is real
+    alternates: { canonical: "/" },
     title,
     description,
     keywords: [
@@ -99,11 +102,12 @@ const jsonLd = {
   url: "https://tripwaley.com",
   areaServed: "IN",
   priceRange: "₹5,000–₹50,000",
-  aggregateRating: {
-    "@type": "AggregateRating",
-    ratingValue: "4.9",
-    reviewCount: "2400",
-  },
+  // NO aggregateRating here. Google treats a self-declared rating on a
+  // LocalBusiness subtype as ineligible for the star feature, so it bought
+  // nothing — and 4.9 / 2400 were hardcoded strings, not counted from real
+  // reviews, which is an advertising-claim problem regardless of Google.
+  // Ratings now ride on individual trips (Product/Offer) where they are
+  // both legitimate and eligible.
   sameAs: [
     "https://instagram.com/tripwaley",
     "https://youtube.com/@tripwaley",
@@ -139,6 +143,14 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${bricolage.variable} ${instrument.variable} ${caveat.variable}`}>
       <body>
+        {/* first focusable element on every page — a keyboard user should not
+            have to tab through the whole nav to reach content */}
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-full focus:bg-brand focus:px-5 focus:py-3 focus:text-sm focus:font-bold focus:text-white"
+        >
+          Skip to content
+        </a>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

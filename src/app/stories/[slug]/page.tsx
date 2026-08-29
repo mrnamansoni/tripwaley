@@ -29,7 +29,7 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
   return (
     <>
       <Navbar />
-      <main className="bg-cream">
+      <main id="main" className="bg-cream">
         {/* cover */}
         <section className="relative h-[52vh] min-h-[22rem] w-full overflow-hidden">
           <SiteMedia src={post.cover} alt="" fill priority sizes="100vw" className="object-cover" />

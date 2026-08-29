@@ -24,7 +24,7 @@ export default function AboutPage() {
   return (
     <CityProvider cities={getCities()} defaultCity={settings.defaultCity}>
       <Navbar overDarkHero />
-      <main className="bg-cream">
+      <main id="main" className="bg-cream">
         {/* story */}
         <section className="bg-ink px-5 pb-16 pt-36 sm:px-8">
           <div className="mx-auto w-full max-w-6xl">

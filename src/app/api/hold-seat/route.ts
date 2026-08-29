@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { clientIp, publicRateLimit } from "@/lib/auth";
 
 /**
  * Placeholder "Hold My Seat" endpoint.
@@ -6,6 +7,15 @@ import { NextResponse } from "next/server";
  * response contract below is what the frontend expects.
  */
 export async function POST(req: Request) {
+  const ip = clientIp(req);
+  const limit = publicRateLimit(ip, "hold", 8);
+  if (limit.blocked) {
+    return NextResponse.json(
+      { error: "Too many requests — please wait a moment." },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfter ?? 60) } }
+    );
+  }
+
   const body = await req.json().catch(() => null);
 
   if (!body?.name || !body?.phone || !body?.trip) {

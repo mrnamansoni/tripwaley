@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { clientIp, publicRateLimit } from "@/lib/auth";
 import { getPackage, getCity, priceFor, getSettings } from "@/lib/catalog";
 
 /**
@@ -11,6 +12,15 @@ import { getPackage, getCity, priceFor, getSettings } from "@/lib/catalog";
  */
 
 export async function POST(req: NextRequest) {
+  const ip = clientIp(req);
+  const limit = publicRateLimit(ip, "book", 8);
+  if (limit.blocked) {
+    return NextResponse.json(
+      { error: "Too many requests — please wait a moment." },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfter ?? 60) } }
+    );
+  }
+
   let body: Record<string, unknown>;
   try {
     body = await req.json();

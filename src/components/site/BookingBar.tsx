@@ -11,6 +11,7 @@ import { useMemo, useState } from "react";
 import { gsap } from "@/lib/gsap";
 import { useCity } from "./CityProvider";
 import CouponField, { type AppliedCoupon } from "./CouponField";
+import { useModal } from "@/hooks/useModal";
 import { inr, shortDate, weekday } from "@/lib/types";
 import { trackInitiateCheckout, trackLead } from "@/lib/analytics";
 
@@ -40,6 +41,7 @@ export default function BookingBar({
   const [phone, setPhone] = useState("");
   const [err, setErr] = useState("");
   const [coupon, setCoupon] = useState<AppliedCoupon | null>(null);
+  const dialogRef = useModal<HTMLDivElement>(modal, () => setModal(false));
 
   const cityDeps = useMemo(() => {
     const mine = departures.filter((d) => d.citySlugs.includes(city.slug));
@@ -107,7 +109,7 @@ export default function BookingBar({
           inside the ~60px bar and clip it off the bottom of the screen. */}
       {modal && (
         <div className="fixed inset-0 z-[70] flex items-end justify-center bg-ink/70 p-4 backdrop-blur-sm sm:items-center" role="dialog" aria-modal="true" aria-label="Hold your seat">
-          <div className="w-full max-w-md rounded-3xl border border-white/12 bg-[#181614] p-6 shadow-card-lg sm:p-8">
+          <div ref={dialogRef} className="w-full max-w-md rounded-3xl border border-white/12 bg-[#181614] p-6 shadow-card-lg sm:p-8">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-[0.6rem] font-bold uppercase tracking-[0.3em] text-gold">seat hold · 24h free</p>
@@ -119,12 +121,14 @@ export default function BookingBar({
               {packageName} · ex-{city.name} · {chosen ? `${weekday(chosen)}, ${shortDate(chosen)}` : "next batch"} · {occ}{seat != null ? ` · ${inr(seat)}/seat` : ""}
             </p>
 
+            <form onSubmit={(e) => { e.preventDefault(); confirm(); }} noValidate>
             <label className="mt-6 block text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white/45">
               Your name <span className="text-white/25">(optional)</span>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Naman"
+                autoComplete="name"
                 className="mt-1.5 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-base text-white outline-none transition-colors focus:border-gold"
               />
             </label>
@@ -135,7 +139,6 @@ export default function BookingBar({
                 <input
                   value={phone}
                   onChange={(e) => { setPhone(e.target.value); setErr(""); }}
-                  onKeyDown={(e) => e.key === "Enter" && confirm()}
                   inputMode="numeric"
                   autoComplete="tel"
                   placeholder="98765 43210"
@@ -171,13 +174,13 @@ export default function BookingBar({
             {err && <p className="mt-2.5 text-sm font-semibold text-brand-bright">{err}</p>}
 
             <button
-              type="button"
-              onClick={confirm}
+              type="submit"
               disabled={busy}
               className="mt-6 w-full rounded-full bg-brand py-3.5 font-extrabold text-white shadow-red transition-colors hover:bg-brand-bright disabled:opacity-60"
             >
               {busy ? "Holding your seat…" : "Confirm & continue on WhatsApp →"}
             </button>
+            </form>
             <p className="mt-3 text-center text-[0.62rem] text-white/35">
               No payment now · we hold your seat 24h · reply STOP anytime
             </p>

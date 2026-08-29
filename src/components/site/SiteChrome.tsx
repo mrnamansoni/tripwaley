@@ -9,6 +9,7 @@
 import SiteMedia from "./SiteMedia";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useModal } from "@/hooks/useModal";
 import type { AnnouncementBar as BarCfg, LeadPopup as PopupCfg } from "@/lib/types";
 
 export default function SiteChrome({ bar, popup }: { bar?: BarCfg; popup?: PopupCfg }) {
@@ -74,19 +75,23 @@ function LeadPopup({ popup }: { popup: PopupCfg }) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "done" | "error">("idle");
-
-  useEffect(() => {
-    if (localStorage.getItem("tw-lead-popup") === "done") return;
-    const t = setTimeout(() => setOpen(true), Math.max(1, popup.delaySeconds) * 1000);
-    return () => clearTimeout(t);
-  }, [popup.delaySeconds]);
-
   const close = () => {
     setOpen(false);
     localStorage.setItem("tw-lead-popup", "seen");
   };
+  const dialogRef = useModal<HTMLDivElement>(open, close);
 
-  const submit = async () => {
+  useEffect(() => {
+    // ANY stored value suppresses it. This used to compare against "done",
+    // which only close() never writes — so dismissing the popup did nothing
+    // and it came back on a timer on every page, forever.
+    if (localStorage.getItem("tw-lead-popup")) return;
+    const t = setTimeout(() => setOpen(true), Math.max(1, popup.delaySeconds) * 1000);
+    return () => clearTimeout(t);
+  }, [popup.delaySeconds]);
+
+  const submit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     if (!/^[6-9]\d{9}$/.test(phone.replace(/[^\d]/g, "").slice(-10))) {
       setState("error");
       return;
@@ -110,7 +115,7 @@ function LeadPopup({ popup }: { popup: PopupCfg }) {
 
   return (
     <div className="fixed inset-0 z-[95] flex items-center justify-center bg-ink/70 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Get this week's departures">
-      <div className="relative grid w-full max-w-2xl overflow-hidden rounded-3xl border border-white/12 bg-cream shadow-card-lg sm:grid-cols-2">
+      <div ref={dialogRef} className="relative grid w-full max-w-2xl overflow-hidden rounded-3xl border border-white/12 bg-cream shadow-card-lg sm:grid-cols-2">
         <button type="button" aria-label="Close" onClick={close} className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-ink/10 text-ink/60 hover:bg-ink/20 hover:text-ink">✕</button>
 
         <div className="relative hidden min-h-[18rem] sm:block">
@@ -126,13 +131,14 @@ function LeadPopup({ popup }: { popup: PopupCfg }) {
           <p className="mt-2 text-sm text-ink/60">{popup.subtitle}</p>
 
           {state === "done" ? (
-            <p className="mt-5 rounded-xl bg-success/12 px-4 py-3 text-sm font-bold text-success">✓ Got it — we&apos;ll be in touch on WhatsApp shortly.</p>
+            <p className="mt-5 rounded-xl bg-success/12 px-4 py-3 text-sm font-bold text-success-ink">✓ Got it — we&apos;ll be in touch on WhatsApp shortly.</p>
           ) : (
-            <div className="mt-5 space-y-2.5">
+            <form onSubmit={submit} className="mt-5 space-y-2.5" noValidate>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Your name (optional)"
+                autoComplete="name"
                 className="w-full rounded-xl border border-line bg-card px-4 py-3 text-sm text-ink outline-none focus:border-brand"
               />
               <div className="flex items-center gap-2 rounded-xl border border-line bg-card px-4 py-3 focus-within:border-brand">
@@ -141,14 +147,14 @@ function LeadPopup({ popup }: { popup: PopupCfg }) {
                   value={phone}
                   onChange={(e) => { setPhone(e.target.value); if (state === "error") setState("idle"); }}
                   inputMode="numeric"
+                  autoComplete="tel"
                   placeholder="10-digit mobile"
                   className="w-full bg-transparent text-sm text-ink outline-none"
                 />
               </div>
               {state === "error" && <p className="text-xs font-bold text-brand">Enter a valid 10-digit Indian mobile number.</p>}
               <button
-                type="button"
-                onClick={submit}
+                type="submit"
                 disabled={state === "sending"}
                 className="w-full rounded-full bg-brand px-6 py-3.5 text-sm font-bold text-white shadow-red transition-colors hover:bg-brand-bright disabled:opacity-50"
               >
@@ -157,7 +163,7 @@ function LeadPopup({ popup }: { popup: PopupCfg }) {
               <button type="button" onClick={close} className="w-full text-center text-[0.7rem] font-semibold uppercase tracking-wider text-ink/40 hover:text-ink/70">
                 No thanks
               </button>
-            </div>
+            </form>
           )}
         </div>
       </div>

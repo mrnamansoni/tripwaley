@@ -73,7 +73,7 @@ export default function TripsPage() {
   return (
     <CityProvider cities={cities} defaultCity={settings.defaultCity}>
       <Navbar />
-      <main className="pt-16">
+      <main id="main" className="pt-16">
         <TripsExplorer
           packages={packages}
           departures={departures}

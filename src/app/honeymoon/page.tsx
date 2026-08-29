@@ -35,7 +35,7 @@ export default function HoneymoonPage() {
   return (
     <CityProvider cities={getCities()} defaultCity={settings.defaultCity}>
       <Navbar overDarkHero />
-      <main>
+      <main id="main">
         <TripTypeHero
           media={slotOne("honeymoon.hero")}
           eyebrow={text("honeymoon.eyebrow")}

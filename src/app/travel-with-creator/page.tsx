@@ -53,7 +53,7 @@ export default function TravelWithCreatorPage() {
   return (
     <CityProvider cities={getCities()} defaultCity={settings.defaultCity}>
       <Navbar overDarkHero />
-      <main>
+      <main id="main">
         {/* ---------------- hero: the line-up poster ---------------- */}
         <section className="relative overflow-hidden bg-ink pb-[8vh] pt-32 sm:pt-40">
           <div className="noise absolute inset-0" aria-hidden="true" />

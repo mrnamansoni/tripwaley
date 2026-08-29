@@ -75,7 +75,7 @@ export default function BookingWire({
         <div className="rounded-3xl border border-line bg-card p-5 shadow-card-lg sm:p-6">
           <div className="flex items-center justify-between border-b border-line pb-4">
             <p className="font-display text-sm font-extrabold uppercase tracking-widest text-ink">Live bookings</p>
-            <span className="inline-flex items-center gap-2 text-[0.62rem] font-bold uppercase tracking-wider text-success">
+            <span className="inline-flex items-center gap-2 text-[0.62rem] font-bold uppercase tracking-wider text-success-ink">
               <span className="animate-live h-2 w-2 rounded-full bg-success" aria-hidden="true" />
               on air
             </span>

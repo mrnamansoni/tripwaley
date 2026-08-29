@@ -54,7 +54,7 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
   return (
     <CityProvider cities={getCities()} defaultCity={settings.defaultCity}>
       <Navbar overDarkHero />
-      <main>
+      <main id="main">
         {/* ---------------- the poster ---------------- */}
         <section className="relative overflow-hidden bg-ink pt-28 sm:pt-32">
           <div aria-hidden="true" className="absolute inset-0 opacity-[0.62]">

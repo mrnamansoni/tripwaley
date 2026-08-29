@@ -113,7 +113,7 @@ export default function Home() {
   return (
     <CityProvider cities={cities} defaultCity={settings.defaultCity}>
       <Navbar overDarkHero />
-      <main>
+      <main id="main">
         <OpeningShot
           departures={depsByCity}
           fromPrices={pricesByCity}

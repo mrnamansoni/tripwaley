@@ -4,7 +4,22 @@
  * Client components import types/formatters from lib/types instead.
  */
 
-import { readCatalog, readReviews } from "./store";
+import { cache } from "react";
+import { readCatalog as readCatalogRaw, readReviews as readReviewsRaw } from "./store";
+
+/* One disk stat per request, not per read.
+ *
+ * store.ts memoises the parsed catalog by mtime, but the freshness check runs
+ * a synchronous fs.statSync on EVERY read — and a single page render fans out
+ * to hundreds of catalog reads, each one blocking the event loop. React's
+ * cache() is request-scoped, so the stat happens once per request and every
+ * later read in that render reuses the result.
+ *
+ * Freshness is unaffected: the catalog cannot change midway through rendering
+ * one page, and the next request stats again — so an admin save is still live
+ * on the very next request, which is the property the whole design rests on. */
+const readCatalog = cache(readCatalogRaw);
+const readReviews = cache(readReviewsRaw);
 import type { BlogPost, City, CollegeTrip, Coupon, Creator, CreatorPose, CreatorTrip, CreatorTripDate, Departure, Faq, Package, PriceRule, Review, Settings, TripCategory, VideoTestimonial, WireEntry } from "./types";
 import { normalizeCollegeTrip, normalizeCouponCode, resolveSlot as resolveSlotPure, resolveContent as resolveContentPure, resolvePageSection, minRate, inCategory, normalizeCreator, packageImages, resolveFigure, DEFAULT_FAQS, DEFAULT_VIDEO_TESTIMONIAL } from "./types";
 import {

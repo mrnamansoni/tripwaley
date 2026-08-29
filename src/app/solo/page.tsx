@@ -34,7 +34,7 @@ export default function SoloPage() {
   return (
     <CityProvider cities={getCities()} defaultCity={settings.defaultCity}>
       <Navbar overDarkHero />
-      <main>
+      <main id="main">
         <TripTypeHero
           media={slotOne("solo.hero")}
           eyebrow={text("solo.eyebrow")}

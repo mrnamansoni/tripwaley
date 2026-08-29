@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { clientIp, publicRateLimit } from "@/lib/auth";
 
 /**
  * Placeholder "Pay Token & Book" endpoint.
@@ -6,6 +7,15 @@ import { NextResponse } from "next/server";
  * the checkout payload; the frontend already handles ok/paymentUrl.
  */
 export async function POST(req: Request) {
+  const ip = clientIp(req);
+  const limit = publicRateLimit(ip, "token", 8);
+  if (limit.blocked) {
+    return NextResponse.json(
+      { error: "Too many requests — please wait a moment." },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfter ?? 60) } }
+    );
+  }
+
   const body = await req.json().catch(() => null);
 
   if (!body?.trip) {

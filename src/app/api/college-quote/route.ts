@@ -12,6 +12,7 @@
  */
 
 import { NextResponse } from "next/server";
+import { clientIp, publicRateLimit } from "@/lib/auth";
 import { appendBooking } from "@/lib/store";
 import { getSettings } from "@/lib/catalog";
 
@@ -32,6 +33,15 @@ function num(v: unknown, min: number, max: number): number | null {
 }
 
 export async function POST(req: Request) {
+  const ip = clientIp(req);
+  const limit = publicRateLimit(ip, "college", 5);
+  if (limit.blocked) {
+    return NextResponse.json(
+      { error: "Too many requests — please wait a moment." },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfter ?? 60) } }
+    );
+  }
+
   let body: Record<string, unknown>;
   try {
     body = await req.json();

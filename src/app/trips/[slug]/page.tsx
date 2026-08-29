@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { tripJsonLd, breadcrumbJsonLd, jsonLdScript, reviewMatchesTrip } from "@/lib/schema";
 import Navbar from "@/components/sections/Navbar";
 import CityProvider from "@/components/site/CityProvider";
 import { CitySwitcher } from "@/components/site/CityProvider";
@@ -23,6 +24,8 @@ import {
   upcomingDepartures,
   fromPrice,
   packageImages,
+  normalizeMediaUrl,
+  getReviews,
   nightsLabel,
   inr,
   minRate,
@@ -55,9 +58,29 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const pkg = getPackage(slug);
   if (!pkg) return {};
+  const title = `${pkg.name} — ${nightsLabel(pkg)} group departure | Tripwaley`;
+  const description = `${pkg.name}: ${pkg.destination || pkg.route}. Fixed group departures from ${citiesPricedFor(slug).length} cities with captains, stays & transport included.`;
+  // Without these, every trip fell back to the site-wide default — so all 27
+  // shared one Ladakh photo and one generic title in every WhatsApp share,
+  // which is this brand's most-seen surface.
+  const hero = normalizeMediaUrl(pkg.heroMedia || packageImages(pkg)[0] || "");
   return {
-    title: `${pkg.name} — ${nightsLabel(pkg)} group departure | Tripwaley`,
-    description: `${pkg.name}: ${pkg.destination || pkg.route}. Fixed group departures from ${citiesPricedFor(slug).length} cities with captains, stays & transport included.`,
+    title,
+    description,
+    alternates: { canonical: `/trips/${slug}` },
+    openGraph: {
+      title,
+      description,
+      url: `/trips/${slug}`,
+      type: "website",
+      images: hero ? [{ url: hero, alt: `${pkg.name} — ${pkg.destination || pkg.route}` }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: hero ? [hero] : undefined,
+    },
   };
 }
 
@@ -74,13 +97,39 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
   const geo = DEST_GEO.find(([re]) => re.test(`${pkg.name} ${pkg.destination} ${pkg.route}`))?.[1];
   const minPrice = minRate(...priced.flatMap(({ rule }) => [rule.triple, rule.double]));
 
+  // Product + Offer so price and availability are eligible for rich results,
+  // and BreadcrumbList because that IS a supported feature. Reviews are
+  // matched by trip name so a rating is only claimed where one exists.
+  const maxPrice = Math.max(
+    ...priced.flatMap(({ rule }) => [rule.triple, rule.double].filter((v): v is number => typeof v === "number")),
+    0
+  );
+  const tripReviews = getReviews().filter((r) => reviewMatchesTrip(r.trip, pkg.name));
+  const schema = jsonLdScript([
+    tripJsonLd({
+      pkg,
+      fromPrice: minPrice,
+      toPrice: maxPrice || undefined,
+      images: [pkg.heroMedia || images[0], ...images].filter(Boolean),
+      validThrough: deps[deps.length - 1]?.date,
+      inStock: deps.length > 0,
+      reviews: tripReviews,
+    }),
+    breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Trips", path: "/trips" },
+      { name: pkg.name, path: `/trips/${pkg.slug}` },
+    ]),
+  ]);
+
   const barDeps: BarDeparture[] = deps.map((d) => ({ date: d.date, citySlugs: d.cities.map((c) => c.slug) }));
   const barPrices: BarPrices = Object.fromEntries(priced.map(({ city, rule }) => [city.slug, { triple: rule.triple, double: rule.double }]));
 
   return (
     <CityProvider cities={cities} defaultCity={settings.defaultCity}>
       <Navbar overDarkHero />
-      <main className="bg-cream pb-28">
+      <main id="main" className="bg-cream pb-28">
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: schema }} />
         <TrackTripView slug={pkg.slug} name={pkg.name} price={minPrice} />
         {/* ---- header ---- */}
         <section className="relative min-h-[78vh] overflow-hidden">

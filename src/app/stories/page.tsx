@@ -17,7 +17,7 @@ export default function StoriesPage() {
   return (
     <>
       <Navbar overDarkHero />
-      <main className="bg-cream">
+      <main id="main" className="bg-cream">
         <section className="bg-ink px-5 pb-14 pt-36 sm:px-8">
           <div className="mx-auto w-full max-w-6xl">
             <p className="font-script text-2xl text-gold sm:text-3xl">field notes from the road</p>

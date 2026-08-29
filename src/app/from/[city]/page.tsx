@@ -53,7 +53,7 @@ export default async function FromCityPage({ params }: { params: Promise<{ city:
   return (
     <CityProvider cities={cities} defaultCity={slug}>
       <Navbar overDarkHero />
-      <main className="bg-cream">
+      <main id="main" className="bg-cream">
         {/* header */}
         <section className="relative overflow-hidden bg-ink px-5 pb-16 pt-36 sm:px-8">
           <div className="mx-auto w-full max-w-6xl">

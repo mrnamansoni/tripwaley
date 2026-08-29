@@ -29,7 +29,7 @@ export default function GroupDeparturesPage() {
   return (
     <CityProvider cities={getCities()} defaultCity={settings.defaultCity}>
       <Navbar overDarkHero />
-      <main>
+      <main id="main">
         <TripTypeHero
           media={slotOne("group.hero")}
           eyebrow={text("group.eyebrow")}
