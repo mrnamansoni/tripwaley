@@ -24,6 +24,29 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        /* P1 — the root layout's force-dynamic makes Next advertise
+           "no-store" on every route, which makes EVERY caching layer illegal:
+           no CDN edge cache, no reverse proxy. Rendering itself only costs
+           ~50ms, so the render was never the problem; forbidding reuse was.
+
+           This keeps dynamic rendering (an admin save is still live on the
+           next request) but lets a SHARED cache hold the result for 60s.
+           max-age=0 keeps browsers revalidating, so a visitor never sees
+           stale content; s-maxage applies only to a CDN, which is why this is
+           inert until Cloudflare is in front — and correct the moment it is.
+
+           /admin and /api are excluded below: caching an authenticated admin
+           page in a shared cache would serve one session's HTML to another
+           visitor. */
+        source: "/:path((?!admin|api).*)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=0, s-maxage=60, stale-while-revalidate=600",
+          },
+        ],
+      },
+      {
         // Applied to everything, including /admin/login — which collects the
         // password controlling all pricing, media and booking data, and was
         // framable by any origin before this.
