@@ -5,7 +5,7 @@
 import SiteMedia from "./SiteMedia";
 import Link from "next/link";
 import WeatherNow from "./WeatherNow";
-import { slot } from "@/lib/catalog";
+import { getCaptains, slot } from "@/lib/catalog";
 
 /* ---------------------------------------------- live weather strip (L46) */
 
@@ -69,14 +69,10 @@ export function SeasonsBand() {
 
 /* ---------------------------------------------- captains band */
 
-const CAPTAINS = [
-  { name: "Tenzin", trips: 147, beat: "High Himalaya", line: "Notices altitude sickness before you do.", img: "/images/group-trek.jpg" },
-  { name: "Aisha", trips: 96, beat: "Himachal circuits", line: "Runs the tightest playlist democracy in the Volvo.", img: "/images/traveller-street.jpg" },
-  { name: "Veer", trips: 121, beat: "Treks & summits", line: "Carries a guitar to 4,000m. Uses it responsibly.", img: "/images/camp-tents.jpg" },
-];
-
 export function CaptainsBand() {
-  const captainImgs = slot("captains");
+  // real rows now, editable in the admin Captains tab
+  const captains = getCaptains();
+  if (!captains.length) return null;
   return (
     <section className="bg-blush py-[9vh]">
       <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
@@ -87,10 +83,10 @@ export function CaptainsBand() {
           <p className="max-w-xs text-sm text-ink/55">Every batch ships with one. Trained, certified, chronically early.</p>
         </div>
         <div className="grid gap-5 sm:grid-cols-3">
-          {CAPTAINS.map((c, i) => (
-            <figure key={c.name} className="group overflow-hidden rounded-3xl border border-line bg-card shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-card-lg">
+          {captains.map((c) => (
+            <figure key={c.slug || c.name} className="group overflow-hidden rounded-3xl border border-line bg-card shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-card-lg">
               <div className="relative h-44 overflow-hidden">
-                <SiteMedia src={captainImgs[i] ?? c.img} alt="" fill sizes="(max-width:640px) 92vw, 30vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.06]" />
+                <SiteMedia src={c.photo} alt={`Captain ${c.name}`} fill sizes="(max-width:640px) 92vw, 30vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.06]" />
                 <span className="absolute bottom-3 left-4 rounded-full bg-ink/60 px-3 py-1 font-mono text-[0.56rem] font-bold uppercase tracking-widest text-white backdrop-blur-sm">
                   {c.trips} trips led
                 </span>

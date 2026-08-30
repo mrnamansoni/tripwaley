@@ -5935,7 +5935,7 @@
    "published": true
   }
  ],
- "seedVersion": 7,
+ "seedVersion": 8,
  "coupons": [
   {
    "code": "FIRSTTRIP",
@@ -5966,6 +5966,35 @@
    "active": true,
    "usedCount": 0,
    "note": "kept as a negative test"
+  }
+ ],
+ "captains": [
+  {
+   "slug": "tenzin",
+   "name": "Tenzin",
+   "trips": 147,
+   "beat": "High Himalaya",
+   "line": "Notices altitude sickness before you do.",
+   "photo": "/images/group-trek.jpg",
+   "published": true
+  },
+  {
+   "slug": "aisha",
+   "name": "Aisha",
+   "trips": 96,
+   "beat": "Himachal circuits",
+   "line": "Runs the tightest playlist democracy in the Volvo.",
+   "photo": "/images/traveller-street.jpg",
+   "published": true
+  },
+  {
+   "slug": "veer",
+   "name": "Veer",
+   "trips": 121,
+   "beat": "Treks & summits",
+   "line": "Carries a guitar to 4,000m. Uses it responsibly.",
+   "photo": "/images/camp-tents.jpg",
+   "published": true
   }
  ]
 }

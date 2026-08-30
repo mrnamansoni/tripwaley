@@ -243,6 +243,8 @@ export interface Catalog {
   creators?: Creator[];
   /** college batches already run — the proof wall on /college-trips */
   colleges?: CollegeTrip[];
+  /** trip captains (About, Vibe Check, and the trip-page feed) */
+  captains?: Captain[];
   /** discount codes applied at booking (admin Coupons tab) */
   coupons?: Coupon[];
   /** highest seed batch already merged in — see mergeSeedContent() in store.ts */
@@ -583,7 +585,6 @@ export const SLOT_DEFS: SlotDef[] = [
   { key: "hero.film", group: "Homepage · Hero", label: "Film frames (the one-take scrub)", hint: "Scroll flicks through these — add up to 8", kind: "list", defaults: ["/images/himalaya-sunrise.jpg", "/images/camp-tents.jpg", "/images/stars.jpg"], max: 8 },
   { key: "hero.blinds", group: "Homepage · Hero", label: "Blinds reveal image", hint: "Revealed as the venetian blinds open", kind: "single", defaults: ["/images/himalaya-sunrise.jpg"] },
   { key: "about.crew", group: "About page", label: "Crew banner", hint: "Full-width band near the FAQs", kind: "single", defaults: ["/images/group-mountains.jpg"] },
-  { key: "captains", group: "Captains band", label: "Captain portraits", hint: "Shown on About & Vibe Check — 3 recommended", kind: "list", defaults: ["/images/group-trek.jpg", "/images/traveller-street.jpg", "/images/camp-tents.jpg"], max: 6 },
 
   /* ---- decorative photo groups (every card/section photo is swappable) ---- */
   { key: "home.gallery", group: "Homepage · Photo dump", label: "Gallery photos (the arc)", hint: "The scroll-shuffle photo wall — add/remove freely", kind: "list", defaults: ["/images/ladakh.jpg", "/images/group-mountains.jpg", "/images/kashmir.jpg", "/images/tent-view.jpg", "/images/kerala.jpg", "/images/himalaya-sunrise.jpg", "/images/rajasthan.jpg", "/images/group-trek.jpg", "/images/andaman.jpg", "/images/traveller-street.jpg", "/images/spiti.jpg", "/images/houseboat.jpg", "/images/meghalaya.jpg", "/images/taj.jpg"], max: 24 },
@@ -821,6 +822,47 @@ export function normalizeCollegeTrip(c: Partial<CollegeTrip>): CollegeTrip {
   };
 }
 
+
+
+/* ------------------------------------------------ captains
+
+   The people who actually run a batch. Until now these were a hardcoded array
+   in PageExtras.tsx with only their photos editable through a media slot, so
+   adding a fourth captain or correcting a trip count needed a deploy. */
+
+export interface Captain {
+  slug: string;
+  /** first name only — the site renders "Captain {name}" */
+  name: string;
+  /** the terrain they own, e.g. "High Himalaya" */
+  beat: string;
+  /** one line of character, shown under the name */
+  line: string;
+  /** trips led, shown as a badge on the photo */
+  trips: number;
+  photo: string;
+  published: boolean;
+}
+
+export function normalizeCaptain(c: Partial<Captain>): Captain {
+  return {
+    slug: c.slug ?? "",
+    name: c.name ?? "",
+    beat: c.beat ?? "",
+    line: c.line ?? "",
+    trips: typeof c.trips === "number" ? c.trips : 0,
+    photo: c.photo ?? "",
+    published: c.published ?? true,
+  };
+}
+
+/** The captains the site shipped with, used to seed the editable list so an
+ *  existing install looks identical the moment the tab appears. */
+export const DEFAULT_CAPTAINS: Captain[] = [
+  { slug: "tenzin", name: "Tenzin", trips: 147, beat: "High Himalaya", line: "Notices altitude sickness before you do.", photo: "/images/group-trek.jpg", published: true },
+  { slug: "aisha", name: "Aisha", trips: 96, beat: "Himachal circuits", line: "Runs the tightest playlist democracy in the Volvo.", photo: "/images/traveller-street.jpg", published: true },
+  { slug: "veer", name: "Veer", trips: 121, beat: "Treks & summits", line: "Carries a guitar to 4,000m. Uses it responsibly.", photo: "/images/camp-tents.jpg", published: true },
+];
 
 /* ------------------------------------------------ coupons
 

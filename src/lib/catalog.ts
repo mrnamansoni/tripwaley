@@ -20,8 +20,8 @@ import { readCatalog as readCatalogRaw, readReviews as readReviewsRaw } from "./
  * on the very next request, which is the property the whole design rests on. */
 const readCatalog = cache(readCatalogRaw);
 const readReviews = cache(readReviewsRaw);
-import type { BlogPost, City, CollegeTrip, Coupon, Creator, CreatorPose, CreatorTrip, CreatorTripDate, Departure, Faq, Package, PriceRule, Review, Settings, TripCategory, VideoTestimonial, WireEntry } from "./types";
-import { normalizeCollegeTrip, normalizeCouponCode, resolveSlot as resolveSlotPure, resolveContent as resolveContentPure, resolvePageSection, minRate, inCategory, normalizeCreator, packageImages, resolveFigure, DEFAULT_FAQS, DEFAULT_VIDEO_TESTIMONIAL } from "./types";
+import type { BlogPost, Captain, City, CollegeTrip, Coupon, Creator, CreatorPose, CreatorTrip, CreatorTripDate, Departure, Faq, Package, PriceRule, Review, Settings, TripCategory, VideoTestimonial, WireEntry } from "./types";
+import { DEFAULT_CAPTAINS, normalizeCaptain, normalizeCollegeTrip, normalizeCouponCode, resolveSlot as resolveSlotPure, resolveContent as resolveContentPure, resolvePageSection, minRate, inCategory, normalizeCreator, packageImages, resolveFigure, DEFAULT_FAQS, DEFAULT_VIDEO_TESTIMONIAL } from "./types";
 import {
   collections as collectionDefaults,
   galleryPhotos as galleryDefaults,
@@ -160,6 +160,19 @@ export const getCreators = (): Creator[] =>
 export const getAllCreators = (): Creator[] => (readCatalog().creators ?? []).map(normalizeCreator);
 export const getCreator = (slug: string): Creator | undefined =>
   getCreators().find((c) => c.slug === slug);
+
+
+/* ------------------------------------------------ captains */
+
+/** Published captains, newest edits first. Falls back to the shipped defaults
+ *  only when the catalog has no captains at all, so a fresh install still
+ *  renders a populated band. */
+export const getCaptains = (): Captain[] => {
+  const rows = (readCatalog().captains ?? []).map(normalizeCaptain).filter((c) => c.published);
+  return rows.length ? rows : DEFAULT_CAPTAINS;
+};
+export const getAllCaptains = (): Captain[] =>
+  (readCatalog().captains ?? DEFAULT_CAPTAINS).map(normalizeCaptain);
 
 /* ------------------------------------------------ college trips */
 

@@ -26,6 +26,7 @@ import {
   packageImages,
   normalizeMediaUrl,
   getReviews,
+  getCaptains,
   nightsLabel,
   inr,
   minRate,
@@ -210,7 +211,7 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
         {pkg.itinerary.length > 0 && <ItineraryRibbon days={pkg.itinerary} images={images} />}
 
         {/* ---- the captain narrates it ---- */}
-        {pkg.itinerary.length > 1 && <CaptainFeed days={pkg.itinerary} packageName={pkg.name} />}
+        {pkg.itinerary.length > 1 && <CaptainFeed days={pkg.itinerary} packageName={pkg.name} captain={getCaptains()[0]} />}
 
         {/* ---- inclusions / exclusions / add-ons ---- */}
         {(pkg.inclusions.length > 0 || pkg.exclusions.length > 0) && (

@@ -11,12 +11,13 @@
 import fs from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
+import { DEFAULT_CAPTAINS } from "./types";
 import type { Booking, Catalog, Review } from "./types";
 
 /** Bump when src/data/catalog.json gains packages/prices/departures that an
  *  already-running install should receive. mergeSeedContent() then adds only
  *  the rows whose keys are missing — admin edits are never overwritten. */
-const SEED_VERSION = 7;
+const SEED_VERSION = 8;
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const SEED_CATALOG = path.join(process.cwd(), "src", "data", "catalog.json");
@@ -90,6 +91,17 @@ function backfill(next: Catalog, seed: Catalog): number {
       next.settings = { ...next.settings, [key]: seed.settings[key] };
       n++;
     }
+  }
+
+
+  /* Captains move from a hardcoded array + a photo-only media slot into real
+     editable rows. An existing install has already chosen those photos through
+     media["captains"], so carry them across by index — otherwise turning on
+     the new tab would silently reset the owner's pictures to the stock ones. */
+  if (!next.captains?.length) {
+    const chosen = next.media?.captains ?? [];
+    next.captains = DEFAULT_CAPTAINS.map((c, i) => ({ ...c, photo: chosen[i] || c.photo }));
+    n += next.captains.length;
   }
 
   const seedCreators = new Map((seed.creators ?? []).map((c) => [c.slug, c]));

@@ -19,7 +19,17 @@ const RIFFS = [
   "Headcount 15/15. Goodnight from the mountains.",
 ];
 
-export default function CaptainFeed({ days, packageName }: { days: ItineraryDay[]; packageName: string }) {
+export default function CaptainFeed({
+  days,
+  packageName,
+  captain,
+}: {
+  days: ItineraryDay[];
+  packageName: string;
+  /** whoever is fronting this trip — passed in so the name, count and initial
+   *  come from the Captains tab instead of being hardcoded here */
+  captain?: { name: string; trips: number; line: string };
+}) {
   const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -51,10 +61,14 @@ export default function CaptainFeed({ days, packageName }: { days: ItineraryDay[
             mission control. This is how {packageName} unfolds — message by message.
           </p>
           <div className="mt-7 flex items-center gap-3">
-            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-brand font-script text-xl text-white">T</span>
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-brand font-script text-xl text-white">
+              {(captain?.name ?? "T").charAt(0).toUpperCase()}
+            </span>
             <div>
-              <p className="font-bold text-white">Captain Tenzin</p>
-              <p className="text-xs text-white/45">147 trips led · replies fast, walks faster</p>
+              <p className="font-bold text-white">Captain {captain?.name ?? "Tenzin"}</p>
+              <p className="text-xs text-white/45">
+                {captain?.trips ?? 147} trips led · {captain?.line ?? "replies fast, walks faster"}
+              </p>
             </div>
             <span className="ml-3 inline-flex items-center gap-1.5 rounded-full bg-success/15 px-3 py-1.5 text-[0.6rem] font-bold uppercase tracking-wider text-success">
               <span className="animate-live h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true" />

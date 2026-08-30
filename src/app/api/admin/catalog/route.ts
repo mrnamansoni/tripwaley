@@ -12,7 +12,7 @@ import { sameOrigin } from "@/lib/auth";
 import { listMedia, readBookings, readCatalog, readReviews, writeCatalog, writeReviews } from "@/lib/store";
 import { SLOT_DEFS, CONTENT_DEFS, resolveSlot, PAGE_SECTION_DEFS, isValidMediaRef, CATEGORY_DEFS, CREATOR_POSE_DEFS } from "@/lib/types";
 import { applySlugRenames, detectSlugRenames } from "@/lib/slugCascade";
-import type { BlogPost, CollegeTrip, Coupon, Catalog, City, Creator, Departure, Faq, Package, PriceRule, Review, WireEntry } from "@/lib/types";
+import type { BlogPost, Captain, CollegeTrip, Coupon, Catalog, City, Creator, Departure, Faq, Package, PriceRule, Review, WireEntry } from "@/lib/types";
 
 export async function GET() {
   const cat = readCatalog();
@@ -160,6 +160,20 @@ function validate(section: string, data: unknown): string | null {
       }
       return null;
     }
+    case "captains": {
+      const rows = data as Captain[];
+      const seen = new Set<string>();
+      for (const c of rows) {
+        if (!isStr(c.name) || !c.name.trim()) return "every captain needs a name";
+        if (!isNum(c.trips) || c.trips < 0) return `${c.name}: trips led must be 0 or more`;
+        if (!okMedia(c.photo)) return `${c.name}: invalid photo`;
+        if (typeof c.published !== "boolean") return `${c.name}: published must be true or false`;
+        const slug = (c.slug ?? "").trim();
+        if (slug && seen.has(slug)) return `duplicate captain slug ${slug}`;
+        if (slug) seen.add(slug);
+      }
+      return null;
+    }
     case "colleges":
       return (data as CollegeTrip[]).every(
         (c) =>
@@ -251,6 +265,12 @@ export async function PUT(req: Request) {
     if (section === "wire") cat.wire = data as WireEntry[];
     if (section === "creators") cat.creators = data as Creator[];
     if (section === "colleges") cat.colleges = data as CollegeTrip[];
+    // a blank slug would collide on the next save; derive one from the name
+    if (section === "captains")
+      cat.captains = (data as Captain[]).map((c, i) => ({
+        ...c,
+        slug: (c.slug ?? "").trim() || `${c.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${i + 1}`,
+      }));
     // codes are stored uppercase so lookup can be a plain equality check
     if (section === "coupons") cat.coupons = (data as Coupon[]).map((c) => ({ ...c, code: c.code.trim().toUpperCase() }));
     writeCatalog(cat);
