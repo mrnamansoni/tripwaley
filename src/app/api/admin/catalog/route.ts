@@ -11,6 +11,7 @@ import { revalidatePath } from "next/cache";
 import { sameOrigin } from "@/lib/auth";
 import { listMedia, readBookings, readCatalog, readReviews, writeCatalog, writeReviews } from "@/lib/store";
 import { SLOT_DEFS, CONTENT_DEFS, resolveSlot, PAGE_SECTION_DEFS, isValidMediaRef, CATEGORY_DEFS, CREATOR_POSE_DEFS } from "@/lib/types";
+import { applySlugRenames, detectSlugRenames } from "@/lib/slugCascade";
 import type { BlogPost, CollegeTrip, Coupon, Catalog, City, Creator, Departure, Faq, Package, PriceRule, Review, WireEntry } from "@/lib/types";
 
 export async function GET() {
@@ -217,6 +218,26 @@ export async function PUT(req: Request) {
     writeReviews(data as Review[]);
   } else {
     const cat: Catalog = { ...readCatalog() };
+
+    // A package's slug IS its identity — prices, departures and creator trips
+    // all reference it by value — but the slug is an editable field. Renaming
+    // one used to silently orphan every row pointing at it; a published
+    // creator trip would just vanish from the site with no error. Detect the
+    // rename here, while both versions are in hand, and carry the references
+    // across with it.
+    if (section === "packages") {
+      const renames = detectSlugRenames(cat.packages ?? [], data as Package[]);
+      if (renames.length) {
+        cat.packages = data as Package[];
+        const moved = applySlugRenames(cat, renames);
+        console.log(
+          `[admin] package slug rename ${renames.map((r) => `${r.from} -> ${r.to}`).join(", ")}` +
+            ` — repointed ${moved.prices} price rule(s), ${moved.departures} departure(s),` +
+            ` ${moved.creatorTrips} creator trip(s)`
+        );
+      }
+    }
+
     if (section === "settings") cat.settings = { ...cat.settings, ...(data as Catalog["settings"]) };
     if (section === "cities") cat.cities = data as City[];
     if (section === "packages") cat.packages = data as Package[];

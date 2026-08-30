@@ -124,9 +124,31 @@ export default function CreatorsEditor() {
           <Btn onClick={() => save("creators", creators)}>Save all</Btn>
         </Head>
 
+        {!base && (
+          <div className="mb-5 max-w-5xl rounded-2xl border-2 border-brand bg-brand/10 p-4">
+            <p className="font-bold text-brand">⚠ This trip is invisible on the site</p>
+            <p className="mt-1.5 text-sm leading-relaxed text-white/70">
+              It points at package <code className="font-mono text-white">{trip.packageSlug}</code>, which no
+              longer exists — most likely its slug was changed. The trip is published and its dates are fine;
+              the site drops it because the package cannot be found.
+              <br />
+              <b className="text-white">Pick the correct package below and Save all.</b> You must actively
+              change the dropdown — re-saving without touching it keeps the broken value.
+            </p>
+          </div>
+        )}
+
         <div className="grid max-w-5xl gap-4 sm:grid-cols-2">
           <label className={label}>package
-            <select value={trip.packageSlug} onChange={(e) => { const v = e.target.value; updTrip({ packageSlug: v }); setOpenTrip(v); }} className={input}>
+            <select
+              value={trip.packageSlug}
+              onChange={(e) => { const v = e.target.value; updTrip({ packageSlug: v }); setOpenTrip(v); }}
+              className={`${input} ${base ? "" : "border-brand"}`}
+            >
+              {/* A dead slug is NOT in livePackages, so without this option the
+                  browser falls back to showing the FIRST package — which looks
+                  like a valid choice while the broken value is what's saved. */}
+              {!base && <option value={trip.packageSlug}>⚠ missing: {trip.packageSlug}</option>}
               {livePackages.map((p) => <option key={p.slug} value={p.slug}>{p.name}</option>)}
             </select>
           </label>
@@ -443,6 +465,13 @@ export default function CreatorsEditor() {
                   {t.headline || base?.name || t.packageSlug}
                   <span className="ml-2 font-mono text-[0.6rem] text-white/35">{t.packageSlug}</span>
                 </button>
+                {/* a dead package reference hides the trip from the site
+                    entirely, so it has to be obvious from the list */}
+                {!base && (
+                  <span className="rounded-full bg-brand px-2.5 py-1 text-[0.58rem] font-bold uppercase tracking-wider text-white">
+                    ⚠ package missing
+                  </span>
+                )}
                 <span className="hidden text-xs text-white/40 sm:block">
                   {t.dates.length} {t.dates.length === 1 ? "date" : "dates"}
                   {t.itinerary?.length ? " · custom itinerary" : ""}
