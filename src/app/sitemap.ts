@@ -15,7 +15,17 @@ import {
  * trips are the ones missing from it.
  *
  * Deliberately excluded: /admin, /api, /lab, /lab2, and the design sandboxes.
+ *
+ * MUST be dynamic. Metadata routes like this one are static by default — even
+ * though the root layout forces every page dynamic, that setting does not reach
+ * sitemap.ts. Statically generated, it ran at IMAGE BUILD time, when the Docker
+ * volume holding the real catalog isn't mounted: readCatalog() fell back to the
+ * seed, so the sitemap listed the SEED's 22 live trips forever. 12 of those had
+ * since been deleted or drafted in the admin, and Google was being handed 12
+ * URLs that 404. Rendering per request reads the live catalog instead.
  */
+export const dynamic = "force-dynamic";
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
   const url = (path: string) => `${SITE_ORIGIN}${path}`;
