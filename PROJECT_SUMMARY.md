@@ -17,6 +17,37 @@ Tripwaley is a production-grade travel booking website for a premium, group-depa
 
 ## Recent Changes
 
+### 2026-09-05 — PhonePe payments: a 5% seat hold, charged online
+
+Booking money now arrives in three stages, and only the first is taken on the website:
+
+| Stage | Amount | Where |
+| --- | --- | --- |
+| Hold | `holdPercent` (5%) of the trip total, **plus `gstPercent` (5%) GST on that hold** | Website, via PhonePe |
+| Advance | balance up to `advancePercent` (20%) of the trip total | Team, offline, ~1 week before departure |
+| Balance | remaining 80% | At departure |
+
+- **PhonePe Standard Checkout V2 (OAuth)** — `client_id` / `client_secret` / `client_version`,
+  not the older merchantId + saltKey / X-VERIFY flow. See `src/lib/phonepe.ts`.
+- **All money is integer paise**, computed once in `src/lib/money.ts` and tested first in
+  `scripts/test-money.mjs` (14 assertions).
+- **The browser never sends an amount.** `/api/pay/create` prices the trip from the catalog,
+  re-applies the coupon server-side via the new shared `src/lib/pricing.ts` (also used by
+  `/api/coupon`, so preview and charge can no longer drift), and freezes the figure on the order.
+- **A payment is confirmed only when PhonePe's Order Status API agrees on both the state and the
+  amount.** The redirect proves nothing. An amount mismatch is flagged, never auto-confirmed,
+  and the customer gets a "we need to check this" page rather than "nothing was charged".
+- Orders live in `data/orders.json`, deliberately **not** `catalog.json` — the admin PUT rewrites
+  the catalog wholesale and would otherwise destroy an order mid-callback. Status transitions are
+  monotonic: a paid order never downgrades.
+- New routes: `/api/pay/create`, `/api/pay/status`, `/api/pay/webhook`, `/pay/return`,
+  `/api/admin/orders`. `/api/book-token` (the ₹2,000 stub) is deleted.
+- New admin **Payments** tab (read-only, with a per-order re-check) and a **Booking ladder**
+  block in Settings showing a live worked example.
+- Terms and Refund Policy rewritten around the three stages, including a clause stating the hold
+  is adjusted against the advance and refundable under the cancellation slab.
+- **Fails closed:** with no PhonePe credentials in the environment, no Pay button renders anywhere.
+
 ### 2026-08-01 — Fixed: admin edits and new photos not showing on the live site until saved twice
 - Asked for: the owner reported that changes made in the admin panel (especially newly uploaded photos) would not appear on the live website right away. They had to go back into the admin panel and click Save a second time before the change showed up. They also asked to make sure admin data itself was not being wiped by deploys, and set the new rule above (never push without asking first).
 - Investigated: checked the VPS directly over SSH. The admin data (prices, bookings, uploaded photos) was safe and not being lost — it survives deploys correctly, the storage folders are set up right. The real problem was different: the website's pages were being built once and reused (cached) instead of checking for new data on every visit. The signal that tells the site "go get fresh data" was being sent, but it did not always take effect before the next visitor arrived, which is why the first Save often looked like it did nothing and a second Save "fixed" it.

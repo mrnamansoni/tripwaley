@@ -52,7 +52,17 @@ export interface Settings {
   whatsapp: string;
   whatsappLink: string;
   defaultCity: string;
+  /** the advance that CONFIRMS a booking, as a % of the trip total. Collected
+   *  by the team offline, roughly a week before departure. */
   advancePercent: number;
+  /** what the website charges to HOLD a seat, as a % of the trip total. This is
+   *  stage one of three and the only stage collected online; it counts toward
+   *  advancePercent rather than adding to it. Optional for back-compat with a
+   *  catalog written before payments existed — read it through holdRates(). */
+  holdPercent?: number;
+  /** GST charged on the HOLD FEE itself, not on the trip total. 0 turns it off
+   *  (set it to 0 if displayed trip prices are already GST-inclusive). */
+  gstPercent?: number;
   refundPolicy: string;
   instagram: string;
   announcement: string;
@@ -100,6 +110,11 @@ export interface GrievanceOfficer {
   /** e.g. "Monday - Friday (9:00 - 18:00 IST)" */
   hours: string;
 }
+
+/* The booking ladder's defaults, used when a catalog predates payments.
+   5% + 5% GST holds the seat online; 20% (inclusive of that 5%) confirms it. */
+export const DEFAULT_HOLD_PERCENT = 5;
+export const DEFAULT_GST_PERCENT = 5;
 
 export const DEFAULT_GRIEVANCE: GrievanceOfficer = {
   name: "",

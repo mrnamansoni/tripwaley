@@ -8,7 +8,44 @@ import { useState } from "react";
 import { useAdmin, Btn, Head, Field, Area, input, label } from "./ui";
 import MediaPicker from "./MediaPicker";
 import type { AnnouncementBar, GrievanceOfficer, LeadPopup, Seo, Socials, Settings, VideoTestimonial } from "@/lib/types";
-import { DEFAULT_GRIEVANCE, DEFAULT_VIDEO_TESTIMONIAL } from "@/lib/types";
+import { DEFAULT_GRIEVANCE, DEFAULT_VIDEO_TESTIMONIAL, DEFAULT_HOLD_PERCENT, DEFAULT_GST_PERCENT } from "@/lib/types";
+import { holdQuote, formatPaise } from "@/lib/money";
+
+/* The ladder is three percentages that interact, and getting them wrong is a
+   money bug on every booking. So show what they actually do to a real amount
+   rather than asking the admin to hold the arithmetic in their head. */
+function LadderPreview({ holdPercent, gstPercent, advancePercent }: { holdPercent: number; gstPercent: number; advancePercent: number }) {
+  const SAMPLE = 18000;
+  const q = holdQuote({ total: SAMPLE, holdPercent, gstPercent, advancePercent });
+  const rows: [string, string][] = [
+    ["charged on the website", formatPaise(q.holdTotalPaise)],
+    [`↳ ${q.holdPercent}% hold`, formatPaise(q.holdBasePaise)],
+    [`↳ ${q.gstPercent}% GST on the hold`, formatPaise(q.holdGstPaise)],
+    ["your team collects later", formatPaise(q.advanceBalancePaise)],
+    ["due at departure", formatPaise(q.departureBalancePaise)],
+  ];
+  return (
+    <div className="mt-4 rounded-xl border border-white/10 bg-black/20 p-4">
+      <p className="font-mono text-[0.6rem] uppercase tracking-[0.18em] text-white/40">
+        on a {formatPaise(SAMPLE * 100)} booking
+      </p>
+      <dl className="mt-3 space-y-1.5">
+        {rows.map(([k, v]) => (
+          <div key={k} className={`flex items-baseline justify-between gap-4 ${k.startsWith("↳") ? "pl-3 text-white/45" : "text-white/80"}`}>
+            <dt className="text-[0.8rem]">{k}</dt>
+            <dd className="font-mono text-[0.8rem] font-bold tabular-nums">{v}</dd>
+          </div>
+        ))}
+      </dl>
+      {q.advanceBalancePaise < 0 && (
+        <p className="mt-3 text-[0.78rem] font-semibold text-amber-300">
+          Hold % is above advance % — the hold counts toward the advance, so this leaves
+          your team collecting a negative amount. Saving will be refused.
+        </p>
+      )}
+    </div>
+  );
+}
 
 const DEF_BAR: AnnouncementBar = { enabled: false, text: "Monsoon batches are filling fast — hold a seat free for 24h.", href: "/trips", emoji: "🎒" };
 const DEF_POPUP: LeadPopup = { enabled: false, delaySeconds: 15, title: "Wait — grab your seat", subtitle: "Drop your number and we'll send this week's departures + a first-timer discount.", incentive: "₹500 off your first batch", cta: "Send me departures", image: "/images/group-mountains.jpg" };
@@ -62,11 +99,30 @@ export default function SettingsEditor() {
                 {data.catalog.cities.filter((c) => c.priced).map((c) => <option key={c.slug} value={c.slug}>{c.name}</option>)}
               </select>
             </label>
-            <Field l="advance %" v={s.advancePercent} type="number" on={(v) => setS({ ...s, advancePercent: Number(v) || 0 })} />
             <Field l="n8n / CRM webhook url" v={s.n8nWebhook ?? ""} on={(v) => setS({ ...s, n8nWebhook: v })} />
             <div className="sm:col-span-2"><Field l="address" v={s.address ?? ""} on={(v) => setS({ ...s, address: v })} /></div>
             <div className="sm:col-span-2"><Area l="refund policy line" v={s.refundPolicy} on={(v) => setS({ ...s, refundPolicy: v })} rows={2} /></div>
             <div className="sm:col-span-2"><Area l="announcement (footer note)" v={s.announcement} on={(v) => setS({ ...s, announcement: v })} rows={2} /></div>
+          </div>
+        </section>
+
+        {/* booking ladder — the three stages money arrives in */}
+        <section>
+          <p className={label}>Booking ladder</p>
+          <div className={`mt-3 ${card}`}>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <Field l="hold % (charged on website)" v={s.holdPercent ?? DEFAULT_HOLD_PERCENT} type="number"
+                on={(v) => setS({ ...s, holdPercent: Number(v) || 0 })} />
+              <Field l="GST % (on the hold fee)" v={s.gstPercent ?? DEFAULT_GST_PERCENT} type="number"
+                on={(v) => setS({ ...s, gstPercent: Number(v) || 0 })} />
+              <Field l="advance % (confirms booking)" v={s.advancePercent} type="number"
+                on={(v) => setS({ ...s, advancePercent: Number(v) || 0 })} />
+            </div>
+            <LadderPreview
+              holdPercent={s.holdPercent ?? DEFAULT_HOLD_PERCENT}
+              gstPercent={s.gstPercent ?? DEFAULT_GST_PERCENT}
+              advancePercent={s.advancePercent}
+            />
           </div>
         </section>
 

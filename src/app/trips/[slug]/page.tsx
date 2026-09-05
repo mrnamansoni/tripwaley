@@ -10,6 +10,7 @@ import FilmStrip from "@/components/site/FilmStrip";
 import CaptainFeed from "@/components/site/CaptainFeed";
 import WeatherNow from "@/components/site/WeatherNow";
 import BookingBar, { type BarDeparture, type BarPrices } from "@/components/site/BookingBar";
+import { phonepeConfigured } from "@/lib/phonepe";
 import MoreTrips from "@/components/site/MoreTrips";
 import SiteMedia from "@/components/site/SiteMedia";
 import RichText from "@/components/site/RichText";
@@ -18,6 +19,7 @@ import TrackTripView from "@/components/site/TrackTripView";
 import {
   getCities,
   getSettings,
+  holdRates,
   getLivePackages,
   getPackage,
   citiesPricedFor,
@@ -91,6 +93,9 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
   if (!pkg || pkg.status !== "live") notFound();
 
   const settings = getSettings();
+  const rates = holdRates();
+  // no gateway configured → no Pay button anywhere, rather than one that 500s
+  const payEnabled = phonepeConfigured();
   const cities = getCities();
   const images = packageImages(pkg);
   const priced = citiesPricedFor(slug);
@@ -196,8 +201,8 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
                 <p className="mt-1 text-sm font-bold text-ink">{pkg.departureHubs || "Delhi + 9 cities"}</p>
               </div>
               <div>
-                <p className="text-[0.58rem] font-bold uppercase tracking-[0.25em] text-ink/40">advance to hold</p>
-                <p className="mt-1 text-sm font-bold text-brand">{settings.advancePercent}% · rest later</p>
+                <p className="text-[0.58rem] font-bold uppercase tracking-[0.25em] text-ink/40">to hold a seat</p>
+                <p className="mt-1 text-sm font-bold text-brand">{rates.holdPercent}% · rest later</p>
               </div>
             </div>
           </div>
@@ -329,7 +334,10 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
               </div>
             </div>
             <p className="mt-4 text-xs text-ink/45">
-              Hold any seat with a {settings.advancePercent}% advance. {settings.refundPolicy}
+              Hold any seat by paying {rates.holdPercent}% online
+              {rates.gstPercent > 0 ? ` (plus ${rates.gstPercent}% GST on that amount)` : ""}. Our team
+              collects the rest of your {rates.advancePercent}% advance closer to the date, and the
+              balance is due at departure. {settings.refundPolicy}
             </p>
           </section>
         )}
@@ -400,6 +408,8 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
         departures={barDeps}
         prices={barPrices}
         whatsapp={settings.whatsapp.replace(/\D/g, "")}
+        rates={rates}
+        payEnabled={payEnabled}
       />
     </CityProvider>
   );

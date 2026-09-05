@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import LegalPage, { Clause } from "@/components/site/LegalPage";
-import { getSettings } from "@/lib/catalog";
+import { getSettings, holdRates } from "@/lib/catalog";
 
 export const metadata: Metadata = {
   title: "Terms & Conditions | Tripwaley",
@@ -9,12 +9,12 @@ export const metadata: Metadata = {
     "The terms that apply when you book a Tripwaley group departure — booking and payment, cancellation, conduct, liability and governing law.",
 };
 
-const UPDATED = "2026-08-18";
+const UPDATED = "2026-09-05";
 
 export default function TermsPage() {
   const s = getSettings();
   const entity = s.legalName || s.brand;
-  const advance = s.advancePercent;
+  const { holdPercent: hold, gstPercent: gst, advancePercent: advance } = holdRates();
 
   return (
     <LegalPage
@@ -22,7 +22,7 @@ export default function TermsPage() {
       title="Terms & Conditions"
       updated={UPDATED}
       grievance
-      intro={`These terms govern your booking with ${entity}. By holding a seat, paying an advance or travelling on one of our departures, you agree to what is written here.`}
+      intro={`These terms govern your booking with ${entity}. By holding a seat, paying towards a booking or travelling on one of our departures, you agree to what is written here.`}
     >
       <Clause n={1} title="Who we are">
         {/* The electronic-record framing is what an Indian payment gateway
@@ -66,27 +66,42 @@ export default function TermsPage() {
         </p>
       </Clause>
 
-      <Clause n={3} title="Holding a seat, and confirming it">
+      <Clause n={3} title="Holding a seat, confirming it, and paying the balance">
+        <p>
+          Payment happens in three stages. <strong>Only the first is collected on this website.</strong>
+        </p>
         <ul>
           <li>
-            <strong>Holding is free.</strong> A hold blocks your seat for 24 hours. No payment is taken and no
-            contract is formed by a hold alone.
+            <strong>Stage 1 — a hold, paid online.</strong> You pay{" "}
+            <strong>{hold}% of the total trip cost</strong>
+            {gst > 0 ? (
+              <>
+                , plus <strong>{gst}% GST on that amount</strong>
+              </>
+            ) : null}
+            , through our payment gateway. This holds your seat. The amount is{" "}
+            <strong>adjusted against your advance</strong> — it counts towards the trip, not on top of it.
+            A hold on its own does not confirm a booking.
           </li>
           <li>
-            <strong>An advance confirms it.</strong> A booking is confirmed only when we receive the advance
-            of <strong>{advance}% of the total trip cost</strong> and issue a written confirmation by email or
-            WhatsApp.
+            <strong>Stage 2 — the advance, which confirms.</strong> Your booking is confirmed only when your
+            total advance reaches <strong>{advance}% of the total trip cost</strong> and we issue a written
+            confirmation by email or WhatsApp. Our team collects the difference — the remaining{" "}
+            {advance - hold}% of the trip cost — usually about a week before departure.
           </li>
           <li>
-            <strong>The balance is due before departure.</strong> The remaining {100 - advance}% must be paid
-            by the date stated on your confirmation. Unpaid balances may result in the seat being released
-            under clause 6.
+            <strong>Stage 3 — the balance, at departure.</strong> The remaining {100 - advance}% is payable at
+            departure, or by the date stated on your confirmation. Unpaid balances may result in the seat
+            being released under clause 6.
           </li>
         </ul>
         <p>
-          All prices are in Indian Rupees (INR) and include applicable taxes unless the trip page says
-          otherwise. Prices quoted on the site may change until a booking is confirmed; once confirmed, your
-          price is locked.
+          All prices are in Indian Rupees (INR).
+          {gst > 0
+            ? " The GST shown on your hold payment is charged in addition to the trip price, and the exact amount is displayed to you before you pay."
+            : ""}{" "}
+          Prices quoted on the site may change until a booking is confirmed; once confirmed, your price is
+          locked.
         </p>
       </Clause>
 
@@ -99,6 +114,12 @@ export default function TermsPage() {
         <p>
           If a payment fails, is reversed, or is disputed with your bank, the booking is not confirmed and the
           seat returns to inventory.
+        </p>
+        <p>
+          <strong>Your hold payment is refundable.</strong> If you cancel, the {hold}% you paid online is
+          refunded on the same basis as any other money paid towards the trip, under the slab in our{" "}
+          <Link href="/refund-policy">Cancellation &amp; Refund Policy</Link>. GST already remitted to the
+          government is refunded only to the extent we are able to recover it.
         </p>
       </Clause>
 

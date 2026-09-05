@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import LegalPage, { Clause, PolicyPreamble } from "@/components/site/LegalPage";
-import { getSettings } from "@/lib/catalog";
+import { getSettings, holdRates } from "@/lib/catalog";
 
 export const metadata: Metadata = {
   title: "Cancellation & Refund Policy | Tripwaley",
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     "Cancellation windows, refund slabs, how refunds are processed and how long they take for Tripwaley group departures.",
 };
 
-const UPDATED = "2026-08-18";
+const UPDATED = "2026-09-05";
 
 /* The refund slab. Kept as data, not prose, because a payment gateway
    reviewer and a traveller both scan for the table — and because the owner
@@ -28,6 +28,7 @@ const TONE = {
 
 export default function RefundPolicyPage() {
   const s = getSettings();
+  const { holdPercent: hold, gstPercent: gst, advancePercent: advance } = holdRates();
   const entity = s.legalName || s.brand;
 
   return (
@@ -60,7 +61,21 @@ export default function RefundPolicyPage() {
         </p>
       </Clause>
 
-      <Clause n={3} title="Refund slab">
+      <Clause n={3} title="The hold you paid online">
+        <p>
+          The {hold}% you pay on this website{gst > 0 ? `, plus the ${gst}% GST charged on it,` : ""} holds
+          your seat. It is <strong>not a separate fee</strong> — it is adjusted against the{" "}
+          {advance}% advance that confirms your booking, and against the total cost of your trip.
+        </p>
+        <p>
+          <strong>It is refundable.</strong> If you cancel, it is treated as money already paid towards the
+          trip and returned under the slab below, exactly like any other payment. Where a trip is cancelled by
+          us, it is refunded in full. GST already remitted to the government is refunded only to the extent we
+          are able to recover it from the authorities.
+        </p>
+      </Clause>
+
+      <Clause n={4} title="Refund slab">
         <p>
           The percentage below applies to the <strong>total trip cost</strong> for the traveller being
           cancelled — not just the advance paid.
@@ -99,7 +114,7 @@ export default function RefundPolicyPage() {
         </p>
       </Clause>
 
-      <Clause n={4} title="How refunds are paid">
+      <Clause n={5} title="How refunds are paid">
         <ul>
           <li>
             Refunds go back to the <strong>original payment method</strong> — the same card, UPI ID or bank
@@ -116,7 +131,7 @@ export default function RefundPolicyPage() {
         </ul>
       </Clause>
 
-      <Clause n={5} title="If we cancel the departure">
+      <Clause n={6} title="If we cancel the departure">
         <p>
           If <strong>we</strong> cancel a batch — insufficient group size, unsafe road or weather conditions,
           permit refusal, or any reason on our side — you choose either:
@@ -131,16 +146,16 @@ export default function RefundPolicyPage() {
         </p>
       </Clause>
 
-      <Clause n={6} title="Changing your date instead of cancelling">
+      <Clause n={7} title="Changing your date instead of cancelling">
         <p>
           A one-time date change to another departure of the same trip is free if requested{" "}
           <strong>7 or more days before</strong> your original departure, subject to seats being available.
-          Inside 7 days, the slab in clause 3 applies instead.
+          Inside 7 days, the slab in clause 4 applies instead.
         </p>
         <p>If the new departure costs more, you pay the difference. If it costs less, we refund the difference.</p>
       </Clause>
 
-      <Clause n={7} title="Partly used trips and no-shows">
+      <Clause n={8} title="Partly used trips and no-shows">
         <p>
           Once a departure has begun, unused portions — a skipped stay, a meal not taken, an activity you opt
           out of, or leaving the trip early — are not refundable, because those costs are already committed on
@@ -152,7 +167,7 @@ export default function RefundPolicyPage() {
         </p>
       </Clause>
 
-      <Clause n={8} title="Removal from a trip">
+      <Clause n={9} title="Removal from a trip">
         <p>
           Where a traveller is removed from a departure under clause 7 of our{" "}
           <Link href="/terms">Terms &amp; Conditions</Link> — conduct endangering the group, illegal
@@ -161,7 +176,7 @@ export default function RefundPolicyPage() {
         </p>
       </Clause>
 
-      <Clause n={9} title="If the trip was not as described">
+      <Clause n={10} title="If the trip was not as described">
         <p>
           If an inclusion listed on your trip page was not delivered — a stay category, a named meal, or
           transport we committed to — report it to our customer service team within{" "}
@@ -170,11 +185,11 @@ export default function RefundPolicyPage() {
         <p>
           We investigate with the supplier concerned and take an appropriate decision. Where we got it wrong,
           we refund the value of the missing inclusion to your original payment method. This is separate from
-          the cancellation slab in clause 3.
+          the cancellation slab in clause 4.
         </p>
       </Clause>
 
-      <Clause n={10} title="Grievances">
+      <Clause n={11} title="Grievances">
         <p>
           If a refund has not reached you within the timelines above, write to us with your booking ID and we
           will trace it with the payment gateway and respond within 5 working days. Contact details are below.

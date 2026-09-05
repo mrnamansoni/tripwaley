@@ -17,7 +17,9 @@ import {
   packageImages,
   packageCategories,
   normalizeMediaUrl,
+  holdRates,
 } from "@/lib/catalog";
+import { phonepeConfigured } from "@/lib/phonepe";
 
 // every page reads admin-edited data (catalog.json, media, settings) straight
 // off disk on each request — force dynamic rendering everywhere so an admin
@@ -160,7 +162,15 @@ export default function RootLayout({
         <VideoAutoPause />
         <SmoothScroll>
           <SearchProvider items={searchItems}>
-            <BookingProvider trips={bookingTrips} whatsapp={settings.whatsapp}>{children}</BookingProvider>
+            <BookingProvider
+              trips={bookingTrips}
+              whatsapp={settings.whatsapp}
+              rates={holdRates()}
+              defaultCity={settings.defaultCity}
+              payEnabled={phonepeConfigured()}
+            >
+              {children}
+            </BookingProvider>
           </SearchProvider>
         </SmoothScroll>
       </body>

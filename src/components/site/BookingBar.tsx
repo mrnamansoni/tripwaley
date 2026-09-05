@@ -1,11 +1,18 @@
 "use client";
 
 /* THE BOOKING BAR — sticky on every package page.
-   City-aware live quote → batch picker → one tap: the lead is captured
-   via /api/book (→ n8n → CRM) and the visitor lands in WhatsApp with a
-   pre-written message. Payment (Razorpay, 40% advance) plugs into this
-   same flow at deploy time. A coupon, when applied, is priced by the
-   server — see CouponField and /api/coupon. */
+   City-aware live quote → batch picker → one tap.
+
+   Two ways out of the capture modal:
+     • Pay the hold online (PhonePe) — the seat is actually held
+     • Continue on WhatsApp — the lead is captured via /api/lead and a human
+       takes it from there
+
+   The pay route is offered only when the gateway is configured; otherwise the
+   WhatsApp path is the whole flow, exactly as before. Amounts shown here are
+   display only — /api/pay/create re-prices everything server-side and charges
+   from its own figure. A coupon is likewise priced by the server; see
+   CouponField and /api/coupon. */
 
 import { useMemo, useState } from "react";
 import { gsap } from "@/lib/gsap";
@@ -13,10 +20,12 @@ import { useCity } from "./CityProvider";
 import CouponField, { type AppliedCoupon } from "./CouponField";
 import { useModal } from "@/hooks/useModal";
 import { inr, shortDate, weekday } from "@/lib/types";
+import { holdQuote, formatPaise } from "@/lib/money";
 import { trackInitiateCheckout, trackLead } from "@/lib/analytics";
 
 export interface BarDeparture { date: string; citySlugs: string[] }
 export interface BarPrices { [citySlug: string]: { triple?: number; double?: number } }
+export interface BarRates { holdPercent: number; gstPercent: number; advancePercent: number }
 
 export default function BookingBar({
   packageSlug,
@@ -24,12 +33,17 @@ export default function BookingBar({
   departures,
   prices,
   whatsapp,
+  rates,
+  payEnabled = false,
 }: {
   packageSlug: string;
   packageName: string;
   departures: BarDeparture[];
   prices: BarPrices;
   whatsapp: string; // digits only, e.g. 919625330270
+  rates: BarRates;
+  /** false when PhonePe isn't configured — then no Pay button is rendered at all */
+  payEnabled?: boolean;
 }) {
   const { city } = useCity();
   const [occ, setOcc] = useState<"triple" | "double">("triple");
@@ -53,6 +67,49 @@ export default function BookingBar({
   const chosen = date || cityDeps[0]?.date || "";
 
   const validPhone = (p: string) => /^[6-9]\d{9}$/.test(p.replace(/[^\d]/g, "").slice(-10));
+
+  /* the hold, shown so the traveller knows the number before they commit.
+     One seat at a time in this bar, so the trip total is the seat price —
+     or the coupon's total when one is applied. */
+  const tripTotal = coupon?.total ?? seat ?? 0;
+  const quote = holdQuote({ total: tripTotal, ...rates });
+  const canPay = payEnabled && quote.chargeable;
+
+  /* pay → server prices it again, creates the order, hands back PhonePe's URL */
+  const payNow = async () => {
+    if (busy) return;
+    if (!validPhone(phone)) {
+      setErr("Enter a valid 10-digit mobile number.");
+      return;
+    }
+    setBusy(true);
+    setErr("");
+    trackInitiateCheckout({ slug: packageSlug, name: packageName, price: seat });
+
+    const res = await fetch("/api/pay/create", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        name,
+        phone,
+        packageSlug,
+        citySlug: city.slug,
+        date: chosen,
+        occupancy: occ,
+        pax: 1,
+        couponCode: coupon?.code ?? "",
+      }),
+    }).catch(() => null);
+
+    const json = await res?.json().catch(() => null);
+    if (!res?.ok || !json?.ok || !json.redirectUrl) {
+      setErr(json?.error ?? "Couldn't start the payment. Please try again, or use WhatsApp.");
+      setBusy(false);
+      return;
+    }
+    // leaving the site — keep the button in its busy state through the handover
+    window.location.href = json.redirectUrl;
+  };
 
   /* step 1: the CTA opens the capture modal (phone is the lead) */
   const openModal = () => {
@@ -112,7 +169,9 @@ export default function BookingBar({
           <div ref={dialogRef} className="w-full max-w-md rounded-3xl border border-white/12 bg-[#181614] p-6 shadow-card-lg sm:p-8">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-[0.6rem] font-bold uppercase tracking-[0.3em] text-gold">seat hold · 24h free</p>
+                <p className="text-[0.6rem] font-bold uppercase tracking-[0.3em] text-gold">
+                  {canPay ? `seat hold · ${quote.holdPercent}% now` : "seat hold · 24h free"}
+                </p>
                 <h3 className="mt-1.5 font-display text-2xl font-extrabold text-white">Where do we reach you?</h3>
               </div>
               <button type="button" onClick={() => setModal(false)} aria-label="Close" className="text-2xl leading-none text-white/40 hover:text-white">×</button>
@@ -121,7 +180,8 @@ export default function BookingBar({
               {packageName} · ex-{city.name} · {chosen ? `${weekday(chosen)}, ${shortDate(chosen)}` : "next batch"} · {occ}{seat != null ? ` · ${inr(seat)}/seat` : ""}
             </p>
 
-            <form onSubmit={(e) => { e.preventDefault(); confirm(); }} noValidate>
+            {/* Enter follows the PRIMARY button, whichever that currently is */}
+            <form onSubmit={(e) => { e.preventDefault(); if (canPay) payNow(); else confirm(); }} noValidate>
             <label className="mt-6 block text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white/45">
               Your name <span className="text-white/25">(optional)</span>
               <input
@@ -171,6 +231,21 @@ export default function BookingBar({
               </>
             )}
 
+            {canPay && (
+              <div className="mt-5 rounded-xl border border-white/12 bg-black/25 p-4">
+                <div className="flex items-baseline justify-between">
+                  <span className="text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white/45">pay now to hold</span>
+                  <span className="font-display text-2xl font-extrabold text-gold">{formatPaise(quote.holdTotalPaise)}</span>
+                </div>
+                <p className="mt-1.5 text-[0.68rem] leading-relaxed text-white/40">
+                  {quote.holdPercent}% of {inr(tripTotal)}
+                  {quote.holdGstPaise > 0 && <> + {quote.gstPercent}% GST</>} — counts toward your trip,
+                  not on top of it. Our team collects {formatPaise(quote.advanceBalancePaise)} closer to
+                  the date, and {formatPaise(quote.departureBalancePaise)} is due at departure.
+                </p>
+              </div>
+            )}
+
             {err && <p className="mt-2.5 text-sm font-semibold text-brand-bright">{err}</p>}
 
             <button
@@ -178,11 +253,26 @@ export default function BookingBar({
               disabled={busy}
               className="mt-6 w-full rounded-full bg-brand py-3.5 font-extrabold text-white shadow-red transition-colors hover:bg-brand-bright disabled:opacity-60"
             >
-              {busy ? "Holding your seat…" : "Confirm & continue on WhatsApp →"}
+              {busy
+                ? canPay ? "Opening secure payment…" : "Holding your seat…"
+                : canPay ? `Pay ${formatPaise(quote.holdTotalPaise)} & hold my seat →` : "Confirm & continue on WhatsApp →"}
             </button>
+
+            {canPay && (
+              <button
+                type="button"
+                onClick={confirm}
+                disabled={busy}
+                className="mt-3 w-full rounded-full border border-white/20 py-3 text-sm font-bold text-white/70 transition-colors hover:border-gold hover:text-gold disabled:opacity-60"
+              >
+                Or talk to us on WhatsApp first
+              </button>
+            )}
             </form>
             <p className="mt-3 text-center text-[0.62rem] text-white/35">
-              No payment now · we hold your seat 24h · reply STOP anytime
+              {canPay
+                ? "Secure payment by PhonePe · UPI, card or netbanking"
+                : "No payment now · we hold your seat 24h · reply STOP anytime"}
             </p>
           </div>
         </div>

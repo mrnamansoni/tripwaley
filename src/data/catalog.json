@@ -5,6 +5,8 @@
   "whatsappLink": "https://wa.me/919625330270",
   "defaultCity": "delhi",
   "advancePercent": 20,
+  "holdPercent": 5,
+  "gstPercent": 5,
   "refundPolicy": "Free cancellation until 7 days before departure.",
   "instagram": "https://instagram.com/tripwaley",
   "announcement": "Monsoon batches are live \u2014 every departure guaranteed.",
@@ -5935,7 +5937,7 @@
    "published": true
   }
  ],
- "seedVersion": 8,
+ "seedVersion": 9,
  "coupons": [
   {
    "code": "FIRSTTRIP",

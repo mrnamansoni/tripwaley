@@ -14,7 +14,7 @@ import {
   parsePromises,
   parseLines,
 } from "@/components/site/TripTypeSections";
-import { getCities, getSettings, slot, slotOne, text } from "@/lib/catalog";
+import { getCities, getSettings, holdRates, slot, slotOne, text } from "@/lib/catalog";
 import { buildTypeCards, categoryStats } from "@/lib/tripType";
 
 export const metadata: Metadata = {
@@ -48,7 +48,7 @@ export default function HoneymoonPage() {
           stats={[
             { value: `${stats.trips}`, label: "curated trips" },
             { value: "2", label: "seats. always." },
-            { value: `${settings.advancePercent}%`, label: "to reserve" },
+            { value: `${holdRates().holdPercent}%`, label: "to hold a seat" },
           ]}
           theme={{
             // a rose wash rather than gold — same brand red, different mood

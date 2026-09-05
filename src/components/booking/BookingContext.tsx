@@ -20,6 +20,9 @@ export interface BookingTrip {
   priceFrom: number; // 0 = "on request"
 }
 
+/** the three percentages the booking ladder runs on, resolved server-side */
+export interface BookingRates { holdPercent: number; gstPercent: number; advancePercent: number }
+
 interface BookingState {
   open: (mode: BookingMode, trip?: string) => void;
   /** the real, admin-configured WhatsApp number (digits) — so header/nav
@@ -39,7 +42,23 @@ export function useBooking(): BookingState {
 /** Global provider so any section (hero card, bento, CTA band) can launch booking.
  *  `trips` is resolved server-side (real packages + next departures) and handed
  *  to the modal so the dropdown never shows placeholder destinations. */
-export function BookingProvider({ children, trips = [], whatsapp = "" }: { children: ReactNode; trips?: BookingTrip[]; whatsapp?: string }) {
+export function BookingProvider({
+  children,
+  trips = [],
+  whatsapp = "",
+  rates,
+  defaultCity = "",
+  payEnabled = false,
+}: {
+  children: ReactNode;
+  trips?: BookingTrip[];
+  whatsapp?: string;
+  rates: BookingRates;
+  /** the city a modal-opened hold is priced from — the modal has no city picker */
+  defaultCity?: string;
+  /** false when PhonePe isn't configured; then the modal offers no payment */
+  payEnabled?: boolean;
+}) {
   const [modal, setModal] = useState<{ mode: BookingMode; trip?: string } | null>(null);
 
   const open = useCallback((mode: BookingMode, trip?: string) => {
@@ -63,6 +82,9 @@ export function BookingProvider({ children, trips = [], whatsapp = "" }: { child
           mode={modal.mode}
           initialTrip={modal.trip}
           trips={trips}
+          rates={rates}
+          defaultCity={defaultCity}
+          payEnabled={payEnabled}
           onClose={() => setModal(null)}
         />
       )}

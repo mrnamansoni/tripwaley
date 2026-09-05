@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { formatINR } from "@/lib/data";
 import { trackInitiateCheckout, trackLead } from "@/lib/analytics";
-import type { BookingMode, BookingTrip } from "./BookingContext";
+import { holdQuote, formatPaise } from "@/lib/money";
+import type { BookingMode, BookingTrip, BookingRates } from "./BookingContext";
 
 type Phase = "form" | "submitting" | "held" | "paying" | "confirmed";
 
@@ -11,20 +12,30 @@ interface Props {
   mode: BookingMode;
   initialTrip?: string;
   trips: BookingTrip[];
+  rates: BookingRates;
+  /** the modal has no city picker, so a hold started here prices from this city */
+  defaultCity: string;
+  payEnabled: boolean;
   onClose: () => void;
 }
 
 const priceLabel = (n: number) => (n > 0 ? `from ${formatINR(n)}` : "on request");
 
 /**
- * Conversion modal: "Hold My Seat" (free 24h hold) and "Pay Token & Book".
- * The hold submits to /api/lead — the SAME durable pipeline the booking bar
- * uses (persists the lead + forwards to n8n/CRM). The optional token step
- * (/api/book-token) is the payment-gateway integration point.
+ * Conversion modal: a free 24h hold, then the option to pay and actually hold
+ * the seat. The hold submits to /api/lead — the SAME durable pipeline the
+ * booking bar uses (persists the lead + forwards to n8n/CRM).
+ *
+ * The payment step posts to /api/pay/create, which re-prices the trip from the
+ * catalog and charges from its own figure. The amount rendered here is display
+ * only; this component never sends a price.
  */
-export default function HoldSeatModal({ mode, initialTrip, trips, onClose }: Props) {
+export default function HoldSeatModal({ mode, initialTrip, trips, rates, defaultCity, payEnabled, onClose }: Props) {
   const [phase, setPhase] = useState<Phase>("form");
   const [error, setError] = useState<string | null>(null);
+  /* the form is unmounted once the hold succeeds, so the contact details are
+     kept here — the payment step needs them and must not ask twice */
+  const [lead, setLead] = useState({ name: "", phone: "" });
   const [trip, setTrip] = useState(
     (initialTrip && trips.some((t) => t.slug === initialTrip) ? initialTrip : trips[0]?.slug) ?? ""
   );
@@ -33,6 +44,10 @@ export default function HoldSeatModal({ mode, initialTrip, trips, onClose }: Pro
 
   const selected: BookingTrip =
     trips.find((t) => t.slug === trip) ?? trips[0] ?? { slug: "", name: "your trip", dateLabel: "next batch", priceFrom: 0 };
+
+  /* what the hold would cost — display only; /api/pay/create prices it again */
+  const quote = holdQuote({ total: selected.priceFrom, ...rates });
+  const canPay = payEnabled && quote.chargeable;
 
   /* Focus management + Escape to close + scroll lock */
   useEffect(() => {
@@ -71,6 +86,8 @@ export default function HoldSeatModal({ mode, initialTrip, trips, onClose }: Pro
       setError("Enter a valid 10-digit Indian mobile number.");
       return;
     }
+    const name = String(data.get("name") ?? "").trim();
+    setLead({ name, phone });
     setPhase("submitting");
     try {
       // the SAME durable pipeline the booking bar uses: persists the lead to the
@@ -80,7 +97,7 @@ export default function HoldSeatModal({ mode, initialTrip, trips, onClose }: Pro
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: String(data.get("name") ?? ""),
+          name,
           phone,
           package: selected.slug,
           date: selected.dateLabel,
@@ -97,19 +114,32 @@ export default function HoldSeatModal({ mode, initialTrip, trips, onClose }: Pro
     }
   }
 
-  async function payToken() {
+  async function payHold() {
     setPhase("paying");
+    setError(null);
     try {
-      const res = await fetch("/api/book-token", {
+      const res = await fetch("/api/pay/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ trip: selected.slug, amount: 2000 }),
+        body: JSON.stringify({
+          name: lead.name,
+          phone: lead.phone,
+          packageSlug: selected.slug,
+          citySlug: defaultCity,
+          date: selected.dateLabel,
+          occupancy: "triple",
+          pax: 1,
+        }),
       });
-      if (!res.ok) throw new Error("token failed");
-      setPhase("confirmed");
-    } catch {
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json?.ok || !json.redirectUrl) {
+        throw new Error(json?.error ?? "Payment could not be started.");
+      }
+      // hand over to PhonePe; /pay/return decides what actually happened
+      window.location.href = json.redirectUrl;
+    } catch (e) {
       setPhase("held");
-      setError("Payment gateway hiccup — please try again.");
+      setError(e instanceof Error ? e.message : "Payment gateway hiccup — please try again.");
     }
   }
 
@@ -238,26 +268,42 @@ export default function HoldSeatModal({ mode, initialTrip, trips, onClose }: Pro
             </h2>
             <p className="mt-2 text-sm text-ink/65">
               Your seat on <strong>{selected.name} · {selected.dateLabel}</strong> is
-              blocked for the next <strong>24 hours</strong>. Lock it in with a token —
-              fully adjusted in your trip price.
+              blocked for the next <strong>24 hours</strong>.
+              {canPay ? " Lock it in now — this amount counts toward your trip, not on top of it." : " A trip captain will call you shortly."}
             </p>
+
+            {canPay && (
+              <div className="mt-5 rounded-xl border border-line bg-cream px-4 py-3 text-left">
+                <div className="flex items-baseline justify-between">
+                  <span className="text-[0.6rem] font-bold uppercase tracking-[0.22em] text-ink/45">pay now to hold</span>
+                  <span className="font-display text-xl font-extrabold text-brand">{formatPaise(quote.holdTotalPaise)}</span>
+                </div>
+                <p className="mt-1 text-[0.68rem] leading-relaxed text-ink/50">
+                  {quote.holdPercent}% of the trip{quote.holdGstPaise > 0 && <> + {quote.gstPercent}% GST</>}.
+                  The rest of your {quote.advancePercent}% advance is collected by our team closer to the
+                  date; the balance is due at departure.
+                </p>
+              </div>
+            )}
             {error && (
               <p role="alert" className="mt-3 rounded-lg bg-brand/10 px-3 py-2 text-sm font-medium text-brand">
                 {error}
               </p>
             )}
-            <button
-              onClick={payToken}
-              disabled={phase === "paying"}
-              className="mt-6 w-full rounded-full bg-brand px-6 py-4 text-base font-bold text-white shadow-red transition-all hover:bg-brand-bright active:scale-[0.98] disabled:opacity-60"
-            >
-              {phase === "paying" ? "Opening secure payment…" : "Pay ₹2,000 token & book"}
-            </button>
+            {canPay && (
+              <button
+                onClick={payHold}
+                disabled={phase === "paying"}
+                className="mt-6 w-full rounded-full bg-brand px-6 py-4 text-base font-bold text-white shadow-red transition-all hover:bg-brand-bright active:scale-[0.98] disabled:opacity-60"
+              >
+                {phase === "paying" ? "Opening secure payment…" : `Pay ${formatPaise(quote.holdTotalPaise)} & hold my seat`}
+              </button>
+            )}
             <button
               onClick={onClose}
-              className="mt-3 w-full rounded-full border border-line bg-card px-6 py-3.5 text-sm font-semibold text-ink/70 transition-colors hover:border-brand hover:text-brand"
+              className={`w-full rounded-full border border-line bg-card px-6 py-3.5 text-sm font-semibold text-ink/70 transition-colors hover:border-brand hover:text-brand ${canPay ? "mt-3" : "mt-6"}`}
             >
-              I&apos;ll decide within 24h
+              {canPay ? "I'll decide within 24h" : "Done"}
             </button>
           </div>
         )}

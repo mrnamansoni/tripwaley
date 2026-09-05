@@ -21,7 +21,7 @@ import { readCatalog as readCatalogRaw, readReviews as readReviewsRaw } from "./
 const readCatalog = cache(readCatalogRaw);
 const readReviews = cache(readReviewsRaw);
 import type { BlogPost, Captain, City, CollegeTrip, Coupon, Creator, CreatorPose, CreatorTrip, CreatorTripDate, Departure, Faq, Package, PriceRule, Review, Settings, TripCategory, VideoTestimonial, WireEntry } from "./types";
-import { DEFAULT_CAPTAINS, normalizeCaptain, normalizeCollegeTrip, normalizeCouponCode, resolveSlot as resolveSlotPure, resolveContent as resolveContentPure, resolvePageSection, minRate, inCategory, normalizeCreator, packageImages, resolveFigure, DEFAULT_FAQS, DEFAULT_VIDEO_TESTIMONIAL } from "./types";
+import { DEFAULT_CAPTAINS, DEFAULT_HOLD_PERCENT, DEFAULT_GST_PERCENT, normalizeCaptain, normalizeCollegeTrip, normalizeCouponCode, resolveSlot as resolveSlotPure, resolveContent as resolveContentPure, resolvePageSection, minRate, inCategory, normalizeCreator, packageImages, resolveFigure, DEFAULT_FAQS, DEFAULT_VIDEO_TESTIMONIAL } from "./types";
 import {
   collections as collectionDefaults,
   galleryPhotos as galleryDefaults,
@@ -82,6 +82,19 @@ export const getGalleryPhotos = (): { src: string; label: string }[] => {
 /* ------------------------------------------------ accessors */
 
 export const getSettings = (): Settings => readCatalog().settings;
+
+/** The three percentages the booking ladder runs on, resolved to real numbers.
+ *  holdPercent/gstPercent are optional on Settings so a catalog written before
+ *  payments existed still type-checks — this is the one place that decides what
+ *  they mean when absent, so no caller has to remember a fallback. */
+export const holdRates = (): { holdPercent: number; gstPercent: number; advancePercent: number } => {
+  const s = getSettings();
+  return {
+    holdPercent: s.holdPercent ?? DEFAULT_HOLD_PERCENT,
+    gstPercent: s.gstPercent ?? DEFAULT_GST_PERCENT,
+    advancePercent: s.advancePercent,
+  };
+};
 
 /** the destinations-page video testimonial, merged over sensible defaults.
  *  Empty text fields fall back to the default (a plain spread would let a

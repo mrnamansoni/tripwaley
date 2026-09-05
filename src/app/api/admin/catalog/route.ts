@@ -62,6 +62,14 @@ function validate(section: string, data: unknown): string | null {
       const s = data as Record<string, unknown>;
       if (!isStr(s.whatsapp) || !isStr(s.brand) || !isStr(s.defaultCity)) return "settings missing required fields";
       if (!isNum(s.advancePercent) || s.advancePercent < 0 || s.advancePercent > 100) return "advancePercent must be 0–100";
+      for (const k of ["holdPercent", "gstPercent"] as const) {
+        if (s[k] !== undefined && (!isNum(s[k]) || (s[k] as number) < 0 || (s[k] as number) > 100)) return `${k} must be 0–100`;
+      }
+      // the online hold is stage one OF the advance, so it cannot exceed it —
+      // otherwise the "still to collect" figure goes negative on every trip
+      if (isNum(s.holdPercent) && s.holdPercent > (s.advancePercent as number)) {
+        return "holdPercent cannot exceed advancePercent — the hold counts toward the advance";
+      }
       return null;
     }
     case "cities":
