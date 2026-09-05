@@ -22,6 +22,17 @@ export function useModal<T extends HTMLElement>(open: boolean, onClose: () => vo
   // where focus was before the dialog opened, so it can be handed back
   const restoreTo = useRef<HTMLElement | null>(null);
 
+  /* onClose is almost always an inline arrow, so it is a NEW function on every
+     render. If the effect below depended on it, every keystroke in the dialog
+     would re-render, tear the effect down and set it up again — the teardown
+     restoring focus, the setup moving focus to the first control. That is
+     exactly the reported bug: typing a phone number kicked focus to the ×
+     button after every character. Hold it in a ref so the effect runs once. */
+  const close = useRef(onClose);
+  useEffect(() => {
+    close.current = onClose;
+  }, [onClose]);
+
   useEffect(() => {
     if (!open) return;
     const root = ref.current;
@@ -35,7 +46,7 @@ export function useModal<T extends HTMLElement>(open: boolean, onClose: () => vo
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.stopPropagation();
-        onClose();
+        close.current();
         return;
       }
       if (e.key !== "Tab" || !root) return;
@@ -62,7 +73,8 @@ export function useModal<T extends HTMLElement>(open: boolean, onClose: () => vo
       document.removeEventListener("keydown", onKey, true);
       restoreTo.current?.focus?.();
     };
-  }, [open, onClose]);
+    // deliberately NOT depending on onClose — see the ref above
+  }, [open]);
 
   return ref;
 }

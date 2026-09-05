@@ -14,7 +14,7 @@
    from its own figure. A coupon is likewise priced by the server; see
    CouponField and /api/coupon. */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { gsap } from "@/lib/gsap";
 import { useCity } from "./CityProvider";
 import CouponField, { type AppliedCoupon } from "./CouponField";
@@ -26,6 +26,9 @@ import { trackInitiateCheckout, trackLead } from "@/lib/analytics";
 export interface BarDeparture { date: string; citySlugs: string[] }
 export interface BarPrices { [citySlug: string]: { triple?: number; double?: number } }
 export interface BarRates { holdPercent: number; gstPercent: number; advancePercent: number }
+
+/** dispatch this to open the booking modal from anywhere on the page */
+export const BOOK_EVENT = "tw:book";
 
 export default function BookingBar({
   packageSlug,
@@ -62,7 +65,14 @@ export default function BookingBar({
     return (mine.length ? mine : departures).slice(0, 6);
   }, [departures, city.slug]);
 
-  const rule = prices[city.slug] ?? Object.values(prices)[0];
+  /* NO cross-city fallback.
+     This used to read `prices[city.slug] ?? Object.values(prices)[0]`, so a city
+     with no price rule silently displayed some OTHER city's rate — the bar said
+     "ex-Guwahati · ₹5,000/seat" using Delhi's price. The server prices from the
+     catalog and correctly refuses ("this trip is priced on request"), so the
+     visitor filled in the whole form and was rejected at the payment step.
+     An unpriced city must read as unpriced here too. */
+  const rule = prices[city.slug];
   const seat = rule?.[occ] ?? rule?.triple ?? rule?.double;
   const chosen = date || cityDeps[0]?.date || "";
 
@@ -110,6 +120,23 @@ export default function BookingBar({
     // leaving the site — keep the button in its busy state through the handover
     window.location.href = json.redirectUrl;
   };
+
+  /* Other parts of the page can open this bar's modal — the creator trip page's
+     per-date cards do, so "Request this seat" books instead of opening WhatsApp.
+     A window event rather than context: the callers are server-rendered markup
+     far from this tree, and a one-line dispatch beats threading a provider
+     through pages that otherwise need no client state. */
+  useEffect(() => {
+    const onBook = (e: Event) => {
+      const detail = (e as CustomEvent<{ date?: string }>).detail;
+      if (detail?.date) setDate(detail.date);
+      setErr("");
+      setModal(true);
+      trackInitiateCheckout({ slug: packageSlug, name: packageName, price: seat });
+    };
+    window.addEventListener(BOOK_EVENT, onBook);
+    return () => window.removeEventListener(BOOK_EVENT, onBook);
+  }, [packageSlug, packageName, seat]);
 
   /* step 1: the CTA opens the capture modal (phone is the lead) */
   const openModal = () => {
@@ -229,6 +256,18 @@ export default function BookingBar({
                   </div>
                 )}
               </>
+            )}
+
+            {/* an unpriced city is now honest about it, instead of showing another
+                city's rate and failing at the payment step */}
+            {seat == null && (
+              <div className="mt-5 rounded-xl border border-gold/25 bg-gold/10 p-4">
+                <p className="text-sm font-bold text-gold">No online rate from {city.name} yet.</p>
+                <p className="mt-1 text-[0.72rem] leading-relaxed text-white/55">
+                  We price this trip individually from here. Send your number and we&apos;ll come back
+                  with a quote — or switch your boarding city in the bar below to book instantly.
+                </p>
+              </div>
             )}
 
             {canPay && (

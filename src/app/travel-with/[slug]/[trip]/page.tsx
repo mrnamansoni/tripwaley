@@ -4,6 +4,9 @@ import { notFound } from "next/navigation";
 import Navbar from "@/components/sections/Navbar";
 import CityProvider from "@/components/site/CityProvider";
 import CurtainFooter from "@/components/site/CurtainFooter";
+import BookingBar from "@/components/site/BookingBar";
+import BookSeatButton from "@/components/site/BookSeatButton";
+import { bookingBarProps } from "@/lib/bookingProps";
 import SiteMedia from "@/components/site/SiteMedia";
 import CreatorFigure, { CreatorAvatar } from "@/components/creator/CreatorFigure";
 import { ItineraryBeside, InOutFlank, PerksBand, InTheirWords } from "@/components/creator/CreatorSections";
@@ -74,10 +77,15 @@ export default async function CreatorTripPage({
     `Hi Tripwaley! I want a seat on ${view.headline} with ${creator.name} (${creator.handle}).`
   )}`;
 
+  /* Creator trips are the SAME packages sold on /trips/[slug], and used to be
+     bookable only by WhatsApp link — so the one surface a creator drives traffic
+     to was the one that couldn't take a payment. Same bar, same flow. */
+  const bar = bookingBarProps(view.package.slug, view.headline || view.package.name);
+
   return (
     <CityProvider cities={getCities()} defaultCity={settings.defaultCity}>
       <Navbar overDarkHero />
-      <main id="main">
+      <main id="main" className="pb-28">
         {/* ---------------- hero: the trip, fronted by the creator ------- */}
         <section className="relative overflow-hidden bg-ink pt-28 sm:pt-32">
           <div aria-hidden="true" className="absolute inset-0 opacity-[0.62]">
@@ -162,12 +170,20 @@ export default async function CreatorTripPage({
               </div>
 
               <div className="mt-8 flex flex-wrap gap-3">
-                <Link
-                  href="#dates"
-                  className={`inline-flex min-h-12 items-center rounded-full px-7 py-3 text-sm font-extrabold transition-all hover:brightness-110 active:scale-[0.98] ${accentBg} ${accentOnBg}`}
-                >
-                  {soldOut ? "Join the waitlist →" : "Request a seat →"}
-                </Link>
+                {soldOut ? (
+                  <Link
+                    href="#dates"
+                    className={`inline-flex min-h-12 items-center rounded-full px-7 py-3 text-sm font-extrabold transition-all hover:brightness-110 active:scale-[0.98] ${accentBg} ${accentOnBg}`}
+                  >
+                    Join the waitlist →
+                  </Link>
+                ) : (
+                  <BookSeatButton
+                    className={`inline-flex min-h-12 items-center rounded-full px-7 py-3 text-sm font-extrabold transition-all hover:brightness-110 active:scale-[0.98] ${accentBg} ${accentOnBg}`}
+                  >
+                    Hold my seat →
+                  </BookSeatButton>
+                )}
                 <a
                   href={waLink}
                   target="_blank"
@@ -254,14 +270,23 @@ export default async function CreatorTripPage({
                             />
                           </div>
                         </div>
-                        <a
-                          href={`${waLink}%20(${encodeURIComponent(shortDate(d.date))})`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="mt-auto block rounded-full bg-ink px-5 py-2.5 text-center text-xs font-extrabold text-cream transition-colors hover:bg-brand"
-                        >
-                          {out ? "Join waitlist" : "Request this seat →"}
-                        </a>
+                        {out ? (
+                          <a
+                            href={`${waLink}%20(${encodeURIComponent(shortDate(d.date))})`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-auto block rounded-full bg-ink px-5 py-2.5 text-center text-xs font-extrabold text-cream transition-colors hover:bg-brand"
+                          >
+                            Join waitlist
+                          </a>
+                        ) : (
+                          <BookSeatButton
+                            date={d.date}
+                            className="mt-auto block w-full rounded-full bg-ink px-5 py-2.5 text-center text-xs font-extrabold text-cream transition-colors hover:bg-brand"
+                          >
+                            Hold this seat →
+                          </BookSeatButton>
+                        )}
                       </div>
                     </article>
                   );
@@ -348,6 +373,7 @@ export default async function CreatorTripPage({
         </section>
       </main>
       <CurtainFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
+      <BookingBar {...bar} />
     </CityProvider>
   );
 }
