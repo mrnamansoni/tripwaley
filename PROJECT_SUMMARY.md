@@ -17,6 +17,28 @@ Tripwaley is a production-grade travel booking website for a premium, group-depa
 
 ## Recent Changes
 
+### 2026-09-05 — PhonePe keys settable from Admin → Payments
+
+Credentials no longer require a Dokploy redeploy. `src/lib/gatewayConfig.ts`
+resolves them from the **environment first**, then a server-only
+`data/gateway.json` written by the admin panel.
+
+- Env wins deliberately: if the panel could override Dokploy, putting live keys
+  in the environment would silently do nothing while a stale sandbox key kept
+  taking payments. Fields supplied by the environment render locked and labelled.
+- **Not** stored in `catalog.json` — that file is handed to the browser wholesale
+  by `/api/admin/catalog`, and `getSettings()` is read by public pages. A secret
+  there is one prop-spread from being served to every visitor.
+- The client secret and webhook password are **write-only**: `/api/admin/gateway`
+  GET reports only whether each is set. A blank field on save means "keep what's
+  stored", so saving the form without retyping secrets can't wipe them.
+- `data/gateway.json` is written 0600 and lives on the gitignored data volume.
+- A **Test connection** button performs a real OAuth call and reports the result.
+
+Covered by `scripts/test-gateway-config.mjs` (10 assertions). Verified end-to-end
+with no env vars at all: a real PhonePe sandbox session was created and webhook
+auth accepted/rejected correctly from panel-supplied credentials alone.
+
 ### 2026-09-05 — Fixed: deleted departures came back on every deploy
 
 The seed catalog shipped inside the Docker image carries 191 departures, 54 of

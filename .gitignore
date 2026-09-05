@@ -32,6 +32,10 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# ...except the template, which exists precisely to be committed. The blanket
+# rule above was silently swallowing it, so documented deploy variables never
+# reached the repo. It holds only blank keys and comments — never a real value.
+!.env.example
 
 # vercel
 .vercel

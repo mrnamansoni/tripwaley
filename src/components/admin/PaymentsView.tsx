@@ -9,6 +9,7 @@
 import { useEffect, useState } from "react";
 import { Head, Btn } from "./ui";
 import { formatPaise } from "@/lib/money";
+import GatewaySettings from "./GatewaySettings";
 import type { Order, OrderStatus } from "@/lib/orders";
 
 const PILL: Record<OrderStatus, string> = {
@@ -83,16 +84,12 @@ export default function PaymentsView() {
         sub="Seat holds paid through PhonePe. The amount charged is always priced by the server, never by the browser."
       />
 
-      {gateway && !gateway.configured && (
-        <p className="mb-5 rounded-xl border border-gold/30 bg-gold/10 px-4 py-3 text-sm text-gold">
-          PhonePe isn&apos;t configured on this server, so no Pay button is shown anywhere on the site.
-          Set PHONEPE_CLIENT_ID, PHONEPE_CLIENT_SECRET and PHONEPE_CLIENT_VERSION to switch it on.
-        </p>
-      )}
+      <GatewaySettings onSaved={() => setReloadKey((k) => k + 1)} />
+
       {gateway?.configured && gateway.env === "sandbox" && (
         <p className="mb-5 rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white/60">
           Running against PhonePe&apos;s <strong className="text-white">sandbox</strong> — these are test
-          payments, and no real money moves. Set PHONEPE_ENV=production to go live.
+          payments, and no real money moves. Switch the environment to production above when you go live.
         </p>
       )}
 

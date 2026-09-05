@@ -1,4 +1,5 @@
 import { createHash, timingSafeEqual } from "node:crypto";
+import { resolveGateway } from "./gatewayConfig";
 
 /**
  * PhonePe Payment Gateway — Standard Checkout V2 (OAuth).
@@ -8,9 +9,10 @@ import { createHash, timingSafeEqual } from "node:crypto";
  * merchantId + saltKey / X-VERIFY checksum flow that most tutorials still
  * show — different endpoints, different auth, nothing transfers.
  *
- * Everything is configured by environment. If the credentials are absent the
- * module reports itself unconfigured and callers must not render a Pay button:
- * a missing key should mean "no payment offered", never "a button that 500s".
+ * Credentials come from lib/gatewayConfig.ts: the environment first, then
+ * whatever was saved in the admin panel. If neither supplies them the module
+ * reports itself unconfigured and callers must not render a Pay button —
+ * a missing key means "no payment offered", never "a button that 500s".
  *
  *   PHONEPE_CLIENT_ID
  *   PHONEPE_CLIENT_SECRET
@@ -38,15 +40,12 @@ const ENDPOINTS: Record<Env, { oauth: string; pay: string; status: (id: string) 
 };
 
 export function phonepeEnv(): Env {
-  return process.env.PHONEPE_ENV === "production" ? "production" : "sandbox";
+  return resolveGateway().env;
 }
 
 function creds() {
-  return {
-    clientId: process.env.PHONEPE_CLIENT_ID ?? "",
-    clientSecret: process.env.PHONEPE_CLIENT_SECRET ?? "",
-    clientVersion: process.env.PHONEPE_CLIENT_VERSION ?? "",
-  };
+  const g = resolveGateway();
+  return { clientId: g.clientId, clientSecret: g.clientSecret, clientVersion: g.clientVersion };
 }
 
 /** True only when a payment could actually be created. */
@@ -67,15 +66,24 @@ export class PhonePeError extends Error {
 /* The access token is valid for hours. Fetching a fresh one per payment adds a
    round-trip to the slowest, most abandonment-prone moment in the funnel, so
    it is cached in module memory and reused until just before it expires. */
-let cached: { token: string; expiresAtMs: number } | null = null;
+let cached: { token: string; expiresAtMs: number; fingerprint: string } | null = null;
+
+/** identifies the credential set a token was minted with, without storing it */
+function fingerprint(clientId: string, clientSecret: string, clientVersion: string, env: string): string {
+  return createHash("sha256").update(`${clientId}:${clientSecret}:${clientVersion}:${env}`).digest("hex");
+}
 
 async function getToken(): Promise<string> {
-  if (cached && Date.now() < cached.expiresAtMs) return cached.token;
-
   const { clientId, clientSecret, clientVersion } = creds();
   if (!clientId || !clientSecret || !clientVersion) {
     throw new PhonePeError("PhonePe credentials are not configured");
   }
+
+  // credentials edited in the admin panel must not keep using a token minted
+  // with the old ones — otherwise a key change appears to do nothing until the
+  // token happens to expire, hours later
+  const fp = fingerprint(clientId, clientSecret, clientVersion, phonepeEnv());
+  if (cached && cached.fingerprint === fp && Date.now() < cached.expiresAtMs) return cached.token;
 
   const body = new URLSearchParams({
     client_id: clientId,
@@ -106,6 +114,7 @@ async function getToken(): Promise<string> {
     token: json.access_token as string,
     // refresh a minute early so a request never races the expiry
     expiresAtMs: (expMs > Date.now() ? expMs : fallback) - 60_000,
+    fingerprint: fp,
   };
   return cached.token;
 }
@@ -251,8 +260,7 @@ export async function orderStatus(merchantOrderId: string): Promise<OrderStatusR
  * deployment rejects callbacks rather than accepting every one of them.
  */
 export function verifyWebhookAuth(header: string | null): boolean {
-  const user = process.env.PHONEPE_WEBHOOK_USER ?? "";
-  const pass = process.env.PHONEPE_WEBHOOK_PASS ?? "";
+  const { webhookUser: user, webhookPass: pass } = resolveGateway();
   if (!user || !pass || !header) return false;
 
   const expected = createHash("sha256").update(`${user}:${pass}`).digest("hex");
