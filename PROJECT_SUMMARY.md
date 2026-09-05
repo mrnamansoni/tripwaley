@@ -17,6 +17,27 @@ Tripwaley is a production-grade travel booking website for a premium, group-depa
 
 ## Recent Changes
 
+### 2026-09-05 — Fixed: deleted departures came back on every deploy
+
+The seed catalog shipped inside the Docker image carries 191 departures, 54 of
+them June 2026. `mergeSeedContent()` adds any seed row the live catalog lacks —
+correct on day one, wrong forever after, because a seed row missing from live
+doesn't mean "not imported yet", it means **the admin deleted it**. Every
+`SEED_VERSION` bump therefore resurrected every deleted departure, package,
+price, city, college, coupon and creator. Deleting them again never helped.
+
+Fixed with tombstones (`src/lib/seedGuard.ts`):
+
+- **On save** — the admin panel PUTs a whole section, so any seed row absent
+  from what was saved was deliberately removed. Recorded in
+  `catalog.seedRemovals`, recomputed per section so re-adding a row clears it.
+- **Once, at migration** — installs predating this have a backlog of untracked
+  deletions, so the first v9 merge captures them before it would re-add them.
+- New seed content still arrives: a row that has never been live has no
+  tombstone. Verified across two consecutive seed bumps.
+
+Covered by `scripts/test-seed-guard.mjs` (11 assertions).
+
 ### 2026-09-05 — PhonePe payments: a 5% seat hold, charged online
 
 Booking money now arrives in three stages, and only the first is taken on the website:

@@ -237,6 +237,17 @@ export interface WireEntry {
 }
 
 export interface Catalog {
+  /** Seed rows the admin has deleted. The seed merge must never re-add these —
+   *  see lib/seedGuard.ts. Keys are per-section; the shape is SeedRemovals. */
+  seedRemovals?: {
+    cities?: string[];
+    packages?: string[];
+    prices?: string[];
+    departures?: string[];
+    colleges?: string[];
+    coupons?: string[];
+    creators?: string[];
+  };
   settings: Settings;
   cities: City[];
   packages: Package[];

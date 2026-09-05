@@ -9,7 +9,8 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { sameOrigin } from "@/lib/auth";
-import { listMedia, readBookings, readCatalog, readReviews, writeCatalog, writeReviews } from "@/lib/store";
+import { listMedia, readBookings, readCatalog, readReviews, readSeedCatalog, writeCatalog, writeReviews } from "@/lib/store";
+import { isSeedSection, removalsForSection } from "@/lib/seedGuard";
 import { SLOT_DEFS, CONTENT_DEFS, resolveSlot, PAGE_SECTION_DEFS, isValidMediaRef, CATEGORY_DEFS, CREATOR_POSE_DEFS } from "@/lib/types";
 import { applySlugRenames, detectSlugRenames } from "@/lib/slugCascade";
 import type { BlogPost, Captain, CollegeTrip, Coupon, Catalog, City, Creator, Departure, Faq, Package, PriceRule, Review, WireEntry } from "@/lib/types";
@@ -281,6 +282,21 @@ export async function PUT(req: Request) {
       }));
     // codes are stored uppercase so lookup can be a plain equality check
     if (section === "coupons") cat.coupons = (data as Coupon[]).map((c) => ({ ...c, code: c.code.trim().toUpperCase() }));
+
+    /* Record what was DELETED. The admin panel sends a whole section at a time,
+       so this array is the complete truth for it: any seed row missing from it
+       was removed on purpose, and the seed merge must never bring it back.
+       (This is why June departures kept reappearing after a deploy.)
+       Recomputed rather than unioned, so re-adding a row clears its tombstone. */
+    if (isSeedSection(section) && Array.isArray(data)) {
+      const gone = removalsForSection(readSeedCatalog(), section, data as unknown[]);
+      const before = cat.seedRemovals?.[section]?.length ?? 0;
+      cat.seedRemovals = { ...cat.seedRemovals, [section]: gone };
+      if (gone.length !== before) {
+        console.log(`[admin] ${section}: ${gone.length} seed row(s) now marked deleted (was ${before})`);
+      }
+    }
+
     writeCatalog(cat);
   }
 

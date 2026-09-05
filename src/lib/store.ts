@@ -13,11 +13,17 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { DEFAULT_CAPTAINS } from "./types";
 import type { Booking, Catalog, Review } from "./types";
+import { collectRemovals, keepForMerge, mergeRemovals, SEED_SECTIONS } from "./seedGuard";
 
 /** Bump when src/data/catalog.json gains packages/prices/departures that an
  *  already-running install should receive. mergeSeedContent() then adds only
  *  the rows whose keys are missing — admin edits are never overwritten. */
 const SEED_VERSION = 9;
+
+/* The version at which deletions started being recorded. An install older than
+   this has deletions the catalog knows nothing about, so the merge captures
+   them once before it would re-add them. */
+const DELETION_TRACKING_VERSION = 9;
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const SEED_CATALOG = path.join(process.cwd(), "src", "data", "catalog.json");
@@ -124,6 +130,11 @@ function backfill(next: Catalog, seed: Catalog): number {
  * seed, so new starter content shipped in src/data/catalog.json would otherwise
  * never reach an existing install. This adds ONLY rows whose key is absent —
  * an admin's edited copy of a row always wins, and nothing is ever deleted.
+ *
+ * "Absent" is not the same as "wanted", though: a row the admin DELETED is also
+ * absent, and re-adding it is a bug (see lib/seedGuard.ts — this is why June
+ * departures kept reappearing after every deploy). Candidates are therefore
+ * filtered against the catalog's tombstones before anything is added.
  */
 function mergeSeedContent() {
   try {
@@ -134,34 +145,49 @@ function mergeSeedContent() {
     const next: Catalog = { ...live };
     let added = 0;
 
+    /* Installs from before deletion tracking carry a backlog of deletions with
+       no record of them — which is exactly why the seed's June departures kept
+       coming back on every bump. Capture that backlog ONCE, here, before the
+       merge below would re-add it. From now on the admin PUT records deletions
+       as they happen, so this never has to guess again. */
+    if ((live.seedVersion ?? 0) < DELETION_TRACKING_VERSION) {
+      const caught = collectRemovals(seed, live);
+      next.seedRemovals = mergeRemovals(live.seedRemovals, caught);
+      const n = SEED_SECTIONS.reduce((sum, k) => sum + (caught[k]?.length ?? 0), 0);
+      if (n) console.log(`[store] seed v${SEED_VERSION}: recorded ${n} existing deletion(s) so they stay deleted`);
+    }
+    const removals = next.seedRemovals;
+
+    /* every candidate below is filtered through keepForMerge: a row the admin
+       deleted stays deleted, a row they have never seen still arrives */
     const haveCities = new Set(live.cities.map((c) => c.slug));
-    const newCities = (seed.cities ?? []).filter((c) => !haveCities.has(c.slug));
+    const newCities = keepForMerge("cities", (seed.cities ?? []).filter((c) => !haveCities.has(c.slug)), removals);
     if (newCities.length) { next.cities = [...live.cities, ...newCities]; added += newCities.length; }
 
     const havePkgs = new Set(live.packages.map((p) => p.slug));
-    const newPkgs = (seed.packages ?? []).filter((p) => !havePkgs.has(p.slug));
+    const newPkgs = keepForMerge("packages", (seed.packages ?? []).filter((p) => !havePkgs.has(p.slug)), removals);
     if (newPkgs.length) { next.packages = [...live.packages, ...newPkgs]; added += newPkgs.length; }
 
     const priceKey = (r: { packageSlug: string; citySlug: string }) => `${r.packageSlug}|${r.citySlug}`;
     const havePrices = new Set(live.prices.map(priceKey));
-    const newPrices = (seed.prices ?? []).filter((r) => !havePrices.has(priceKey(r)));
+    const newPrices = keepForMerge("prices", (seed.prices ?? []).filter((r) => !havePrices.has(priceKey(r))), removals);
     if (newPrices.length) { next.prices = [...live.prices, ...newPrices]; added += newPrices.length; }
 
     const depKey = (d: { date: string; packageSlug: string }) => `${d.date}|${d.packageSlug}`;
     const haveDeps = new Set(live.departures.map(depKey));
-    const newDeps = (seed.departures ?? []).filter((d) => !haveDeps.has(depKey(d)));
+    const newDeps = keepForMerge("departures", (seed.departures ?? []).filter((d) => !haveDeps.has(depKey(d))), removals);
     if (newDeps.length) { next.departures = [...live.departures, ...newDeps]; added += newDeps.length; }
 
     const haveColleges = new Set((live.colleges ?? []).map((c) => c.slug));
-    const newColleges = (seed.colleges ?? []).filter((c) => !haveColleges.has(c.slug));
+    const newColleges = keepForMerge("colleges", (seed.colleges ?? []).filter((c) => !haveColleges.has(c.slug)), removals);
     if (newColleges.length) { next.colleges = [...(live.colleges ?? []), ...newColleges]; added += newColleges.length; }
 
     const haveCoupons = new Set((live.coupons ?? []).map((c) => c.code.toUpperCase()));
-    const newCoupons = (seed.coupons ?? []).filter((c) => !haveCoupons.has(c.code.toUpperCase()));
+    const newCoupons = keepForMerge("coupons", (seed.coupons ?? []).filter((c) => !haveCoupons.has(c.code.toUpperCase())), removals);
     if (newCoupons.length) { next.coupons = [...(live.coupons ?? []), ...newCoupons]; added += newCoupons.length; }
 
     const haveCreators = new Set((live.creators ?? []).map((c) => c.slug));
-    const newCreators = (seed.creators ?? []).filter((c) => !haveCreators.has(c.slug));
+    const newCreators = keepForMerge("creators", (seed.creators ?? []).filter((c) => !haveCreators.has(c.slug)), removals);
     if (newCreators.length) { next.creators = [...(live.creators ?? []), ...newCreators]; added += newCreators.length; }
 
     added += backfill(next, seed);
@@ -201,6 +227,10 @@ function writeJson(file: string, value: unknown) {
 /* ------------------------------------------------ public API */
 
 export const readCatalog = (): Catalog => readJson<Catalog>(FILES.catalog);
+
+/** The seed shipped in the image — needed to tell a deleted row from a new one. */
+export const readSeedCatalog = (): Catalog =>
+  JSON.parse(fs.readFileSync(SEED_CATALOG, "utf8")) as Catalog;
 export const writeCatalog = (c: Catalog) => writeJson(FILES.catalog, c);
 
 export const readReviews = (): Review[] => readJson<Review[]>(FILES.reviews);
