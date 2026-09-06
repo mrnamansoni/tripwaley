@@ -36,6 +36,7 @@ export default function BookingBar({
   packageName,
   departures,
   prices,
+  cityNames = {},
   whatsapp,
   rates,
   payEnabled = false,
@@ -44,6 +45,8 @@ export default function BookingBar({
   packageName: string;
   departures: BarDeparture[];
   prices: BarPrices;
+  /** slug → display name for the departure-city dropdown */
+  cityNames?: Record<string, string>;
   whatsapp: string; // digits only, e.g. 919625330270
   rates: BarRates;
   /** false when PhonePe isn't configured — then no Pay button is rendered at all */
@@ -52,6 +55,23 @@ export default function BookingBar({
   const { city } = useCity();
   const [occ, setOcc] = useState<"triple" | "double">("triple");
   const [date, setDate] = useState<string>("");
+  const [pax, setPax] = useState(1);
+
+  /* The cities this package is actually priced from. The bar used to take the
+     boarding city from the site-wide CityProvider, which is a browsing
+     preference, not a bookable choice — so a visitor whose city had no rule for
+     this trip saw "on request" with no way forward. Booking now picks from
+     THIS package's priced cities, defaulting to the global one when it is among
+     them. An unpriced city can no longer be selected at all. */
+  const bookableCities = useMemo(() => Object.keys(prices), [prices]);
+  const [pickedCity, setPickedCity] = useState<string>("");
+  const bookCity =
+    pickedCity && prices[pickedCity]
+      ? pickedCity
+      : prices[city.slug]
+        ? city.slug
+        : bookableCities[0] ?? city.slug;
+  const bookCityName = cityNames[bookCity] ?? (bookCity === city.slug ? city.name : bookCity);
   const [busy, setBusy] = useState(false);
   const [stub, setStub] = useState(false);
   const [modal, setModal] = useState(false);
@@ -62,9 +82,9 @@ export default function BookingBar({
   const dialogRef = useModal<HTMLDivElement>(modal, () => setModal(false));
 
   const cityDeps = useMemo(() => {
-    const mine = departures.filter((d) => d.citySlugs.includes(city.slug));
+    const mine = departures.filter((d) => d.citySlugs.includes(bookCity));
     return (mine.length ? mine : departures).slice(0, 6);
-  }, [departures, city.slug]);
+  }, [departures, bookCity]);
 
   /* NO cross-city fallback.
      This used to read `prices[city.slug] ?? Object.values(prices)[0]`, so a city
@@ -73,7 +93,7 @@ export default function BookingBar({
      catalog and correctly refuses ("this trip is priced on request"), so the
      visitor filled in the whole form and was rejected at the payment step.
      An unpriced city must read as unpriced here too. */
-  const rule = prices[city.slug];
+  const rule = prices[bookCity];
   const seat = rule?.[occ] ?? rule?.triple ?? rule?.double;
   const chosen = date || cityDeps[0]?.date || "";
 
@@ -82,7 +102,9 @@ export default function BookingBar({
   /* the hold, shown so the traveller knows the number before they commit.
      One seat at a time in this bar, so the trip total is the seat price —
      or the coupon's total when one is applied. */
-  const tripTotal = coupon?.total ?? seat ?? 0;
+  /* pax multiplies the trip, and therefore the hold. The server re-derives this
+     from its own catalog rate — this figure is display only. */
+  const tripTotal = coupon?.total ?? (seat != null ? seat * pax : 0);
   const quote = holdQuote({ total: tripTotal, ...rates });
   const canPay = payEnabled && quote.chargeable;
 
@@ -104,10 +126,10 @@ export default function BookingBar({
         name,
         phone,
         packageSlug,
-        citySlug: city.slug,
+        citySlug: bookCity,
         date: chosen,
         occupancy: occ,
-        pax: 1,
+        pax,
         couponCode: coupon?.code ?? "",
         source: leadSource("booking-bar", { packageSlug }),
       }),
@@ -161,8 +183,8 @@ export default function BookingBar({
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        name, phone, package: packageSlug, city: city.slug, date: chosen, occupancy: occ,
-        price: coupon?.total ?? seat ?? null, pax: 1,
+        name, phone, package: packageSlug, city: bookCity, date: chosen, occupancy: occ,
+        price: tripTotal || null, pax,
         source: leadSource("booking-bar", { packageSlug }),
       }),
     }).catch(() => null);
@@ -183,7 +205,7 @@ export default function BookingBar({
       gsap.fromTo("[data-bb-stamp]", { autoAlpha: 0, scale: 2.4, rotate: 12 }, { autoAlpha: 1, scale: 1, rotate: -7, duration: 0.35, ease: "power4.in", delay: 0.75 });
     });
     const msg = encodeURIComponent(
-      `Hi Tripwaley! Hold a seat for me:\n• ${packageName}\n• From ${city.name}\n• ${chosen ? `${weekday(chosen)}, ${shortDate(chosen)}` : "next batch"}\n• ${occ} sharing${seat != null ? ` — ${inr(seat)}/seat` : ""}${coupon ? `\n• Coupon: ${coupon.code} (${coupon.label}) — ${inr(coupon.total)}` : ""}${name ? `\n• Name: ${name}` : ""}\n• Mobile: ${phone.replace(/[^\d]/g, "").slice(-10)}`
+      `Hi Tripwaley! Hold a seat for me:\n• ${packageName}\n• From ${bookCityName}\n• ${chosen ? `${weekday(chosen)}, ${shortDate(chosen)}` : "next batch"}\n• ${pax} traveller${pax > 1 ? "s" : ""}, ${occ} sharing${seat != null ? ` — ${inr(seat)}/seat` : ""}${coupon ? `\n• Coupon: ${coupon.code} (${coupon.label}) — ${inr(coupon.total)}` : ""}${name ? `\n• Name: ${name}` : ""}\n• Mobile: ${phone.replace(/[^\d]/g, "").slice(-10)}`
     );
     setTimeout(() => {
       window.open(`https://wa.me/${whatsapp}?text=${msg}`, "_blank", "noopener");
@@ -210,7 +232,7 @@ export default function BookingBar({
               <button type="button" onClick={() => setModal(false)} aria-label="Close" className="text-2xl leading-none text-white/40 hover:text-white">×</button>
             </div>
             <p className="mt-1.5 text-sm text-white/50">
-              {packageName} · ex-{city.name} · {chosen ? `${weekday(chosen)}, ${shortDate(chosen)}` : "next batch"} · {occ}{seat != null ? ` · ${inr(seat)}/seat` : ""}
+              {packageName} · ex-{bookCityName} · {chosen ? `${weekday(chosen)}, ${shortDate(chosen)}` : "next batch"} · {pax} × {occ}{seat != null ? ` · ${inr(seat)}/seat` : ""}
             </p>
 
             {/* Enter follows the PRIMARY button, whichever that currently is */}
@@ -243,9 +265,9 @@ export default function BookingBar({
               <>
                 <CouponField
                   packageSlug={packageSlug}
-                  citySlug={city.slug}
+                  citySlug={bookCity}
                   occupancy={occ}
-                  pax={1}
+                  pax={pax}
                   applied={coupon}
                   onApply={setCoupon}
                   onClear={() => setCoupon(null)}
@@ -268,7 +290,7 @@ export default function BookingBar({
                 city's rate and failing at the payment step */}
             {seat == null && (
               <div className="mt-5 rounded-xl border border-gold/25 bg-gold/10 p-4">
-                <p className="text-sm font-bold text-gold">No online rate from {city.name} yet.</p>
+                <p className="text-sm font-bold text-gold">No online rate from {bookCityName} yet.</p>
                 <p className="mt-1 text-[0.72rem] leading-relaxed text-white/55">
                   We price this trip individually from here. Send your number and we&apos;ll come back
                   with a quote — or switch your boarding city in the bar below to book instantly.
@@ -334,7 +356,7 @@ export default function BookingBar({
             </div>
             <div className="flex items-end justify-between pt-2.5">
               <div>
-                <p className="font-mono text-[0.5rem] uppercase tracking-widest text-ink/45">ex-{city.name}</p>
+                <p className="font-mono text-[0.5rem] uppercase tracking-widest text-ink/45">ex-{bookCityName}</p>
                 <p className="font-display text-sm font-extrabold leading-tight text-ink">{packageName.slice(0, 22)}</p>
                 <p className="font-mono text-[0.55rem] text-ink/55">{chosen ? `${weekday(chosen)} · ${shortDate(chosen)}` : "next batch"} · {occ}</p>
               </div>
@@ -357,7 +379,7 @@ export default function BookingBar({
         {/* quote */}
         <div className="min-w-0">
           <p className="truncate text-[0.55rem] font-bold uppercase tracking-widest text-white/45 sm:text-[0.6rem]">
-            {packageName} · ex-{city.name}
+            {packageName} · ex-{bookCityName}
           </p>
           <p className="font-display text-lg font-extrabold leading-tight text-white sm:text-2xl">
             {seat != null ? inr(seat) : "on request"}
@@ -391,6 +413,47 @@ export default function BookingBar({
             </button>
           ))}
         </div>
+
+        {/* travellers — pax multiplies the trip total and therefore the hold */}
+        <div className="order-5 flex items-center overflow-hidden rounded-full border border-white/15 sm:order-3" role="group" aria-label="Travellers">
+          <button
+            type="button"
+            onClick={() => setPax((p) => Math.max(1, p - 1))}
+            disabled={pax <= 1}
+            aria-label="One fewer traveller"
+            className="min-h-9 px-3 text-sm font-bold text-white/70 transition-colors hover:text-gold disabled:opacity-25 sm:min-h-10"
+          >
+            −
+          </button>
+          <span className="min-w-[3.6rem] text-center text-[0.66rem] font-bold uppercase tracking-wider text-white sm:text-xs" aria-live="polite">
+            {pax} {pax === 1 ? "pax" : "pax"}
+          </span>
+          <button
+            type="button"
+            onClick={() => setPax((p) => Math.min(20, p + 1))}
+            disabled={pax >= 20}
+            aria-label="One more traveller"
+            className="min-h-9 px-3 text-sm font-bold text-white/70 transition-colors hover:text-gold disabled:opacity-25 sm:min-h-10"
+          >
+            +
+          </button>
+        </div>
+
+        {/* departure city — ONLY cities this package is priced from */}
+        {bookableCities.length > 1 && (
+          <select
+            value={bookCity}
+            onChange={(e) => setPickedCity(e.target.value)}
+            aria-label="Departure city"
+            className="order-6 min-h-9 max-w-[9.5rem] rounded-full border border-white/15 bg-transparent px-3.5 py-1.5 text-[0.66rem] font-bold text-white outline-none sm:order-3 sm:min-h-10 sm:max-w-none sm:px-4 sm:py-2 sm:text-xs [&>option]:text-ink"
+          >
+            {bookableCities.map((c) => (
+              <option key={c} value={c}>
+                from {cityNames[c] ?? c}
+              </option>
+            ))}
+          </select>
+        )}
 
         {/* batch picker */}
         {cityDeps.length > 0 && (

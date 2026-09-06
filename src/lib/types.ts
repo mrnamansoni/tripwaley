@@ -205,6 +205,19 @@ export interface Package {
   itineraryPdf?: string;
   /** hero override — image OR video, upload or pasted link. Falls to images[0] */
   heroMedia?: string;
+  /** can this trip be PAID for online? Unset means yes, so every package that
+   *  existed before the toggle keeps taking payments. When false the site shows
+   *  the seat-hold flow only — lead + WhatsApp + webhook — and /api/pay/create
+   *  refuses the order, because a client-only toggle would be decorative. */
+  bookingEnabled?: boolean;
+  /* ---- weather: the trip page shows live conditions at the destination.
+     Coordinates were a hardcoded regex table keyed on the trip name, so any
+     package it failed to match showed nothing — 9 of 22 live trips. These
+     override the table, so a new package is self-service. ---- */
+  lat?: number;
+  lng?: number;
+  /** label under the temperature, e.g. "Srinagar". Defaults to `destination`. */
+  weatherPlace?: string;
 }
 export interface PriceRule { packageSlug: string; citySlug: string; triple?: number; double?: number; quad?: number }
 export interface Departure { date: string; packageSlug: string; citySlugs: string[] }

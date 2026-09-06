@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Navbar from "@/components/sections/Navbar";
 import CityProvider from "@/components/site/CityProvider";
 import CurtainFooter from "@/components/site/CurtainFooter";
+import AskCreator from "@/components/creator/AskCreator";
 import SiteMedia from "@/components/site/SiteMedia";
 import CreatorFigure from "@/components/creator/CreatorFigure";
 import { PerksBand, InTheirWords, CreatorGallery, CreatorTripCards } from "@/components/creator/CreatorSections";
@@ -140,14 +141,6 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
                     ? `See ${trips.length} trip${trips.length > 1 ? "s" : ""} · ${dateCount} dates →`
                     : "Talk to us →"}
                 </Link>
-                <a
-                  href={waLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-12 items-center rounded-full border border-white/25 px-6 py-3 text-sm font-bold text-white transition-colors hover:border-gold hover:text-gold"
-                >
-                  Ask a question
-                </a>
               </div>
             </div>
 
@@ -221,6 +214,17 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
             </Link>
           </div>
         </section>
+        {/* "Ask <creator>" — its own moment at the foot of the page, rather than
+            an outline button competing with the hero CTA. */}
+        <AskCreator
+          firstName={creator.firstName}
+          name={creator.name}
+          handle={creator.handle}
+          portrait={creator.portrait}
+          waLink={waLink}
+          accent={creator.accent}
+        />
+
       </main>
       <CurtainFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
     </CityProvider>

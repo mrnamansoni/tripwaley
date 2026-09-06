@@ -1,4 +1,4 @@
-import { citiesPricedFor, upcomingDepartures, getSettings, holdRates } from "./catalog";
+import { citiesPricedFor, upcomingDepartures, getPackage, getSettings, holdRates } from "./catalog";
 import { phonepeConfigured } from "./phonepe";
 
 /**
@@ -16,12 +16,15 @@ export interface BookingBarProps {
   packageName: string;
   departures: { date: string; citySlugs: string[] }[];
   prices: Record<string, { triple?: number; double?: number }>;
+  /** slug → display name, for the departure-city dropdown */
+  cityNames: Record<string, string>;
   whatsapp: string;
   rates: { holdPercent: number; gstPercent: number; advancePercent: number };
   payEnabled: boolean;
 }
 
 export function bookingBarProps(slug: string, name: string, departureLimit = 12): BookingBarProps {
+  const pkg = getPackage(slug);
   const priced = citiesPricedFor(slug);
   const deps = upcomingDepartures({ packageSlug: slug, limit: departureLimit });
   const settings = getSettings();
@@ -33,7 +36,12 @@ export function bookingBarProps(slug: string, name: string, departureLimit = 12)
     prices: Object.fromEntries(priced.map(({ city, rule }) => [city.slug, { triple: rule.triple, double: rule.double }])),
     whatsapp: settings.whatsapp.replace(/\D/g, ""),
     rates: holdRates(),
-    // no gateway configured → no Pay button anywhere, rather than one that 500s
-    payEnabled: phonepeConfigured(),
+    /* Pay is offered only when the gateway is configured AND the owner has left
+       booking open for this trip. Either being false means the seat-hold flow
+       only — never a Pay button that the server would refuse. */
+    payEnabled: phonepeConfigured() && pkg?.bookingEnabled !== false,
+    /* the city dropdown lists these and nothing else, so an unpriced city can
+       no longer be chosen at all */
+    cityNames: Object.fromEntries(priced.map(({ city }) => [city.slug, city.name])),
   };
 }

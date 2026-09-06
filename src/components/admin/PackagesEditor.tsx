@@ -122,8 +122,28 @@ export default function PackagesEditor() {
             <option value="draft">draft — hidden</option>
           </select>
         </label>
+        <label className={label}>online booking
+          {/* unset means enabled, so every package that predates this toggle
+              keeps taking payments exactly as before */}
+          <select
+            value={open.bookingEnabled === false ? "off" : "on"}
+            onChange={(e) => upd({ bookingEnabled: e.target.value === "on" })}
+            className={input}
+          >
+            <option value="on">on — visitors can pay the hold online</option>
+            <option value="off">off — &ldquo;Hold my seat&rdquo; only (lead + WhatsApp)</option>
+          </select>
+        </label>
         <Field l="code" v={open.code} on={(v) => upd({ code: v })} />
         <Field l="departure hubs" v={open.departureHubs} on={(v) => upd({ departureHubs: v })} />
+        {/* Weather is normally resolved from the destination name. These are the
+            override for anywhere the built-in table doesn't know, or gets wrong. */}
+        <Field l="weather latitude (optional)" v={open.lat ?? ""} type="number"
+          on={(v) => upd({ lat: v === "" ? undefined : Number(v) })} />
+        <Field l="weather longitude (optional)" v={open.lng ?? ""} type="number"
+          on={(v) => upd({ lng: v === "" ? undefined : Number(v) })} />
+        <Field l="weather place label (optional)" v={open.weatherPlace ?? ""}
+          on={(v) => upd({ weatherPlace: v })} />
         <div className="sm:col-span-2">
           {/* THE BRIEF — this is the long description the package page leads with.
               It had no field here before, so it could only be set by the importer. */}

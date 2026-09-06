@@ -2,6 +2,7 @@
    Server-rendered, no hooks — the quote form is the only client island. */
 
 import SiteMedia from "./SiteMedia";
+import ReadMore from "./ReadMore";
 import { inr } from "@/lib/types";
 import type { CollegeTrip } from "@/lib/types";
 
@@ -80,7 +81,12 @@ export function CollegeWall({
                   )}
                   {r.quote && (
                     <blockquote className="mt-3 flex-1 border-l-2 border-gold/60 pl-3.5">
-                      <p className="text-[0.86rem] leading-relaxed text-white/60">&ldquo;{r.quote}&rdquo;</p>
+                      {/* these run to 1,300 characters — a college head writing a
+                          thank-you note does not write short. Clamped so the row of
+                          cards keeps one height, with the full text still in the DOM. */}
+                      <ReadMore lines={5} moreLabel="Read the full note" tone="dark">
+                        <p className="text-[0.86rem] leading-relaxed text-white/60">&ldquo;{r.quote}&rdquo;</p>
+                      </ReadMore>
                       {r.quoteBy && (
                         <footer className="mt-2 font-mono text-[0.55rem] uppercase tracking-[0.2em] text-white/35">
                           {r.quoteBy}

@@ -261,7 +261,7 @@ export default function ItineraryRibbon({
                   {day.body && (
                     <RichText
                       text={day.body}
-                      collapseOver={dayCollapse?.over ?? 340}
+                      collapseOver={dayCollapse?.over ?? 260}
                       collapsedHeight={dayCollapse?.height ?? "16rem"}
                       className="mt-1.5"
                       moreLabel="Read the full day"

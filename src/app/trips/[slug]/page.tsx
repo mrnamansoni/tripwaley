@@ -9,6 +9,7 @@ import ItineraryRibbon from "@/components/site/ItineraryRibbon";
 import FilmStrip from "@/components/site/FilmStrip";
 import CaptainFeed from "@/components/site/CaptainFeed";
 import WeatherNow from "@/components/site/WeatherNow";
+import { resolveGeo } from "@/lib/geo";
 import BookingBar, { type BarDeparture, type BarPrices } from "@/components/site/BookingBar";
 import { phonepeConfigured } from "@/lib/phonepe";
 import MoreTrips from "@/components/site/MoreTrips";
@@ -37,21 +38,6 @@ import {
 } from "@/lib/catalog";
 
 /* destination coordinates for the live forecast card */
-const DEST_GEO: [RegExp, { lat: number; lng: number; place: string }][] = [
-  [/kedarkantha/i, { lat: 31.02, lng: 78.18, place: "Kedarkantha base" }],
-  [/chopta|tungnath|kedarnath/i, { lat: 30.47, lng: 79.04, place: "Chopta" }],
-  [/kasol|kheerganga|parvati|tosh/i, { lat: 32.01, lng: 77.31, place: "Kasol" }],
-  [/jibhi|tirthan|raghupur/i, { lat: 31.59, lng: 77.34, place: "Jibhi" }],
-  [/spiti|jispa|baralacha|kaza/i, { lat: 32.22, lng: 78.07, place: "Kaza, Spiti" }],
-  [/kashmir|srinagar|gulmarg/i, { lat: 34.08, lng: 74.8, place: "Srinagar" }],
-  [/goa/i, { lat: 15.3, lng: 74.08, place: "Goa" }],
-  [/udaipur|rajasthan|jodhpur/i, { lat: 24.58, lng: 73.71, place: "Udaipur" }],
-  [/rishikesh/i, { lat: 30.09, lng: 78.27, place: "Rishikesh" }],
-  [/mcleod|triund|bir/i, { lat: 32.24, lng: 76.32, place: "McLeodganj" }],
-  [/valley of flowers|flower/i, { lat: 30.73, lng: 79.61, place: "Valley of Flowers" }],
-  [/shimla|kufri|mashobra/i, { lat: 31.1, lng: 77.17, place: "Shimla" }],
-  [/manali/i, { lat: 32.24, lng: 77.19, place: "Manali" }],
-];
 
 export function generateStaticParams() {
   return getLivePackages().map((p) => ({ slug: p.slug }));
@@ -95,12 +81,12 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
   const settings = getSettings();
   const rates = holdRates();
   // no gateway configured → no Pay button anywhere, rather than one that 500s
-  const payEnabled = phonepeConfigured();
+  const payEnabled = phonepeConfigured() && pkg.bookingEnabled !== false;
   const cities = getCities();
   const images = packageImages(pkg);
   const priced = citiesPricedFor(slug);
   const deps = upcomingDepartures({ packageSlug: slug, limit: 12 });
-  const geo = DEST_GEO.find(([re]) => re.test(`${pkg.name} ${pkg.destination} ${pkg.route}`))?.[1];
+  const geo = resolveGeo(pkg);
   const minPrice = minRate(...priced.flatMap(({ rule }) => [rule.triple, rule.double]));
 
   // Product + Offer so price and availability are eligible for rich results,
@@ -130,6 +116,7 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
 
   const barDeps: BarDeparture[] = deps.map((d) => ({ date: d.date, citySlugs: d.cities.map((c) => c.slug) }));
   const barPrices: BarPrices = Object.fromEntries(priced.map(({ city, rule }) => [city.slug, { triple: rule.triple, double: rule.double }]));
+  const barCityNames = Object.fromEntries(priced.map(({ city }) => [city.slug, city.name]));
 
   return (
     <CityProvider cities={cities} defaultCity={settings.defaultCity}>
@@ -407,6 +394,7 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
         packageName={pkg.name}
         departures={barDeps}
         prices={barPrices}
+        cityNames={barCityNames}
         whatsapp={settings.whatsapp.replace(/\D/g, "")}
         rates={rates}
         payEnabled={payEnabled}

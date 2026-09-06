@@ -78,6 +78,15 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  /* Enforced here as well as in the UI. A toggle the browser alone respects is
+     decorative — anyone can POST this endpoint directly. */
+  if (priced.pkg.bookingEnabled === false) {
+    return NextResponse.json(
+      { ok: false, error: "Online booking isn't open for this trip — please WhatsApp us to hold a seat." },
+      { status: 409 }
+    );
+  }
+
   const rates = holdRates();
   const quote = holdQuote({ total: priced.total, ...rates });
   if (!quote.chargeable) {

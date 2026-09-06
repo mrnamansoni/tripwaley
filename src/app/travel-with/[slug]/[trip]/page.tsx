@@ -6,6 +6,7 @@ import CityProvider from "@/components/site/CityProvider";
 import CurtainFooter from "@/components/site/CurtainFooter";
 import BookingBar from "@/components/site/BookingBar";
 import BookSeatButton from "@/components/site/BookSeatButton";
+import AskCreator from "@/components/creator/AskCreator";
 import { bookingBarProps } from "@/lib/bookingProps";
 import SiteMedia from "@/components/site/SiteMedia";
 import CreatorFigure, { CreatorAvatar } from "@/components/creator/CreatorFigure";
@@ -184,14 +185,6 @@ export default async function CreatorTripPage({
                     Hold my seat →
                   </BookSeatButton>
                 )}
-                <a
-                  href={waLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-12 items-center rounded-full border border-white/25 px-6 py-3 text-sm font-bold text-white transition-colors hover:border-gold hover:text-gold"
-                >
-                  Ask {creator.firstName}
-                </a>
               </div>
             </div>
 
@@ -351,6 +344,17 @@ export default async function CreatorTripPage({
             </div>
           </section>
         )}
+
+        {/* "Ask <creator>" — moved out of the hero, where it competed with the
+            booking CTA, into its own moment after the trip has made its case. */}
+        <AskCreator
+          firstName={creator.firstName}
+          name={creator.name}
+          handle={creator.handle}
+          portrait={creator.portrait}
+          waLink={waLink}
+          accent={creator.accent}
+        />
 
         <section className={`relative overflow-hidden py-[11vh] ${accentBg}`}>
           <div className="noise absolute inset-0" aria-hidden="true" />

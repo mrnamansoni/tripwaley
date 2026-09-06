@@ -81,6 +81,12 @@ function validate(section: string, data: unknown): string | null {
         if (p.categories != null && (!Array.isArray(p.categories) || !p.categories.every((c) => CATEGORY_KEYS.has(c)))) {
           return `invalid categories on ${p.slug}`;
         }
+        if (p.bookingEnabled != null && typeof p.bookingEnabled !== "boolean") return `bookingEnabled on ${p.slug} must be true or false`;
+        // a half-entered coordinate would plot the wrong point, so require both
+        const hasLat = p.lat != null && p.lat !== ("" as unknown), hasLng = p.lng != null && p.lng !== ("" as unknown);
+        if (hasLat !== hasLng) return `set BOTH latitude and longitude on ${p.slug}, or neither`;
+        if (hasLat && (!isNum(p.lat) || (p.lat as number) < -90 || (p.lat as number) > 90)) return `latitude on ${p.slug} must be between -90 and 90`;
+        if (hasLng && (!isNum(p.lng) || (p.lng as number) < -180 || (p.lng as number) > 180)) return `longitude on ${p.slug} must be between -180 and 180`;
         if (!okLink(p.itineraryPdf)) return `itinerary PDF on ${p.slug} must be a full http(s) link`;
         if (!okMedia(p.heroMedia)) return `invalid hero media on ${p.slug}`;
         if (p.images != null && (!Array.isArray(p.images) || !p.images.every(isValidMediaRef))) return `invalid gallery on ${p.slug}`;
