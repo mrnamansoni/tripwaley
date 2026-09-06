@@ -1,6 +1,6 @@
 # Project Summary: Tripwaley
 
-Last updated: 2026-09-05
+Last updated: 2026-09-06
 
 ## Project Overview
 Tripwaley is a production-grade travel booking website for a premium, group-departure travel brand in India. It is a Next.js 16 site with 3D/scroll-driven visuals (React Three Fiber, GSAP, Lenis), city-aware pricing, a lead-capture booking flow, and a full custom admin panel (CMS-style) so the owner can edit trips, prices, departures, cities, media, reviews, and bookings without touching code. There is no database — everything is stored in JSON files under `data/`.
@@ -38,6 +38,67 @@ Tripwaley is a production-grade travel booking website for a premium, group-depa
 - **New standing rule from the owner (2026-08-01, still in effect):** never push any change to GitHub directly. Always explain the plan in chat first and wait for a clear "yes" before making or pushing any change.
 
 ## Recent Changes
+
+### 2026-09-06 — Booking toggle, travellers + city, weather, creator section, read-more (73fe8d3)
+
+- **Per-package booking toggle.** `Package.bookingEnabled`, defaulting to true so existing trips
+  are untouched. Enforced in the UI *and* in `/api/pay/create` — a toggle only the browser
+  respects is decorative, since anyone can POST that endpoint.
+- **Travellers + departure city in the booking bar.** The city list contains only cities the
+  package is actually priced from, which removes the root of the 307e6e9 bug rather than its
+  symptom: an unpriced city can no longer be selected. `pax` multiplies the trip and the hold, and
+  the server re-derives it — it is the one field that can make a booking 20× larger.
+- **Weather.** The coordinate table matched `name + destination + route` CONCATENATED,
+  first-match-wins, which failed twice: five destinations were missing entirely (Lansdowne,
+  Andaman, Meghalaya ×2, Kerala), and **"Manali Exploration" showed Kasol's weather** because its
+  route mentions Kasol and that pattern sat earlier. Now `src/lib/geo.ts`, resolved by
+  specificity — admin coordinate → destination → name → route — with per-package `lat`/`lng`/
+  `weatherPlace` so the table never needs editing for a new destination.
+- **"Ask &lt;creator&gt;"** moved out of the hero into its own section on both creator pages, built
+  once from the creator record.
+- **Read-more.** Audited on production first: only `/college-trips` has genuinely long copy
+  (testimonial quotes, 1,278 and 930 chars). Everything else measures zero paragraphs over 260,
+  and trip briefs/itineraries already collapse via `RichText` (threshold lowered 340 → 260).
+
+Two bugs written and caught during this work, both worth remembering:
+
+- `gsap.from({autoAlpha: 0})` + ScrollTrigger left the whole creator section **permanently
+  invisible** — the trigger existed, `refresh()` and `update()` ran, nothing appeared;
+  `immediateRender:false` didn't help either. This site scrolls through Lenis. Reveals here now
+  use IntersectionObserver + CSS with a failsafe timer, so content **cannot fail closed**.
+- `ReadMore`'s overflow check was circular: it set `line-clamp` to measure, but `line-clamp` does
+  nothing without `display:-webkit-box`, which was only applied after deciding to clamp. It
+  silently clamped nothing. Measure against line height instead.
+
+### 2026-09-06 — n8n webhook never fired for seat holds; CRM-shaped payload (d10aafe)
+
+`/api/lead` — every "Hold my seat" — read `N8N_WEBHOOK_URL` alone, while the Admin → Settings
+field labelled "n8n / CRM webhook url" was read **only by the college quote form**. A URL pasted
+there made college quotes fire and seat holds silently not. Leads were never lost (they are in
+`data/bookings.json`), they just never reached the CRM.
+
+`src/lib/webhooks.ts` now owns resolution for every sender — env first, admin setting as fallback.
+Nothing outside that file reads a webhook env var.
+
+The payload (`src/lib/webhookPayload.ts`, documented in `docs/webhooks.md`, real samples in
+`docs/webhook-samples/`) is built around two rules that exist because of how n8n fails:
+
+- **every path is present on every event**, null when empty — a mapping on `money.couponCode` must
+  not break on a booking without a coupon
+- **every leaf is a scalar** — a nullable nested object is the same trap in disguise, so coupon and
+  UTM fields are flat and `payment` is always a full object with null members
+
+Money appears twice throughout: rupees for CRM currency fields, integer paise for reconciliation.
+A `crm` block is pre-computed (dealName, dealValue, stage, leadSource, expectedCloseDate) so
+mapping is a drag rather than an expression. `eventId` is stable per event — **dedupe on it**,
+because PhonePe and n8n both retry.
+
+Attribution (page + surface + creator + UTM) is sent by the browser, cross-checked against the
+`Referer` header, frozen onto the order, and shown as a column in Admin → Bookings.
+
+Deleted `/api/hold-seat`: a stub that returned fake success and **discarded the lead**.
+
+**BREAKING:** the payload shape changed; the n8n mapping needs rebuilding once.
 
 ### 2026-09-05 — Fixed: three booking bugs (307e6e9)
 
@@ -195,6 +256,11 @@ Booking money now arrives in three stages, and only the first is taken on the we
 
 Verified against production on 2026-09-05 unless marked otherwise.
 
+### Do this first
+- [ ] **Rebuild the n8n mapping** against `docs/webhook-samples/`. The payload shape changed in
+      d10aafe, so the old mapping will not match. Then press **Send test event** in
+      Admin → Bookings to confirm delivery end to end.
+
 ### Payments — live, but still on sandbox
 - [ ] **Complete one real end-to-end sandbox payment through a browser.** The gateway is confirmed
       working (a real PhonePe checkout session is created from tripwaley.com, `payEnabled: true`),
@@ -231,6 +297,9 @@ Verified against production on 2026-09-05 unless marked otherwise.
 - [ ] A probe order `TW-MTPUG07F-e34460a4` was created on production while verifying the gateway on
       2026-09-05. Status `created`, no money moved, sandbox. Safe to ignore.
 - [ ] Real photography still needs to replace remaining placeholders in `public/images/`.
+- [ ] Weather coordinates were added for Lansdowne, Andaman, Meghalaya and Kerala from general
+      knowledge of those places. Spot-check they point where you'd expect, and correct any in
+      Admin → Packages (the lat/lng fields override the built-in table).
 
 ## Key Details
 - Project root: `/Users/apple/Applications/tripwaley`
@@ -256,9 +325,16 @@ Verified against production on 2026-09-05 unless marked otherwise.
 - **Seed merge**: `mergeSeedContent()` adds seed rows the live catalog lacks — but a row the admin
   DELETED is also "lacking". `catalog.seedRemovals` records tombstones (see `src/lib/seedGuard.ts`)
   so deletions survive a `SEED_VERSION` bump. This was the "June departures keep coming back" bug.
+- **CRM webhook**: one resolver, `src/lib/webhooks.ts` — env `N8N_WEBHOOK_URL`, then
+  `TW_BOOKING_WEBHOOK`, then Admin → Settings. Nothing else may read those env vars. Payload
+  contract and samples: `docs/webhooks.md`, `docs/webhook-samples/`. Two invariants that must not
+  be weakened: every path present on every event, and every leaf a scalar.
+- **Animation**: reveals must not be able to hide content permanently. GSAP ScrollTrigger reveals
+  proved unreliable against this site's Lenis scrolling — see `AskCreator.tsx` for the
+  IntersectionObserver-plus-failsafe pattern to copy.
 - Tests: no test runner is installed. Verification scripts use `node:assert` and Node's native
   TypeScript stripping: `node scripts/test-money.mjs` (14), `test-seed-guard.mjs` (11),
-  `test-gateway-config.mjs` (10).
+  `test-gateway-config.mjs` (10), `test-webhooks.mjs` (18), `test-geo.mjs` (9) — 62 total.
 - CRM integration: `N8N_WEBHOOK_URL` env var — when set, every lead (`/api/lead`) is also POSTed to this n8n webhook for CRM push (e.g. Twenty CRM).
 - Image slot registry: `SLOT_DEFS` in `src/lib/types.ts` — add new slots here to make any future hardcoded image editable from the admin Media tab.
 - Design tokens: all colors/fonts defined once in `src/app/globals.css` under `@theme` (brand red `#C91B20`, gold `#F5A31A`, ink `#1A1614`, cream `#FFFCF8`, etc.).
