@@ -1,21 +1,68 @@
 # Project Summary: Tripwaley
 
-Last updated: 2026-08-01
+Last updated: 2026-09-05
 
 ## Project Overview
 Tripwaley is a production-grade travel booking website for a premium, group-departure travel brand in India. It is a Next.js 16 site with 3D/scroll-driven visuals (React Three Fiber, GSAP, Lenis), city-aware pricing, a lead-capture booking flow, and a full custom admin panel (CMS-style) so the owner can edit trips, prices, departures, cities, media, reviews, and bookings without touching code. There is no database — everything is stored in JSON files under `data/`.
+
+## Start here (new session? read this first)
+1. `AGENTS.md` — **this Next.js version has breaking changes.** Read the relevant guide in
+   `node_modules/next/dist/docs/` before relying on assumed framework behaviour. This has bitten
+   real work: `sitemap.ts` was silently static, metadata routes ignore the layout's `force-dynamic`.
+2. **Standing rule:** never push to GitHub without stating the plan and getting an explicit yes.
+3. Two data copies, and confusing them causes real bugs: `src/data/catalog.json` is the SEED baked
+   into the Docker image; `data/catalog.json` is the LIVE catalog on the server volume that the
+   admin panel edits. They diverge, and that divergence is deliberate — see the seed-guard entry.
+4. Money code is tested first, `node:assert` scripts, no test runner installed:
+   `node scripts/test-money.mjs`, `test-seed-guard.mjs`, `test-gateway-config.mjs`.
+5. Design spec for the payment work: `docs/superpowers/specs/2026-09-05-phonepe-payments-design.md`.
 
 ## Current Status
 - The site is **live in production** at `tripwaley.com`, deployed on a Hostinger VPS through Dokploy. It builds and deploys automatically from GitHub — every push to the `main` branch triggers a new deploy.
 - Homepage, `/trips`, `/trips/[slug]`, `/from/[city]`, `/destinations`, `/collections`, `/about`, `/vibe-check`, `/stories` pages all exist and pull from the JSON data layer.
 - Admin panel lives at `/admin` (login at `/admin/login`), protected by a password-hash + session-cookie auth system. Admin edits (prices, packages, photos, reviews, settings) now show up on the live site right away — this was broken until today's fix, see below.
-- Booking/lead capture is wired end-to-end and confirmed working in production: the sticky booking bar and the "Hold my seat" popup both save to `data/bookings.json` and forward to an n8n webhook.
+- **Payments are LIVE** (verified on production 2026-09-05): PhonePe Standard Checkout V2 takes a
+  5% seat hold + 5% GST on that hold. Credentials are set from Admin → Payments, currently pointed
+  at PhonePe's **sandbox** — real cards are not charged until `env` is switched to production.
+- The booking ladder is three stages, and only the first happens online: 5% (+GST) holds the seat →
+  the team collects the balance of the 20% advance offline about a week out → the rest at departure.
+  The percentages are `holdPercent` / `gstPercent` / `advancePercent` in Admin → Settings.
+- The booking flow is on trip pages AND creator trip pages (`/travel-with/[slug]/[trip]`); both get
+  their props from `src/lib/bookingProps.ts` so they cannot drift apart.
+- Lead capture still works alongside payment: leads save to `data/bookings.json` and forward to n8n.
 - Media management: every image used anywhere on the site is a named "slot". Admin → Media tab lets the owner replace any slot's image, add more images to list-type slots, remove extra images, upload new files, or do a global "replace this file everywhere it's used" swap.
 - Phone number capture is enforced server-side — a lead cannot be created without a valid 10-digit Indian mobile number.
+- Admin tabs: Dashboard, Content, Pages, Packages, Creators, Captains, Colleges, Coupons, Prices,
+  Departures, Cities, Media, Reviews, FAQ, Stories, Settings, **Payments**, Bookings.
 - A large "lab" of experimental hero/section designs still exists under `src/components/lab/` and `src/components/lab2/`, viewable at `/lab` and `/lab2` — design sandbox, not part of the live user-facing site.
 - **New standing rule from the owner (2026-08-01, still in effect):** never push any change to GitHub directly. Always explain the plan in chat first and wait for a clear "yes" before making or pushing any change.
 
 ## Recent Changes
+
+### 2026-09-05 — Fixed: three booking bugs (307e6e9)
+
+- **The booking bar quoted another city's price.** `prices[city.slug] ?? Object.values(prices)[0]`
+  meant a boarding city with no price rule fell back to whichever city was first, so the bar read
+  "ex-Guwahati · ₹5,000/seat" using a different city's rate. The visitor filled the whole form and
+  the server — which prices from the catalog — refused at the payment step. An unpriced city now
+  reads "on request" with no Pay button, matching what the server will do.
+- **Typing in any dialog threw focus to the close button.** `useModal`'s effect depended on
+  `onClose`, an inline arrow and therefore a new function every render; each keystroke tore the
+  effect down (restoring focus) and set it up again (focusing the first control). `onClose` now
+  lives in a ref. Affected every dialog using the hook, not just booking.
+- **Creator trips could not be booked** — same packages as `/trips/[slug]`, but WhatsApp-only
+  checkout. They now render the same `BookingBar`; per-date cards open it with that departure
+  preselected via a `tw:book` window event. Sold-out dates keep their waitlist link, and
+  "Ask <creator>" stays on WhatsApp — those are conversations, not checkouts.
+
+### 2026-09-05 — Fixed: the sitemap listed 12 trips that 404 (d0701c0)
+
+Metadata routes are static by default and the root layout's `force-dynamic` does not reach
+`sitemap.ts`, so it was generated during `next build` **inside the Docker image** — before the
+volume with the real catalog is mounted. It fell back to the seed and froze around the seed's 22
+live trips; 12 had since been deleted or drafted in the admin, and Google was being handed 12 URLs
+that 404. `export const dynamic = "force-dynamic"` makes it render per request. Verified live
+afterwards: 22 trip URLs, 0 dead.
 
 ### 2026-09-05 — PhonePe keys settable from Admin → Payments
 
@@ -145,9 +192,45 @@ Booking money now arrives in three stages, and only the first is taken on the we
 - Done: `create-next-app` scaffold with Next.js 16 (App Router, TypeScript strict, Tailwind v4), React Three Fiber 9 + GSAP ScrollTrigger + Lenis smooth scroll, a procedural low-poly 3D Himalayan valley hero (`components/three/`), brand design tokens in `globals.css` (`@theme`), placeholder `BookingContext`/`HoldSeatModal` conversion funnel, and placeholder `/api/hold-seat` + `/api/book-token` routes. This became the foundation everything else was layered on.
 
 ## Pending / Next Steps
-- [ ] Real payment gateway is still a placeholder in `/api/book-token` (the "pay token to confirm booking" step after "Hold my seat") — known, not yet requested.
-- [ ] Real photography still needs to replace any remaining placeholder images in `public/images/` at some point (per README note).
-- [ ] Remember the new rule: always explain the plan in chat and get a clear yes before pushing anything to GitHub.
+
+Verified against production on 2026-09-05 unless marked otherwise.
+
+### Payments — live, but still on sandbox
+- [ ] **Complete one real end-to-end sandbox payment through a browser.** The gateway is confirmed
+      working (a real PhonePe checkout session is created from tripwaley.com, `payEnabled: true`),
+      but nobody has yet approved a UPI collect and watched it land in Admin → Payments as `paid`.
+      That is the last untested link.
+- [ ] **Switch `env` to production** in Admin → Payments once PhonePe approves the live account.
+      One dropdown. Do it only after the sandbox run above passes.
+- [ ] **Change the webhook password.** It is currently `Naman1234`, which is weak and was shared in
+      a screenshot — treat it as public. Change it on the PhonePe dashboard and in Admin → Payments
+      together. It only guards the callback (the amount check catches a wrong figure anyway), but
+      it should not stay as-is for production.
+
+### Two policy questions the owner has not answered — currently written as assumptions
+- [ ] **Is the 5% hold refundable?** Terms and the Refund Policy currently say YES — adjusted
+      against the 20% advance and refunded under the existing cancellation slab. If it should be
+      non-refundable instead, that is legal but needs explicit pre-payment disclosure and a tick-box
+      under the Consumer Protection (E-Commerce) Rules 2020, i.e. a different build.
+- [ ] **Are trip prices GST-exclusive?** Assumed YES, since GST is charged on top of the hold. If
+      prices are meant to be GST-inclusive this line double-charges — set `gstPercent` to 0 and the
+      GST wording disappears from the site automatically.
+
+### Believed open — carried from earlier sessions, NOT re-verified
+- [ ] Cloudflare CDN. Blocked on the owner creating the account. **Critical:** the Hostinger email
+      records (MX `mx1/mx2.hostinger.com`, SPF, `autodiscover` CNAME) must be recreated in
+      Cloudflare BEFORE the nameserver switch, or `grievance@tripwaley.com` breaks — and PhonePe
+      depends on that address. No DMARC record exists.
+- [ ] ~10 Google Drive photos set to "Restricted" — need "Anyone with the link".
+- [ ] Seeded coupon `EXPIRED24` exists as a negative test; delete it before it confuses anyone.
+- [ ] Orphaned price rules pointing at package slugs that no longer exist. `findOrphans()` in
+      `src/lib/slugCascade.ts` reports them. Inert, but they clutter the catalog.
+- [ ] Confirm the `grievance@tripwaley.com` mailbox actually exists and is monitored.
+
+### Housekeeping
+- [ ] A probe order `TW-MTPUG07F-e34460a4` was created on production while verifying the gateway on
+      2026-09-05. Status `created`, no money moved, sandbox. Safe to ignore.
+- [ ] Real photography still needs to replace remaining placeholders in `public/images/`.
 
 ## Key Details
 - Project root: `/Users/apple/Applications/tripwaley`
@@ -159,6 +242,23 @@ Booking money now arrives in three stages, and only the first is taken on the we
 - **GitHub**: `mrnamansoni/tripwaley`, branch `main`. A push to `main` auto-deploys through Dokploy, usually live within a few minutes.
 - **Storage on the server**: three separate storage areas set up in Dokploy itself (not in the project's `docker-compose.yml`, which is not actually used) — one for admin data (prices/bookings/reviews), one for uploaded photos, one for the image cache. These keep admin changes safe across every deploy.
 - Admin panel: `/admin` (guarded), login at `/admin/login`. Auth env vars: `ADMIN_PASSWORD_HASH` + `SESSION_SECRET` (generate hash via `node scripts/hash-password.mjs "your-password"`); dev fallback password `tripwaley@2026` if hash isn't set.
+- **Payments**: PhonePe Standard Checkout **V2 (OAuth)** — `client_id` / `client_secret` /
+  `client_version`, NOT the older merchantId + saltKey / X-VERIFY flow most tutorials show.
+  Credentials resolve **environment first, then `data/gateway.json`** (written by Admin → Payments,
+  mode 0600, never in `catalog.json` because that file is served to the browser wholesale).
+  Env winning is deliberate: the reverse would let a stale sandbox key silently override live keys.
+  With no credentials anywhere, no Pay button renders at all — it fails closed.
+- **Payment invariants** (do not weaken these): the browser never sends an amount; `/api/pay/create`
+  prices from the catalog via `src/lib/pricing.ts` and freezes the figure on the order; an order is
+  `paid` only when PhonePe's Order Status API agrees on **state AND amount**; status transitions are
+  monotonic so a late `FAILED` cannot undo a payment; orders live in `data/orders.json`, never in
+  `catalog.json`, because the admin PUT rewrites the catalog wholesale.
+- **Seed merge**: `mergeSeedContent()` adds seed rows the live catalog lacks — but a row the admin
+  DELETED is also "lacking". `catalog.seedRemovals` records tombstones (see `src/lib/seedGuard.ts`)
+  so deletions survive a `SEED_VERSION` bump. This was the "June departures keep coming back" bug.
+- Tests: no test runner is installed. Verification scripts use `node:assert` and Node's native
+  TypeScript stripping: `node scripts/test-money.mjs` (14), `test-seed-guard.mjs` (11),
+  `test-gateway-config.mjs` (10).
 - CRM integration: `N8N_WEBHOOK_URL` env var — when set, every lead (`/api/lead`) is also POSTed to this n8n webhook for CRM push (e.g. Twenty CRM).
 - Image slot registry: `SLOT_DEFS` in `src/lib/types.ts` — add new slots here to make any future hardcoded image editable from the admin Media tab.
 - Design tokens: all colors/fonts defined once in `src/app/globals.css` under `@theme` (brand red `#C91B20`, gold `#F5A31A`, ink `#1A1614`, cream `#FFFCF8`, etc.).
@@ -167,5 +267,7 @@ Booking money now arrives in three stages, and only the first is taken on the we
   - No database — chose JSON file storage for simplicity since this is a single-owner admin panel, not multi-tenant.
   - Phone capture enforced server-side (HTTP 422 on invalid/missing phone) rather than only client-side, so the lead requirement can't be bypassed.
   - Image slots modeled as a registry (`SLOT_DEFS`) with defaults + admin overrides, rather than editing image paths directly in code, so every image on the site is owner-replaceable through the admin UI.
-  - Every page now always fetches fresh data on every visit (added 2026-08-01), instead of relying on cached pages plus a refresh signal, because the refresh signal was not reliable enough on its own.
+  - Every page still renders fresh on every visit (root layout `force-dynamic`), but public pages
+    now send `s-maxage=60, stale-while-revalidate=600` so a CDN can absorb the load — the earlier
+    blanket `no-store` was costing performance for no benefit.
   - Every page-generating request now does a small amount of extra work on every visit instead of using a saved copy — this is fine because reading the data file is fast and cheap, not a heavy database call.
