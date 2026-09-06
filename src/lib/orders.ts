@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { randomBytes } from "node:crypto";
 import type { HoldQuote } from "./money";
+import type { LeadSource } from "./webhookPayload";
 
 /**
  * Payment orders — one row per attempt to hold a seat.
@@ -45,6 +46,10 @@ export interface Order {
   pax: number;
 
   coupon?: { code: string; label: string; discount: number };
+
+  /** where the booking came from — page, surface and creator. Frozen with the
+   *  order so attribution survives even if the visitor's session is long gone. */
+  source?: LeadSource;
 
   /** frozen at creation, priced server-side — the ONLY authority on the amount */
   quote: HoldQuote;

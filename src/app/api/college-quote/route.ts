@@ -8,13 +8,13 @@
  *
  * PHONE IS REQUIRED: it's the only field that makes this a usable lead.
  *
- * env: N8N_WEBHOOK_URL — shared with /api/lead so both feed the same CRM.
+ * The webhook URL comes from lib/webhooks.ts, shared with every other sender.
  */
 
 import { NextResponse } from "next/server";
+import { crmWebhookUrl } from "@/lib/webhooks";
 import { clientIp, publicRateLimit } from "@/lib/auth";
 import { appendBooking } from "@/lib/store";
-import { getSettings } from "@/lib/catalog";
 
 /** accept Indian mobiles: 10 digits starting 6–9, optional +91 / 0 prefix */
 function normalizePhone(raw: string): string | null {
@@ -94,7 +94,7 @@ export async function POST(req: Request) {
     notes,
   };
 
-  const hook = process.env.N8N_WEBHOOK_URL || getSettings().n8nWebhook;
+  const hook = crmWebhookUrl();
   if (hook) {
     // fire-and-forget: a slow CRM must never hold up the student's form
     fetch(hook, {

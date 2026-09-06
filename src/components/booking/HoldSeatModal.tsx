@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { formatINR } from "@/lib/data";
 import { trackInitiateCheckout, trackLead } from "@/lib/analytics";
 import { holdQuote, formatPaise } from "@/lib/money";
+import { leadSource } from "@/lib/leadSource";
 import type { BookingMode, BookingTrip, BookingRates } from "./BookingContext";
 
 type Phase = "form" | "submitting" | "held" | "paying" | "confirmed";
@@ -102,7 +103,7 @@ export default function HoldSeatModal({ mode, initialTrip, trips, rates, default
           package: selected.slug,
           date: selected.dateLabel,
           price: selected.priceFrom > 0 ? selected.priceFrom : null,
-          source: mode === "token" ? "hold-modal-token" : "hold-modal",
+          source: leadSource(mode === "token" ? "hold-modal-token" : "hold-modal", { packageSlug: selected.slug }),
         }),
       });
       if (!res.ok) throw new Error("lead failed");
@@ -129,6 +130,7 @@ export default function HoldSeatModal({ mode, initialTrip, trips, rates, default
           date: selected.dateLabel,
           occupancy: "triple",
           pax: 1,
+          source: leadSource("hold-modal", { packageSlug: selected.slug }),
         }),
       });
       const json = await res.json().catch(() => null);

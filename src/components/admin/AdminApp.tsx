@@ -15,6 +15,7 @@ import StoriesEditor from "./StoriesEditor";
 import CreatorsEditor from "./CreatorsEditor";
 import CaptainsEditor from "./CaptainsEditor";
 import PaymentsView from "./PaymentsView";
+import WebhookPanel from "./WebhookPanel";
 import CollegesEditor from "./CollegesEditor";
 import CouponsEditor from "./CouponsEditor";
 import SettingsEditor from "./SettingsEditor";
@@ -342,12 +343,13 @@ function BookingsView() {
   const { data } = useAdmin();
   return (
     <>
-      <Head title="Bookings & leads" sub="Every 'hold my seat' lands here (and forwards to n8n → CRM when configured)." />
+      <Head title="Bookings & leads" sub="Every 'hold my seat' lands here, and forwards to your CRM." />
+      <WebhookPanel />
       <div data-lenis-prevent className="overflow-x-auto rounded-2xl border border-white/10">
         <table className="w-full min-w-[52rem] text-left text-sm">
           <thead className="bg-black/40 text-[0.58rem] font-bold uppercase tracking-widest text-white/45">
             <tr>
-              {["when", "name", "mobile", "package", "city", "date", "occupancy", "quote"].map((h) => <th key={h} className="px-4 py-3">{h}</th>)}
+              {["when", "name", "mobile", "package", "city", "date", "pax", "quote", "came from"].map((h) => <th key={h} className="px-4 py-3">{h}</th>)}
             </tr>
           </thead>
           <tbody>
@@ -366,12 +368,23 @@ function BookingsView() {
                 <td className="px-4 py-2.5 font-bold text-white">{b.package}</td>
                 <td className="px-4 py-2.5">{b.city}</td>
                 <td className="px-4 py-2.5">{b.date || "—"}</td>
-                <td className="px-4 py-2.5">{b.occupancy}</td>
+                <td className="px-4 py-2.5">{b.pax ?? 1} · {b.occupancy || "—"}</td>
                 <td className="px-4 py-2.5 text-gold">{b.price ? inr(b.price) : "—"}</td>
+                <td className="px-4 py-2.5">
+                  {b.creator && (
+                    <span className="mr-1.5 inline-flex rounded-full bg-gold/15 px-2 py-0.5 text-[0.6rem] font-extrabold uppercase tracking-wider text-gold">
+                      {b.creator}
+                    </span>
+                  )}
+                  <span className="text-white/70">{b.source || "—"}</span>
+                  {b.sourcePage && (
+                    <span className="block font-mono text-[0.6rem] text-white/35">{b.sourcePage}</span>
+                  )}
+                </td>
               </tr>
             ))}
             {data.bookings.length === 0 && (
-              <tr><td colSpan={8} className="px-4 py-8 text-center text-white/35">No leads yet — they&apos;ll appear the moment someone holds a seat.</td></tr>
+              <tr><td colSpan={9} className="px-4 py-8 text-center text-white/35">No leads yet — they&apos;ll appear the moment someone holds a seat.</td></tr>
             )}
           </tbody>
         </table>

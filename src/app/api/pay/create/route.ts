@@ -4,6 +4,7 @@ import { getCity, getSettings, holdRates } from "@/lib/catalog";
 import { quoteTrip } from "@/lib/pricing";
 import { holdQuote, formatPaise } from "@/lib/money";
 import { createOrder, newOrderId } from "@/lib/orders";
+import { resolveSource, type LeadSource } from "@/lib/webhookPayload";
 import { createPayment, phonepeConfigured, PhonePeError } from "@/lib/phonepe";
 
 /**
@@ -101,6 +102,9 @@ export async function POST(req: NextRequest) {
     occupancy: priced.occupancy,
     pax: priced.pax,
     ...(priced.coupon ? { coupon: priced.coupon } : {}),
+    // frozen with the order, so a paid booking can still be credited to the
+    // creator or campaign that produced it months later
+    source: resolveSource(body.source as LeadSource | undefined, req.headers.get("referer")),
     quote,
     contact: { name, phone },
   });

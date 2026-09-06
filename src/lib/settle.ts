@@ -1,6 +1,9 @@
 import { getOrder, updateOrder, type Order } from "./orders";
 import { orderStatus } from "./phonepe";
 import { formatPaise } from "./money";
+import { getPackage } from "./catalog";
+import { buildPaymentEvent } from "./webhookPayload";
+import { sendToCrm, withCreatorName } from "./webhooks";
 
 /**
  * Turning a PhonePe status into a settled order.
@@ -20,43 +23,39 @@ export type Settlement = { order: Order; changed: boolean; reason?: string };
 
 /** notify ops exactly once, when an order first becomes paid */
 function notifyOps(order: Order) {
-  const hook = process.env.TW_BOOKING_WEBHOOK;
-  const payload = {
-    event: "seat_hold_paid",
-    bookingId: order.id,
-    paidAt: order.paidAt,
-    package: { slug: order.packageSlug, name: order.packageName },
-    fromCity: { slug: order.citySlug, name: order.cityName },
-    date: order.date,
-    occupancy: order.occupancy,
-    pax: order.pax,
-    coupon: order.coupon ?? null,
-    money: {
-      currency: "INR",
-      tripTotal: order.quote.totalPaise / 100,
-      paidNow: order.quote.holdTotalPaise / 100,
-      holdBase: order.quote.holdBasePaise / 100,
-      gst: order.quote.holdGstPaise / 100,
-      /* what the team still has to collect to reach the confirming advance */
-      advanceStillDue: order.quote.advanceBalancePaise / 100,
-      dueAtDeparture: order.quote.departureBalancePaise / 100,
-    },
-    contact: order.contact,
-    phonepe: order.phonepe ?? null,
-    source: "website-hold",
-  };
+  const pkg = getPackage(order.packageSlug);
+  const paxSafe = order.pax || 1;
 
-  if (!hook) {
-    console.log("[settle] paid (no webhook configured):", JSON.stringify(payload));
-    return;
-  }
-  // fire-and-forget: a CRM hiccup must never affect what the traveller sees
-  fetch(hook, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(payload),
-    signal: AbortSignal.timeout(4000),
-  }).catch((e) => console.error("[settle] ops webhook failed:", e?.message));
+  sendToCrm(
+    withCreatorName(buildPaymentEvent({
+      id: order.id,
+      name: order.contact.name,
+      phone: order.contact.phone,
+      packageSlug: order.packageSlug,
+      packageName: order.packageName,
+      packageCode: pkg?.code ?? "",
+      destination: pkg?.destination ?? "",
+      nights: pkg?.nights ?? null,
+      date: order.date,
+      citySlug: order.citySlug,
+      cityName: order.cityName,
+      occupancy: order.occupancy,
+      pax: paxSafe,
+      // per-seat rupees, derived from the frozen quote rather than re-priced
+      seatPrice: order.quote.totalPaise ? order.quote.totalPaise / 100 / paxSafe : null,
+      coupon: order.coupon ?? null,
+      source: order.source,
+      quote: order.quote,
+      payment: {
+        status: order.status,
+        orderId: order.id,
+        gatewayOrderId: order.phonepe?.orderId ?? null,
+        transactionId: order.phonepe?.transactionId ?? null,
+        method: order.phonepe?.paymentMode ?? null,
+        paidAt: order.paidAt ?? null,
+      },
+    }))
+  );
 }
 
 interface StatusFacts {

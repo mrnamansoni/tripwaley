@@ -1,0 +1,88 @@
+{
+  "event": "payment.completed",
+  "eventId": "evt_pay_TW-MTPYXJ36-f84c5fa8",
+  "schemaVersion": 1,
+  "occurredAt": "2026-09-06T15:30:23.762Z",
+  "environment": "development",
+  "contact": {
+    "name": "Aisha Khan",
+    "firstName": "Aisha",
+    "phone": "9812345678",
+    "phoneE164": "+919812345678",
+    "whatsappUrl": "https://wa.me/919812345678",
+    "email": null
+  },
+  "trip": {
+    "packageSlug": "manali-exploration",
+    "packageName": "Manali Exploration",
+    "packageCode": "TRWLY-001",
+    "destination": "Manali",
+    "nights": 5,
+    "departureDate": "2026-11-14",
+    "departureDateLabel": "Sat, 14 Nov",
+    "fromCity": "delhi",
+    "fromCityName": "Delhi",
+    "occupancy": "triple",
+    "travellers": 2
+  },
+  "money": {
+    "currency": "INR",
+    "seatPrice": 6650,
+    "seatPricePaise": 665000,
+    "subtotal": 13300,
+    "subtotalPaise": 1330000,
+    "discount": 700,
+    "discountPaise": 70000,
+    "tripTotal": 13300,
+    "tripTotalPaise": 1330000,
+    "couponCode": "FIRSTTRIP",
+    "couponLabel": "5% off",
+    "couponDiscount": 700,
+    "couponDiscountPaise": 70000,
+    "paidNow": 698.25,
+    "paidNowPaise": 69825,
+    "holdBase": 665,
+    "holdBasePaise": 66500,
+    "gst": 33.25,
+    "gstPaise": 3325,
+    "advanceStillDue": 1995,
+    "advanceStillDuePaise": 199500,
+    "dueAtDeparture": 10640,
+    "dueAtDeparturePaise": 1064000,
+    "holdPercent": 5,
+    "gstPercent": 5,
+    "advancePercent": 20
+  },
+  "source": {
+    "page": "/travel-with/naman/manali-exploration",
+    "surface": "creator-date-card",
+    "creator": "naman",
+    "creatorName": "Naman Soni",
+    "packageSlug": null,
+    "referrer": null,
+    "utmSource": null,
+    "utmMedium": null,
+    "utmCampaign": null,
+    "utmContent": null,
+    "utmTerm": null
+  },
+  "payment": {
+    "status": "paid",
+    "orderId": "TW-MTPYXJ36-f84c5fa8",
+    "gateway": "phonepe",
+    "gatewayOrderId": "OMO2407121",
+    "transactionId": "OM2407121",
+    "method": "UPI_INTENT",
+    "paidAt": "2026-09-06T15:30:23.761Z"
+  },
+  "crm": {
+    "dealName": "Manali Exploration — Aisha Khan (2 pax, Sat, 14 Nov)",
+    "dealValue": 13300,
+    "stage": "seat_held",
+    "leadSource": "creator:naman",
+    "expectedCloseDate": "2026-11-07"
+  },
+  "links": {
+    "tripUrl": "http://localhost:3000/trips/manali-exploration"
+  }
+}

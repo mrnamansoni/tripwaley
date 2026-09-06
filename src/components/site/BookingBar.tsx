@@ -22,6 +22,7 @@ import { useModal } from "@/hooks/useModal";
 import { inr, shortDate, weekday } from "@/lib/types";
 import { holdQuote, formatPaise } from "@/lib/money";
 import { trackInitiateCheckout, trackLead } from "@/lib/analytics";
+import { leadSource } from "@/lib/leadSource";
 
 export interface BarDeparture { date: string; citySlugs: string[] }
 export interface BarPrices { [citySlug: string]: { triple?: number; double?: number } }
@@ -108,6 +109,7 @@ export default function BookingBar({
         occupancy: occ,
         pax: 1,
         couponCode: coupon?.code ?? "",
+        source: leadSource("booking-bar", { packageSlug }),
       }),
     }).catch(() => null);
 
@@ -158,7 +160,11 @@ export default function BookingBar({
     const res = await fetch("/api/lead", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ name, phone, package: packageSlug, city: city.slug, date: chosen, occupancy: occ, price: coupon?.total ?? seat ?? null, source: coupon ? `booking-bar coupon:${coupon.code}` : "booking-bar" }),
+      body: JSON.stringify({
+        name, phone, package: packageSlug, city: city.slug, date: chosen, occupancy: occ,
+        price: coupon?.total ?? seat ?? null, pax: 1,
+        source: leadSource("booking-bar", { packageSlug }),
+      }),
     }).catch(() => null);
     if (!res || !res.ok) {
       setErr("Couldn't hold the seat — check the number and retry.");

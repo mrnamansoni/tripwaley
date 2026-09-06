@@ -1,0 +1,88 @@
+{
+  "event": "lead.captured",
+  "eventId": "evt_lead_68692f65",
+  "schemaVersion": 1,
+  "occurredAt": "2026-09-06T15:30:23.572Z",
+  "environment": "development",
+  "contact": {
+    "name": "Priya",
+    "firstName": "Priya",
+    "phone": "9876543210",
+    "phoneE164": "+919876543210",
+    "whatsappUrl": "https://wa.me/919876543210",
+    "email": null
+  },
+  "trip": {
+    "packageSlug": "manali-exploration",
+    "packageName": "Manali Exploration",
+    "packageCode": "TRWLY-001",
+    "destination": "Manali",
+    "nights": 5,
+    "departureDate": "2026-12-05",
+    "departureDateLabel": "Sat, 5 Dec",
+    "fromCity": "delhi",
+    "fromCityName": "Delhi",
+    "occupancy": "double",
+    "travellers": 2
+  },
+  "money": {
+    "currency": "INR",
+    "seatPrice": 8000,
+    "seatPricePaise": 800000,
+    "subtotal": 16000,
+    "subtotalPaise": 1600000,
+    "discount": 0,
+    "discountPaise": 0,
+    "tripTotal": 16000,
+    "tripTotalPaise": 1600000,
+    "couponCode": null,
+    "couponLabel": null,
+    "couponDiscount": null,
+    "couponDiscountPaise": null,
+    "paidNow": null,
+    "paidNowPaise": null,
+    "holdBase": null,
+    "holdBasePaise": null,
+    "gst": null,
+    "gstPaise": null,
+    "advanceStillDue": null,
+    "advanceStillDuePaise": null,
+    "dueAtDeparture": null,
+    "dueAtDeparturePaise": null,
+    "holdPercent": null,
+    "gstPercent": null,
+    "advancePercent": null
+  },
+  "source": {
+    "page": "/trips/manali-exploration",
+    "surface": "booking-bar",
+    "creator": null,
+    "creatorName": null,
+    "packageSlug": null,
+    "referrer": null,
+    "utmSource": null,
+    "utmMedium": null,
+    "utmCampaign": null,
+    "utmContent": null,
+    "utmTerm": null
+  },
+  "payment": {
+    "status": null,
+    "orderId": null,
+    "gateway": null,
+    "gatewayOrderId": null,
+    "transactionId": null,
+    "method": null,
+    "paidAt": null
+  },
+  "crm": {
+    "dealName": "Manali Exploration — Priya (2 pax, Sat, 5 Dec)",
+    "dealValue": 16000,
+    "stage": "lead",
+    "leadSource": "booking-bar",
+    "expectedCloseDate": "2026-11-28"
+  },
+  "links": {
+    "tripUrl": "http://localhost:3000/trips/manali-exploration"
+  }
+}

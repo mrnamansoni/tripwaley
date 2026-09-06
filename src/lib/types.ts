@@ -226,7 +226,17 @@ export interface Booking {
   date: string;
   occupancy: string;
   price: number | null;
+  /** the control that produced the lead — booking-bar, hold-modal, … */
   source: string;
+  /* ---- attribution (optional for back-compat with rows written earlier) ----
+     "source" alone could not answer "which page did this come from" or "which
+     creator sent it", which is what the CRM actually needs to credit a lead. */
+  /** the path the visitor was on, e.g. /travel-with/rashi/spiti-solo-circuit */
+  sourcePage?: string;
+  /** creator slug when the lead came through a creator page */
+  creator?: string;
+  /** how many travellers the lead is for */
+  pax?: number;
 }
 /** one entry on the live-booking wire band (admin-curated, no real PII) */
 export interface WireEntry {

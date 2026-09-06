@@ -7,6 +7,7 @@
       posts to /api/lead (same pipeline as the booking bar). */
 
 import SiteMedia from "./SiteMedia";
+import { leadSource } from "@/lib/leadSource";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useModal } from "@/hooks/useModal";
@@ -100,7 +101,7 @@ function LeadPopup({ popup }: { popup: PopupCfg }) {
     const res = await fetch("/api/lead", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ name, phone, source: "timed-popup" }),
+      body: JSON.stringify({ name, phone, source: leadSource("timed-popup") }),
     });
     if (res.ok) {
       setState("done");

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { clientIp, publicRateLimit } from "@/lib/auth";
+import { crmWebhookUrl } from "@/lib/webhooks";
 import { getPackage, getCity, priceFor, getSettings } from "@/lib/catalog";
 
 /**
@@ -8,7 +9,11 @@ import { getPackage, getCity, priceFor, getSettings } from "@/lib/catalog";
  * If the webhook is down the client still gets its WhatsApp handoff —
  * no lead is ever silently lost on the visitor's side.
  *
- * env: TW_BOOKING_WEBHOOK — n8n webhook URL (optional in dev)
+ * The webhook URL comes from lib/webhooks.ts, shared with every other sender.
+ *
+ * NOTE: nothing on the site calls this route today — the booking bar and the
+ * seat-hold modal both post to /api/lead. It is kept because it prices
+ * server-side and may be wanted for a server-to-server integration.
  */
 
 export async function POST(req: NextRequest) {
@@ -67,7 +72,7 @@ export async function POST(req: NextRequest) {
   };
 
   // fire-and-forget to ops; a CRM hiccup must never block the visitor
-  const hook = process.env.TW_BOOKING_WEBHOOK;
+  const hook = crmWebhookUrl();
   if (hook) {
     fetch(hook, {
       method: "POST",

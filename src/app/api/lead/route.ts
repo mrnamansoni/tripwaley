@@ -1,13 +1,19 @@
 /**
- * Public lead capture — every "hold my seat" fires here before WhatsApp
- * opens, so no intent is ever lost. PHONE IS REQUIRED (that's the lead).
- * Appends to the bookings log and forwards to n8n when N8N_WEBHOOK_URL is
- * set (CRM push happens there). Validated + capped here.
+ * Public lead capture — every "Hold my seat" fires here before WhatsApp opens,
+ * so no intent is ever lost. PHONE IS REQUIRED (that's the lead).
+ *
+ * Appends to the bookings log and forwards a structured event to the CRM.
+ * The webhook URL is resolved by lib/webhooks.ts, which reads the environment
+ * AND the admin setting — this route used to read N8N_WEBHOOK_URL alone, so a
+ * URL configured in Admin → Settings meant leads silently never reached n8n.
  */
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { clientIp, publicRateLimit } from "@/lib/auth";
 import { appendBooking } from "@/lib/store";
+import { getCity, getPackage, priceFor } from "@/lib/catalog";
+import { buildLeadEvent, resolveSource, type LeadSource } from "@/lib/webhookPayload";
+import { sendToCrm, withCreatorName } from "@/lib/webhooks";
 
 /** accept Indian mobiles: 10 digits starting 6–9, optional +91 / 0 prefix */
 function normalizePhone(raw: string): string | null {
@@ -16,7 +22,7 @@ function normalizePhone(raw: string): string | null {
   return /^[6-9]\d{9}$/.test(ten) ? ten : null;
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   const ip = clientIp(req);
   const limit = publicRateLimit(ip, "lead", 8);
   if (limit.blocked) {
@@ -38,26 +44,57 @@ export async function POST(req: Request) {
   const phone = normalizePhone(str(body.phone, 20));
   if (!phone) return NextResponse.json({ error: "a valid mobile number is required" }, { status: 422 });
 
+  // the browser says where it came from; the Referer header is the second
+  // witness. resolveSource() decides between them.
+  const src = resolveSource(body.source as LeadSource | undefined, req.headers.get("referer"));
+
+  const packageSlug = str(body.package);
+  const citySlug = str(body.city, 40);
+  const paxRaw = Number(body.pax);
+  const pax = Number.isFinite(paxRaw) ? Math.min(20, Math.max(1, Math.round(paxRaw))) : 1;
+
   const row = appendBooking({
     name: str(body.name, 60),
     phone,
-    package: str(body.package),
-    city: str(body.city, 40),
+    package: packageSlug,
+    city: citySlug,
     date: str(body.date, 10),
     occupancy: str(body.occupancy, 10),
     price: typeof body.price === "number" && Number.isFinite(body.price) ? body.price : null,
-    source: str(body.source, 30) || "site",
+    source: src.surface,
+    sourcePage: src.page,
+    ...(src.creator ? { creator: src.creator } : {}),
+    pax,
   });
 
-  const hook = process.env.N8N_WEBHOOK_URL;
-  if (hook) {
-    fetch(hook, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ event: "seat_hold", ...row }),
-      signal: AbortSignal.timeout(6000), // don't let a hung n8n pile up open sockets
-    }).catch(() => {});
-  }
+  /* Enrich from the catalog rather than trusting the browser: the CRM wants the
+     trip's real name, code and seat price, and those must not be whatever a
+     request body happened to claim. */
+  const pkg = packageSlug ? getPackage(packageSlug) : undefined;
+  const city = citySlug ? getCity(citySlug) : undefined;
+  const rule = packageSlug && citySlug ? priceFor(packageSlug, citySlug) : undefined;
+  const occ = row.occupancy === "double" ? "double" : "triple";
+  const seat = rule?.[occ] ?? rule?.triple ?? rule?.double ?? null;
+
+  sendToCrm(
+    withCreatorName(buildLeadEvent({
+      id: row.id,
+      name: row.name,
+      phone: row.phone,
+      packageSlug: pkg?.slug ?? packageSlug,
+      packageName: pkg?.name ?? "",
+      packageCode: pkg?.code ?? "",
+      destination: pkg?.destination ?? "",
+      nights: pkg?.nights ?? null,
+      date: row.date,
+      citySlug: city?.slug ?? citySlug,
+      cityName: city?.name ?? citySlug,
+      occupancy: row.occupancy,
+      pax,
+      seatPrice: seat,
+      source: src,
+    }))
+  );
 
   return NextResponse.json({ ok: true, id: row.id });
 }
