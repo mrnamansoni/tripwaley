@@ -1,0 +1,96 @@
+{
+  "event": "lead.captured",
+  "eventId": "evt_lead_a91f0c73",
+  "schemaVersion": 1,
+  "occurredAt": "2026-09-07T10:30:55.394Z",
+  "environment": "development",
+  "contact": {
+    "name": "Ritu Malhotra",
+    "firstName": "Ritu",
+    "phone": "9811122233",
+    "phoneE164": "+919811122233",
+    "whatsappUrl": "https://wa.me/919811122233",
+    "email": "ritu@srcc.edu"
+  },
+  "trip": {
+    "packageSlug": null,
+    "packageName": "College trip — Goa",
+    "packageCode": null,
+    "destination": "Goa",
+    "nights": null,
+    "departureDate": null,
+    "departureDateLabel": null,
+    "fromCity": null,
+    "fromCityName": null,
+    "occupancy": null,
+    "travellers": 60
+  },
+  "money": {
+    "currency": "INR",
+    "seatPrice": 7000,
+    "seatPricePaise": 700000,
+    "subtotal": 420000,
+    "subtotalPaise": 42000000,
+    "discount": 0,
+    "discountPaise": 0,
+    "tripTotal": 420000,
+    "tripTotalPaise": 42000000,
+    "couponCode": null,
+    "couponLabel": null,
+    "couponDiscount": null,
+    "couponDiscountPaise": null,
+    "paidNow": null,
+    "paidNowPaise": null,
+    "holdBase": null,
+    "holdBasePaise": null,
+    "gst": null,
+    "gstPaise": null,
+    "advanceStillDue": null,
+    "advanceStillDuePaise": null,
+    "dueAtDeparture": null,
+    "dueAtDeparturePaise": null,
+    "holdPercent": null,
+    "gstPercent": null,
+    "advancePercent": null
+  },
+  "source": {
+    "page": "/college-trips",
+    "surface": "college-quote",
+    "creator": null,
+    "creatorName": null,
+    "packageSlug": null,
+    "referrer": null,
+    "utmSource": null,
+    "utmMedium": null,
+    "utmCampaign": null,
+    "utmContent": null,
+    "utmTerm": null
+  },
+  "payment": {
+    "status": null,
+    "orderId": null,
+    "gateway": null,
+    "gatewayOrderId": null,
+    "transactionId": null,
+    "method": null,
+    "paidAt": null
+  },
+  "college": {
+    "institution": "Shri Ram College of Commerce",
+    "students": 60,
+    "budgetPerStudent": 7000,
+    "budgetPerStudentPaise": 700000,
+    "month": "November",
+    "notes": "Post-exam batch. Need AC sleeper buses."
+  },
+  "crm": {
+    "dealName": "College trip — Goa — Ritu Malhotra (60 pax)",
+    "dealValue": 420000,
+    "stage": "lead",
+    "leadSource": "college-quote",
+    "expectedCloseDate": null
+  },
+  "links": {
+    "tripUrl": null
+  }
+}

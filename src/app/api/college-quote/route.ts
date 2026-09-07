@@ -3,16 +3,21 @@
  *
  * Same contract as /api/lead — the row lands in the bookings log so it shows
  * up in the admin Bookings tab alongside every other enquiry — but the extra
- * college fields (batch size, budget per student) are carried through to the
- * ops webhook, where the quote actually gets built.
+ * college fields (batch size, budget per student) ride in the event's `college`
+ * block, where the quote actually gets built.
  *
  * PHONE IS REQUIRED: it's the only field that makes this a usable lead.
  *
- * The webhook URL comes from lib/webhooks.ts, shared with every other sender.
+ * This used to POST a flat, college-shaped payload of its own to the SAME
+ * webhook URL as every other event. One n8n mapping could not read both, so a
+ * college enquiry errored the workflow and the lead never reached the CRM. It
+ * now sends the shared envelope through the shared sender, which also means
+ * these deliveries show up in Admin → Bookings like everything else.
  */
 
-import { NextResponse } from "next/server";
-import { crmWebhookUrl } from "@/lib/webhooks";
+import { NextRequest, NextResponse } from "next/server";
+import { sendToCrm } from "@/lib/webhooks";
+import { buildLeadEvent, resolveSource, type LeadSource } from "@/lib/webhookPayload";
 import { clientIp, publicRateLimit } from "@/lib/auth";
 import { appendBooking } from "@/lib/store";
 
@@ -32,7 +37,7 @@ function num(v: unknown, min: number, max: number): number | null {
   return Math.min(max, Math.max(min, Math.round(n)));
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   const ip = clientIp(req);
   const limit = publicRateLimit(ip, "college", 5);
   if (limit.blocked) {
@@ -81,31 +86,37 @@ export async function POST(req: Request) {
     source: "college-quote",
   });
 
-  const payload = {
-    event: "college_quote",
-    ...row,
-    college,
-    contactName: name,
-    email,
-    destination,
-    students,
-    budgetPerStudent: budget,
-    month,
-    notes,
-  };
+  /* The surface is asserted by the server — this route IS the college form, and
+     that is not something a request body gets a say in. Anything else the
+     browser knows (UTMs, the page) still travels. */
+  const client = (body.source as LeadSource | undefined) ?? {};
+  const src = resolveSource(
+    { ...client, surface: "college-quote", page: client.page || "/college-trips" },
+    req.headers.get("referer")
+  );
 
-  const hook = crmWebhookUrl();
-  if (hook) {
-    // fire-and-forget: a slow CRM must never hold up the student's form
-    fetch(hook, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(payload),
-      signal: AbortSignal.timeout(6000),
-    }).catch((e) => console.error("[college-quote] webhook failed:", e?.message));
-  } else {
-    console.log("[college-quote] lead (no webhook configured):", JSON.stringify(payload));
-  }
+  sendToCrm(
+    buildLeadEvent({
+      id: row.id,
+      name: name || college,
+      phone,
+      email,
+      // there is no package yet — that is the whole point of the enquiry
+      packageName: destination ? `College trip — ${destination}` : "College trip enquiry",
+      destination,
+      pax: students ?? undefined,
+      // a per-student budget is the closest thing this form has to a seat price
+      seatPrice: budget,
+      source: src,
+      college: {
+        institution: college,
+        students,
+        budgetPerStudent: budget,
+        month,
+        notes,
+      },
+    })
+  );
 
   return NextResponse.json({ ok: true, id: row.id });
 }

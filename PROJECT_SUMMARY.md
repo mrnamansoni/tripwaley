@@ -1,6 +1,6 @@
 # Project Summary: Tripwaley
 
-Last updated: 2026-09-06
+Last updated: 2026-09-07
 
 ## Project Overview
 Tripwaley is a production-grade travel booking website for a premium, group-departure travel brand in India. It is a Next.js 16 site with 3D/scroll-driven visuals (React Three Fiber, GSAP, Lenis), city-aware pricing, a lead-capture booking flow, and a full custom admin panel (CMS-style) so the owner can edit trips, prices, departures, cities, media, reviews, and bookings without touching code. There is no database — everything is stored in JSON files under `data/`.
@@ -38,6 +38,60 @@ Tripwaley is a production-grade travel booking website for a premium, group-depa
 - **New standing rule from the owner (2026-08-01, still in effect):** never push any change to GitHub directly. Always explain the plan in chat first and wait for a clear "yes" before making or pushing any change.
 
 ## Recent Changes
+
+### 2026-09-07 — Fixed: 8 bugs found reviewing the booking + webhook work
+
+A code review of `d10aafe` + `73fe8d3`, prompted by a real production event the owner pasted from
+n8n (order `TW-MTQG8VNL-6ed408c6` — a PAID booking with `departureDate: null`).
+
+**The two that could take the wrong money or lose a booking:**
+
+1. **A stale coupon quoted one price and charged another.** An applied coupon's server-priced
+   `total` was cached in component state and never re-checked when travellers, departure city or
+   occupancy changed — all of which the server re-prices. At 3 travellers the modal showed
+   ₹423.94 while PhonePe took ₹1,271.81. The pax stepper shipped in `73fe8d3` is what made this
+   reachable; before it, pax was hardcoded to 1. **Changing any of those three now drops the
+   coupon** with a visible "re-apply it" note, rather than silently keeping a stale figure.
+2. **A booking could be paid for with no departure date at all.** A trip's dates live in TWO
+   places — the shared `departures` collection, and `dates` on a creator's record — and the
+   booking bar only ever read the first. A package whose batches existed only on a creator record
+   left the bar with nothing to offer and nothing to fall back on, so its hero CTA submitted an
+   empty date that every layer downstream accepted. Fixed at three levels: creator dates now fill
+   an empty shared list (`departureDates.ts` — a fallback, deliberately NOT a merge, so deleted
+   batches can't come back on sale); the bar hides the Pay button and says "no dates published"
+   instead of the misleading "next batch"; and **`/api/pay/create` now refuses any order whose
+   date isn't a real ISO date**, which is the chokepoint every pay path goes through.
+
+**The rest:**
+
+3. `money.subtotal` was POST-discount while `discount` was reported separately, so
+   `subtotal - discount` equalled neither the gross nor the net on every coupon booking (₹8,075 −
+   ₹425 = ₹7,650 on a ₹8,500 trip). Gross revenue in the CRM was wrong. The pre-coupon rate is now
+   stored on the order and `preCouponSeatPrice()` reconstructs it for orders written earlier.
+4. The college form and `/api/book` still posted a flat legacy payload to the SAME webhook URL, so
+   one n8n mapping could not read both — a college enquiry would error the workflow. Both now send
+   the shared envelope through the shared sender, which also means they show up in the deliveries
+   panel. Carrying the college fields without breaking "every path present" needed a new `college`
+   block, present-and-null on trip events exactly like `payment`.
+5. The navbar "Hold a seat" modal sent a DISPLAY label as the date ("12 Jul", "flexible dates"),
+   which `/api/lead`'s 10-char cap turned into "flexible d". `BookingTrip` now carries the ISO date
+   alongside its label, and that modal offers no payment for a trip with no real date.
+6. Coupons were dropped from every `lead.captured` event — someone who applied a code and took the
+   WhatsApp route reached the CRM at full price with no record of the code. `/api/lead` now prices
+   the coupon itself (never trusting a browser-supplied discount).
+7. The name field was labelled "(optional)" but `/api/pay/create` rejects names under 2 chars —
+   blank name + Pay meant a 422 after the button already said "Opening secure payment…".
+8. The batch `<select>` could display a different date than the one being booked, when a date card
+   picked a departure absent from the shared list. Its options are now a union including `chosen`.
+
+Verified against a live local webhook receiver (both events came back with an identical top-level
+shape), a real browser run of the coupon/pax flow, and `/api/pay/create` refusing `""`, `"12 Jul"`
+and `"flexible d"` while still accepting `2026-10-26`. 80 assertions across 6 test scripts (was 62).
+
+**Still the owner's to do:** some live packages have no rows in the shared Departures list at all —
+locally that's 5 of them, and it's what caused #2 in production. The site now fails honestly on
+those trips (no Pay button, "dates on request") instead of taking money, but they can't be booked
+online until real departures are added in Admin → Departures.
 
 ### 2026-09-06 — Booking toggle, travellers + city, weather, creator section, read-more (73fe8d3)
 
@@ -257,9 +311,14 @@ Booking money now arrives in three stages, and only the first is taken on the we
 Verified against production on 2026-09-05 unless marked otherwise.
 
 ### Do this first
-- [ ] **Rebuild the n8n mapping** against `docs/webhook-samples/`. The payload shape changed in
-      d10aafe, so the old mapping will not match. Then press **Send test event** in
-      Admin → Bookings to confirm delivery end to end.
+1. **Rebuild the n8n mapping** against `docs/webhook-samples/` — the payload shape changed again on
+   2026-09-07 (a `college` block was added, and `money.subtotal` is now correctly pre-discount).
+   `docs/webhooks.md` is the reference. Then press **Send test event** in Admin → Bookings, which
+   shows where the URL came from and the last 40 delivery attempts.
+2. **Add real departures for the live packages that have none.** Admin → Departures. A trip with no
+   rows there cannot be booked or paid for online — the site now says "dates on request" and offers
+   only the WhatsApp path, which is honest but is not a sale. This is what produced the dateless
+   paid booking on 2026-09-06.
 
 ### Payments — live, but still on sandbox
 - [ ] **Complete one real end-to-end sandbox payment through a browser.** The gateway is confirmed

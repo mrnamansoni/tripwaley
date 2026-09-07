@@ -11,7 +11,7 @@
  */
 
 import assert from "node:assert/strict";
-import { holdQuote, formatPaise, PHONEPE_MIN_PAISE } from "../src/lib/money.ts";
+import { preCouponSeatPrice, holdQuote, formatPaise, PHONEPE_MIN_PAISE } from "../src/lib/money.ts";
 
 let n = 0;
 const ok = (label) => { n++; console.log(`  ✓ ${label}`); };
@@ -129,6 +129,41 @@ console.log("\nmoney — display formatting");
   assert.equal(formatPaise(1_440_000), "₹14,400");
   assert.equal(formatPaise(0), "₹0");
   ok("whole rupees drop the decimals; paise are shown to 2dp; thousands grouped");
+}
+
+console.log("\nmoney — the per-seat rate the CRM is told (the coupon bug)");
+{
+  /* The real production event: a ₹8,500 seat with FIRSTTRIP (5%) reported
+     seatPrice 8075 — the DISCOUNTED rate — because it was derived from the
+     order's frozen total. The webhook then published subtotal 8075 alongside
+     discount 425, so subtotal - discount was 7,650: neither the gross nor the
+     net. Gross revenue in the CRM was wrong on every coupon booking. */
+  assert.equal(
+    preCouponSeatPrice({ totalPaise: 807500, couponDiscount: 425, pax: 1 }),
+    8500,
+    "the discount must be added back to recover the pre-coupon rate"
+  );
+  ok("a discounted total reconstructs the ₹8,500 rate, not ₹8,075");
+
+  assert.equal(preCouponSeatPrice({ totalPaise: 2422500, couponDiscount: 1275, pax: 3 }), 8500);
+  ok("it divides by pax after adding the discount back, not before");
+
+  // no coupon → the total already IS the gross
+  assert.equal(preCouponSeatPrice({ totalPaise: 1600000, pax: 2 }), 8000);
+  ok("an uncouponed order is unchanged");
+
+  // a stored rate is authoritative — newer orders never reconstruct anything
+  assert.equal(
+    preCouponSeatPrice({ totalPaise: 807500, couponDiscount: 425, pax: 1, stored: 8500 }),
+    8500
+  );
+  ok("a stored pre-coupon rate wins over reconstruction");
+
+  // and nothing plausible produces a NaN or a negative in the payload
+  assert.equal(preCouponSeatPrice({ totalPaise: 0, pax: 1 }), null);
+  assert.equal(preCouponSeatPrice({ totalPaise: NaN, pax: 1 }), null);
+  assert.equal(preCouponSeatPrice({ totalPaise: 100000, pax: 0 }), 1000, "pax 0 must not divide by zero");
+  ok("junk in gives null out, never NaN or Infinity");
 }
 
 console.log(`\n${n} assertions passed.\n`);

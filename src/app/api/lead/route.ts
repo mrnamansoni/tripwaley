@@ -12,6 +12,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { clientIp, publicRateLimit } from "@/lib/auth";
 import { appendBooking } from "@/lib/store";
 import { getCity, getPackage, priceFor } from "@/lib/catalog";
+import { quoteTrip } from "@/lib/pricing";
 import { buildLeadEvent, resolveSource, type LeadSource } from "@/lib/webhookPayload";
 import { sendToCrm, withCreatorName } from "@/lib/webhooks";
 
@@ -72,9 +73,22 @@ export async function POST(req: NextRequest) {
      request body happened to claim. */
   const pkg = packageSlug ? getPackage(packageSlug) : undefined;
   const city = citySlug ? getCity(citySlug) : undefined;
-  const rule = packageSlug && citySlug ? priceFor(packageSlug, citySlug) : undefined;
   const occ = row.occupancy === "double" ? "double" : "triple";
-  const seat = rule?.[occ] ?? rule?.triple ?? rule?.double ?? null;
+
+  /* Price the coupon HERE, the same way /api/pay/create does. The lead event
+     used to carry no coupon at all — someone who applied a code and took the
+     WhatsApp route reached the CRM as a full-price lead, contradicting the
+     discounted figure sitting on the same row in Admin → Bookings, and losing
+     any record of which code they used. The discount is re-derived rather than
+     read from the request, because a browser-supplied discount is not a fact. */
+  const priced = packageSlug && citySlug
+    ? quoteTrip({ packageSlug, citySlug, occupancy: occ, pax, code: str(body.couponCode, 40) })
+    : undefined;
+
+  const rule = packageSlug && citySlug ? priceFor(packageSlug, citySlug) : undefined;
+  // an invalid/expired code must not cost us the lead — fall back to list price
+  const seat = priced?.ok ? priced.seat : rule?.[occ] ?? rule?.triple ?? rule?.double ?? null;
+  const coupon = priced?.ok ? priced.coupon ?? null : null;
 
   sendToCrm(
     withCreatorName(buildLeadEvent({
@@ -92,6 +106,7 @@ export async function POST(req: NextRequest) {
       occupancy: row.occupancy,
       pax,
       seatPrice: seat,
+      coupon,
       source: src,
     }))
   );

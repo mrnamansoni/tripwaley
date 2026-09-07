@@ -47,6 +47,12 @@ export interface Order {
 
   coupon?: { code: string; label: string; discount: number };
 
+  /** the per-seat rate BEFORE any coupon, in rupees. Stored because the frozen
+   *  `quote.totalPaise` is the DISCOUNTED total: deriving a seat price from it
+   *  made the CRM report a post-discount `subtotal` alongside a `discount`, so
+   *  subtotal - discount no longer equalled the total. */
+  seatPrice?: number;
+
   /** where the booking came from — page, surface and creator. Frozen with the
    *  order so attribution survives even if the visitor's session is long gone. */
   source?: LeadSource;

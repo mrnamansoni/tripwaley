@@ -81,7 +81,13 @@ export default async function CreatorTripPage({
   /* Creator trips are the SAME packages sold on /trips/[slug], and used to be
      bookable only by WhatsApp link — so the one surface a creator drives traffic
      to was the one that couldn't take a payment. Same bar, same flow. */
-  const bar = bookingBarProps(view.package.slug, view.headline || view.package.name);
+  /* The creator's own dates are the fallback for the booking bar: they are what
+     the date cards on this page offer, and if this package has no rows in the
+     shared departures collection they are the only dates that exist. Without
+     them the bar's hero CTA had nothing to send and booked an empty date. */
+  const bar = bookingBarProps(view.package.slug, view.headline || view.package.name, {
+    fallbackDates: view.dates.map((d) => d.date),
+  });
 
   return (
     <CityProvider cities={getCities()} defaultCity={settings.defaultCity}>

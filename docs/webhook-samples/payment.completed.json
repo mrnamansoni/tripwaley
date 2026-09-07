@@ -2,7 +2,7 @@
   "event": "payment.completed",
   "eventId": "evt_pay_TW-MTPYXJ36-f84c5fa8",
   "schemaVersion": 1,
-  "occurredAt": "2026-09-06T15:30:23.762Z",
+  "occurredAt": "2026-09-07T10:30:55.394Z",
   "environment": "development",
   "contact": {
     "name": "Aisha Khan",
@@ -27,10 +27,10 @@
   },
   "money": {
     "currency": "INR",
-    "seatPrice": 6650,
-    "seatPricePaise": 665000,
-    "subtotal": 13300,
-    "subtotalPaise": 1330000,
+    "seatPrice": 7000,
+    "seatPricePaise": 700000,
+    "subtotal": 14000,
+    "subtotalPaise": 1400000,
     "discount": 700,
     "discountPaise": 70000,
     "tripTotal": 13300,
@@ -75,6 +75,14 @@
     "method": "UPI_INTENT",
     "paidAt": "2026-09-06T15:30:23.761Z"
   },
+  "college": {
+    "institution": null,
+    "students": null,
+    "budgetPerStudent": null,
+    "budgetPerStudentPaise": null,
+    "month": null,
+    "notes": null
+  },
   "crm": {
     "dealName": "Manali Exploration — Aisha Khan (2 pax, Sat, 14 Nov)",
     "dealValue": 13300,
@@ -83,6 +91,6 @@
     "expectedCloseDate": "2026-11-07"
   },
   "links": {
-    "tripUrl": "http://localhost:3000/trips/manali-exploration"
+    "tripUrl": "https://tripwaley.com/trips/manali-exploration"
   }
 }

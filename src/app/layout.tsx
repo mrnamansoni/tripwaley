@@ -141,7 +141,13 @@ export default function RootLayout({
       return { slug: p.slug, name: p.name, date: next?.date ?? "", priceFrom: fromPrice(p.slug) ?? 0 };
     })
     .sort((a, b) => (a.date || "9999").localeCompare(b.date || "9999"))
-    .map((t) => ({ slug: t.slug, name: t.name, dateLabel: t.date ? shortDate(t.date) : "flexible dates", priceFrom: t.priceFrom }));
+    .map((t) => ({
+      slug: t.slug,
+      name: t.name,
+      dateLabel: t.date ? shortDate(t.date) : "flexible dates",
+      date: t.date,
+      priceFrom: t.priceFrom,
+    }));
   return (
     <html lang="en" className={`${bricolage.variable} ${instrument.variable} ${caveat.variable}`}>
       <body>

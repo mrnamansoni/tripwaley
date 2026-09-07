@@ -17,6 +17,11 @@ export interface BookingTrip {
   slug: string;
   name: string;
   dateLabel: string; // next departure, e.g. "12 Jul" — or "flexible dates"
+  /** the SAME departure as an ISO date, "" when there isn't one. The modal used
+   *  to submit `dateLabel`, so /api/lead's 10-char cap turned "flexible dates"
+   *  into "flexible d" and the CRM received "12 Jul" — no year, unparseable —
+   *  in a field every consumer treats as ISO. */
+  date: string;
   priceFrom: number; // 0 = "on request"
 }
 

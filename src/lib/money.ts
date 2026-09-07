@@ -128,3 +128,33 @@ export function formatPaise(paise: number): string {
 export function toRupees(paise: number): number {
   return Number.isFinite(paise) ? paise / 100 : 0;
 }
+
+/**
+ * The per-seat rate BEFORE any coupon, for the CRM's money block.
+ *
+ * An order freezes `quote.totalPaise`, which is the DISCOUNTED total. Deriving
+ * a seat price from that and handing it to the webhook made the payload report
+ * a post-discount `subtotal` beside a separate `discount`, so subtotal minus
+ * discount equalled neither the gross nor the net — ₹8,075 − ₹425 = ₹7,650 on a
+ * trip that cost ₹8,500 before the coupon and ₹8,075 after. Any CRM field
+ * mapped to `subtotal` as gross revenue under-reported by the discount.
+ *
+ * Orders written since then store the real pre-coupon rate; older ones have to
+ * add the discount back, which is exact because the discount is frozen too.
+ */
+export function preCouponSeatPrice(o: {
+  /** the DISCOUNTED total frozen on the order */
+  totalPaise: number;
+  /** rupees off, from the coupon frozen on the order */
+  couponDiscount?: number | null;
+  pax?: number | null;
+  /** the rate stored at order creation — authoritative when present */
+  stored?: number | null;
+}): number | null {
+  if (o.stored != null && Number.isFinite(o.stored)) return o.stored;
+  const pax = o.pax && o.pax > 0 ? o.pax : 1;
+  const total = Number(o.totalPaise);
+  if (!Number.isFinite(total) || total <= 0) return null;
+  const discountPaise = Math.round(Number(o.couponDiscount ?? 0) * 100) || 0;
+  return (total + discountPaise) / 100 / pax;
+}

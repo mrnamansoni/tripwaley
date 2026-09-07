@@ -99,6 +99,20 @@ export async function POST(req: NextRequest) {
   const citySlug = String(body.citySlug ?? "");
   const city = getCity(citySlug);
   const date = String(body.date ?? "").slice(0, 40);
+
+  /* A departure date is not optional on a PAID order. This route used to accept
+     whatever arrived — an empty string when the booking bar had no date to
+     offer, or a display label like "12 Jul" from the seat-hold modal — freeze
+     it onto the order, and forward it to the CRM as null or as an unparseable
+     string. A booking nobody can date is a booking nobody can honour, so it is
+     refused here rather than discovered later. */
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return NextResponse.json(
+      { ok: false, error: "Please pick a departure date before paying." },
+      { status: 422 }
+    );
+  }
+
   const orderId = newOrderId();
 
   const order = createOrder({
@@ -110,6 +124,8 @@ export async function POST(req: NextRequest) {
     date,
     occupancy: priced.occupancy,
     pax: priced.pax,
+    // pre-coupon, so the CRM's subtotal/discount/total stay consistent
+    seatPrice: priced.seat,
     ...(priced.coupon ? { coupon: priced.coupon } : {}),
     // frozen with the order, so a paid booking can still be credited to the
     // creator or campaign that produced it months later

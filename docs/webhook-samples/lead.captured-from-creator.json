@@ -1,15 +1,15 @@
 {
   "event": "lead.captured",
-  "eventId": "evt_lead_d56274a7",
+  "eventId": "evt_lead_7c31aa02",
   "schemaVersion": 1,
-  "occurredAt": "2026-09-06T15:30:23.580Z",
+  "occurredAt": "2026-09-07T10:30:55.393Z",
   "environment": "development",
   "contact": {
-    "name": "Naman Soni",
-    "firstName": "Naman",
-    "phone": "9625330270",
-    "phoneE164": "+919625330270",
-    "whatsappUrl": "https://wa.me/919625330270",
+    "name": "Priya",
+    "firstName": "Priya",
+    "phone": "9876543210",
+    "phoneE164": "+919876543210",
+    "whatsappUrl": "https://wa.me/919876543210",
     "email": null
   },
   "trip": {
@@ -18,27 +18,27 @@
     "packageCode": "TRWLY-001",
     "destination": "Manali",
     "nights": 5,
-    "departureDate": "2026-11-14",
-    "departureDateLabel": "Sat, 14 Nov",
+    "departureDate": "2026-12-05",
+    "departureDateLabel": "Sat, 5 Dec",
     "fromCity": "delhi",
     "fromCityName": "Delhi",
-    "occupancy": "triple",
-    "travellers": 3
+    "occupancy": "double",
+    "travellers": 2
   },
   "money": {
     "currency": "INR",
-    "seatPrice": 7000,
-    "seatPricePaise": 700000,
-    "subtotal": 21000,
-    "subtotalPaise": 2100000,
-    "discount": 0,
-    "discountPaise": 0,
-    "tripTotal": 21000,
-    "tripTotalPaise": 2100000,
-    "couponCode": null,
-    "couponLabel": null,
-    "couponDiscount": null,
-    "couponDiscountPaise": null,
+    "seatPrice": 8000,
+    "seatPricePaise": 800000,
+    "subtotal": 16000,
+    "subtotalPaise": 1600000,
+    "discount": 800,
+    "discountPaise": 80000,
+    "tripTotal": 15200,
+    "tripTotalPaise": 1520000,
+    "couponCode": "FIRSTTRIP",
+    "couponLabel": "5% off",
+    "couponDiscount": 800,
+    "couponDiscountPaise": 80000,
     "paidNow": null,
     "paidNowPaise": null,
     "holdBase": null,
@@ -58,11 +58,11 @@
     "surface": "creator-date-card",
     "creator": "naman",
     "creatorName": "Naman Soni",
-    "packageSlug": null,
+    "packageSlug": "manali-exploration",
     "referrer": null,
     "utmSource": "instagram",
-    "utmMedium": "bio",
-    "utmCampaign": "nov-batches",
+    "utmMedium": "social",
+    "utmCampaign": "spiti-oct",
     "utmContent": null,
     "utmTerm": null
   },
@@ -75,14 +75,22 @@
     "method": null,
     "paidAt": null
   },
+  "college": {
+    "institution": null,
+    "students": null,
+    "budgetPerStudent": null,
+    "budgetPerStudentPaise": null,
+    "month": null,
+    "notes": null
+  },
   "crm": {
-    "dealName": "Manali Exploration — Naman Soni (3 pax, Sat, 14 Nov)",
-    "dealValue": 21000,
+    "dealName": "Manali Exploration — Priya (2 pax, Sat, 5 Dec)",
+    "dealValue": 15200,
     "stage": "lead",
     "leadSource": "creator:naman",
-    "expectedCloseDate": "2026-11-07"
+    "expectedCloseDate": "2026-11-28"
   },
   "links": {
-    "tripUrl": "http://localhost:3000/trips/manali-exploration"
+    "tripUrl": "https://tripwaley.com/trips/manali-exploration"
   }
 }

@@ -79,6 +79,7 @@ export default function BookingBar({
   const [phone, setPhone] = useState("");
   const [err, setErr] = useState("");
   const [coupon, setCoupon] = useState<AppliedCoupon | null>(null);
+  const [couponNote, setCouponNote] = useState("");
   const dialogRef = useModal<HTMLDivElement>(modal, () => setModal(false));
 
   const cityDeps = useMemo(() => {
@@ -96,6 +97,35 @@ export default function BookingBar({
   const rule = prices[bookCity];
   const seat = rule?.[occ] ?? rule?.triple ?? rule?.double;
   const chosen = date || cityDeps[0]?.date || "";
+  /* No date anywhere — not in the shared departures list, not on the creator's
+     own dates, and none preselected by a date card. The bar used to call this
+     "next batch", which reads as "we'll put you on the next one" when in fact
+     there is nothing to put anyone on, and it let the booking through with an
+     empty date that reached the CRM as null. */
+  const noDates = !chosen;
+
+  /* every date the picker offers, `chosen` always among them */
+  const barDates = useMemo(() => {
+    const all = cityDeps.map((d) => d.date);
+    if (chosen && !all.includes(chosen)) all.unshift(chosen);
+    return all.sort();
+  }, [cityDeps, chosen]);
+
+  /* Anything that changes WHAT is being priced invalidates an applied coupon.
+     Its `total` was computed server-side for the old pax/city/occupancy, and
+     this bar shows the hold derived from that figure — so leaving it applied
+     quoted one amount and charged another (₹423.94 shown, ₹1,271.81 taken at
+     three travellers). Dropping it is the honest move: the visitor sees the
+     code has gone and re-applies it against the new basket. */
+  const reprice = () => {
+    if (coupon) {
+      setCoupon(null);
+      setCouponNote("Your code was removed — the trip changed. Re-apply it below.");
+    }
+  };
+  const changePax = (next: number) => { setPax(next); reprice(); };
+  const changeOcc = (next: "triple" | "double") => { setOcc(next); reprice(); };
+  const changeCity = (next: string) => { setPickedCity(next); reprice(); };
 
   const validPhone = (p: string) => /^[6-9]\d{9}$/.test(p.replace(/[^\d]/g, "").slice(-10));
 
@@ -106,11 +136,29 @@ export default function BookingBar({
      from its own catalog rate — this figure is display only. */
   const tripTotal = coupon?.total ?? (seat != null ? seat * pax : 0);
   const quote = holdQuote({ total: tripTotal, ...rates });
-  const canPay = payEnabled && quote.chargeable;
+  /* No payable date means no Pay button at all, rather than one that takes the
+     money and books an unnamed departure. The WhatsApp path stays open — an
+     enquiry about a trip with no published dates is a perfectly good lead, and
+     it is the only thing left for this visitor to do. */
+  const canPay = payEnabled && quote.chargeable && !noDates;
 
   /* pay → server prices it again, creates the order, hands back PhonePe's URL */
   const payNow = async () => {
     if (busy) return;
+    /* Never take money for a departure we cannot name. /api/pay/create would
+       accept an empty date and freeze it onto the order, which is how a paid
+       booking reached the CRM with departureDate: null. */
+    if (noDates) {
+      setErr("No dates are open for this trip yet — message us and we'll book you onto the next batch.");
+      return;
+    }
+    /* The server requires a name on the pay path (422 otherwise). Catching it
+       here means the visitor is told before the button says "Opening secure
+       payment…", not after. */
+    if (name.trim().length < 2) {
+      setErr("Please add your name — the payment gateway needs it.");
+      return;
+    }
     if (!validPhone(phone)) {
       setErr("Enter a valid 10-digit mobile number.");
       return;
@@ -185,6 +233,9 @@ export default function BookingBar({
       body: JSON.stringify({
         name, phone, package: packageSlug, city: bookCity, date: chosen, occupancy: occ,
         price: tripTotal || null, pax,
+        // the server re-prices this code itself; the lead event carries the
+        // coupon only because this line sends it
+        couponCode: coupon?.code ?? "",
         source: leadSource("booking-bar", { packageSlug }),
       }),
     }).catch(() => null);
@@ -205,7 +256,7 @@ export default function BookingBar({
       gsap.fromTo("[data-bb-stamp]", { autoAlpha: 0, scale: 2.4, rotate: 12 }, { autoAlpha: 1, scale: 1, rotate: -7, duration: 0.35, ease: "power4.in", delay: 0.75 });
     });
     const msg = encodeURIComponent(
-      `Hi Tripwaley! Hold a seat for me:\n• ${packageName}\n• From ${bookCityName}\n• ${chosen ? `${weekday(chosen)}, ${shortDate(chosen)}` : "next batch"}\n• ${pax} traveller${pax > 1 ? "s" : ""}, ${occ} sharing${seat != null ? ` — ${inr(seat)}/seat` : ""}${coupon ? `\n• Coupon: ${coupon.code} (${coupon.label}) — ${inr(coupon.total)}` : ""}${name ? `\n• Name: ${name}` : ""}\n• Mobile: ${phone.replace(/[^\d]/g, "").slice(-10)}`
+      `Hi Tripwaley! Hold a seat for me:\n• ${packageName}\n• From ${bookCityName}\n• ${chosen ? `${weekday(chosen)}, ${shortDate(chosen)}` : "dates not published yet"}\n• ${pax} traveller${pax > 1 ? "s" : ""}, ${occ} sharing${seat != null ? ` — ${inr(seat)}/seat` : ""}${coupon ? `\n• Coupon: ${coupon.code} (${coupon.label}) — ${inr(coupon.total)}` : ""}${name ? `\n• Name: ${name}` : ""}\n• Mobile: ${phone.replace(/[^\d]/g, "").slice(-10)}`
     );
     setTimeout(() => {
       window.open(`https://wa.me/${whatsapp}?text=${msg}`, "_blank", "noopener");
@@ -232,13 +283,16 @@ export default function BookingBar({
               <button type="button" onClick={() => setModal(false)} aria-label="Close" className="text-2xl leading-none text-white/40 hover:text-white">×</button>
             </div>
             <p className="mt-1.5 text-sm text-white/50">
-              {packageName} · ex-{bookCityName} · {chosen ? `${weekday(chosen)}, ${shortDate(chosen)}` : "next batch"} · {pax} × {occ}{seat != null ? ` · ${inr(seat)}/seat` : ""}
+              {packageName} · ex-{bookCityName} · {chosen ? `${weekday(chosen)}, ${shortDate(chosen)}` : "dates on request"} · {pax} × {occ}{seat != null ? ` · ${inr(seat)}/seat` : ""}
             </p>
 
             {/* Enter follows the PRIMARY button, whichever that currently is */}
             <form onSubmit={(e) => { e.preventDefault(); if (canPay) payNow(); else confirm(); }} noValidate>
             <label className="mt-6 block text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white/45">
-              Your name <span className="text-white/25">(optional)</span>
+              Your name{" "}
+              {canPay
+                ? <span className="text-brand-bright">*</span>
+                : <span className="text-white/25">(optional)</span>}
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -269,9 +323,12 @@ export default function BookingBar({
                   occupancy={occ}
                   pax={pax}
                   applied={coupon}
-                  onApply={setCoupon}
-                  onClear={() => setCoupon(null)}
+                  onApply={(c) => { setCoupon(c); setCouponNote(""); }}
+                  onClear={() => { setCoupon(null); setCouponNote(""); }}
                 />
+                {couponNote && (
+                  <p className="mt-2 text-[0.72rem] font-semibold text-gold">{couponNote}</p>
+                )}
                 {coupon && (
                   <div className="mt-3 flex items-baseline justify-between border-t border-white/10 pt-3">
                     <span className="text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white/45">
@@ -294,6 +351,16 @@ export default function BookingBar({
                 <p className="mt-1 text-[0.72rem] leading-relaxed text-white/55">
                   We price this trip individually from here. Send your number and we&apos;ll come back
                   with a quote — or switch your boarding city in the bar below to book instantly.
+                </p>
+              </div>
+            )}
+
+            {noDates && payEnabled && (
+              <div className="mt-5 rounded-xl border border-gold/25 bg-gold/10 p-4">
+                <p className="text-sm font-bold text-gold">No dates published for this trip yet.</p>
+                <p className="mt-1 text-[0.72rem] leading-relaxed text-white/55">
+                  Send us your number and we&apos;ll tell you the moment the next batch opens —
+                  there&apos;s nothing to pay for until there is a date to hold.
                 </p>
               </div>
             )}
@@ -358,7 +425,7 @@ export default function BookingBar({
               <div>
                 <p className="font-mono text-[0.5rem] uppercase tracking-widest text-ink/45">ex-{bookCityName}</p>
                 <p className="font-display text-sm font-extrabold leading-tight text-ink">{packageName.slice(0, 22)}</p>
-                <p className="font-mono text-[0.55rem] text-ink/55">{chosen ? `${weekday(chosen)} · ${shortDate(chosen)}` : "next batch"} · {occ}</p>
+                <p className="font-mono text-[0.55rem] text-ink/55">{chosen ? `${weekday(chosen)} · ${shortDate(chosen)}` : "dates on request"} · {occ}</p>
               </div>
               <div data-bb-stamp className="opacity-0">
                 <span className="inline-block rounded border-2 border-success px-1.5 py-0.5 font-display text-[0.55rem] font-extrabold uppercase tracking-widest text-success">
@@ -403,7 +470,7 @@ export default function BookingBar({
             <button
               key={o}
               type="button"
-              onClick={() => setOcc(o)}
+              onClick={() => changeOcc(o)}
               disabled={!rule?.[o]}
               className={`min-h-9 px-3.5 py-1.5 text-[0.66rem] font-bold uppercase tracking-wider transition-colors disabled:opacity-30 sm:min-h-10 sm:px-4 sm:py-2 sm:text-xs ${
                 occ === o ? "bg-gold text-ink" : "text-white/70 hover:text-gold"
@@ -418,7 +485,7 @@ export default function BookingBar({
         <div className="order-5 flex items-center overflow-hidden rounded-full border border-white/15 sm:order-3" role="group" aria-label="Travellers">
           <button
             type="button"
-            onClick={() => setPax((p) => Math.max(1, p - 1))}
+            onClick={() => changePax(Math.max(1, pax - 1))}
             disabled={pax <= 1}
             aria-label="One fewer traveller"
             className="min-h-9 px-3 text-sm font-bold text-white/70 transition-colors hover:text-gold disabled:opacity-25 sm:min-h-10"
@@ -430,7 +497,7 @@ export default function BookingBar({
           </span>
           <button
             type="button"
-            onClick={() => setPax((p) => Math.min(20, p + 1))}
+            onClick={() => changePax(Math.min(20, pax + 1))}
             disabled={pax >= 20}
             aria-label="One more traveller"
             className="min-h-9 px-3 text-sm font-bold text-white/70 transition-colors hover:text-gold disabled:opacity-25 sm:min-h-10"
@@ -443,7 +510,7 @@ export default function BookingBar({
         {bookableCities.length > 1 && (
           <select
             value={bookCity}
-            onChange={(e) => setPickedCity(e.target.value)}
+            onChange={(e) => changeCity(e.target.value)}
             aria-label="Departure city"
             className="order-6 min-h-9 max-w-[9.5rem] rounded-full border border-white/15 bg-transparent px-3.5 py-1.5 text-[0.66rem] font-bold text-white outline-none sm:order-3 sm:min-h-10 sm:max-w-none sm:px-4 sm:py-2 sm:text-xs [&>option]:text-ink"
           >
@@ -455,17 +522,23 @@ export default function BookingBar({
           </select>
         )}
 
-        {/* batch picker */}
-        {cityDeps.length > 0 && (
+        {/* batch picker.
+            `chosen` can be a date a DATE CARD selected that this list doesn't
+            contain — the cards come from the creator's own dates, these options
+            from the shared departures collection. A <select> whose value has no
+            option renders the first one instead, so the bar showed one date
+            while the modal booked another. Union, so what is displayed is
+            always what will be sent. */}
+        {barDates.length > 0 && (
           <select
             value={chosen}
             onChange={(e) => setDate(e.target.value)}
             aria-label="Departure date"
             className="order-4 min-h-9 max-w-[9.5rem] rounded-full border border-white/15 bg-transparent px-3.5 py-1.5 text-[0.66rem] font-bold text-white outline-none sm:order-3 sm:min-h-10 sm:max-w-none sm:px-4 sm:py-2 sm:text-xs [&>option]:text-ink"
           >
-            {cityDeps.map((d) => (
-              <option key={d.date} value={d.date}>
-                {weekday(d.date)} · {shortDate(d.date)}
+            {barDates.map((d) => (
+              <option key={d} value={d}>
+                {weekday(d)} · {shortDate(d)}
               </option>
             ))}
           </select>

@@ -29,7 +29,7 @@ sender and reports what n8n replied.
 
 | `event` | Fires when |
 | --- | --- |
-| `lead.captured` | Someone submits "Hold my seat", the timed popup, or any lead form |
+| `lead.captured` | Someone submits "Hold my seat", the timed popup, the college enquiry form, or any other lead form |
 | `payment.completed` | A seat-hold payment is confirmed by PhonePe (state **and** amount agree) |
 | `payment.failed` | A payment failed, or the settled amount did not match what we priced |
 | `test.ping` | The admin's test button |
@@ -41,7 +41,9 @@ booking without a coupon — the key is present and `null`. This holds across al
 
 **Every leaf is a scalar.** No nullable nested objects, because `money.coupon.code` would exist on
 one event and vanish on the next. Coupon and UTM fields are flat for this reason, and `payment` is
-always a full object with `null` members on a lead rather than being `null` itself.
+always a full object with `null` members on a lead rather than being `null` itself. The same applies
+to `college`: a trip booking carries the block with every member `null`, so one mapping reads a
+college enquiry and a seat hold without branching.
 
 ## Structure
 
@@ -63,6 +65,8 @@ money.currency / seatPrice / subtotal / discount / tripTotal
 source.page / url-path the visitor was on / surface / creator / creatorName / referrer
     .utmSource / utmMedium / utmCampaign / utmContent / utmTerm
 payment.status / orderId / gateway / gatewayOrderId / transactionId / method / paidAt
+college.institution / students / budgetPerStudent / budgetPerStudentPaise / month / notes
+    (all null unless the event came from the college enquiry form)
 crm.dealName / dealValue / stage / leadSource / expectedCloseDate
 links.tripUrl
 ```
@@ -73,11 +77,16 @@ Every figure appears twice: **rupees** (`paidNow: 1102.5`) for humans and CRM cu
 **integer paise** (`paidNowPaise: 110250`) for anything that must reconcile exactly against
 PhonePe's settlement report. Never do arithmetic on the rupee values.
 
-The three booking stages always reconstruct the total:
+Two identities always hold, on every event:
 
 ```
-holdBase + advanceStillDue + dueAtDeparture === tripTotal
+subtotal - discount                              === tripTotal
+holdBase + advanceStillDue + dueAtDeparture      === tripTotal
 ```
+
+`subtotal` is **gross** — seat price before any coupon, times travellers — so `subtotal` is the
+figure to map to gross revenue and `tripTotal` the figure to map to net. (Until Sept 2026 `subtotal`
+was reported post-discount, which made the first identity false on every coupon booking.)
 
 ### The `crm` block
 

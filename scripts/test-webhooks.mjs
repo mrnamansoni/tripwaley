@@ -240,4 +240,103 @@ console.log("\nwebhook — where the URL comes from (this WAS the bug)");
   ok("blank and malformed values fall through instead of breaking delivery");
 }
 
+console.log("\nwebhook — the money block adds up (the coupon bug)");
+{
+  /* A coupon booking reached the CRM as seatPrice 8075 / subtotal 8075 /
+     discount 425 / tripTotal 8075, because settle.ts derived the per-seat rate
+     from the DISCOUNTED total. subtotal - discount then equalled 7,650: neither
+     the gross (8,500) nor the net (8,075). Anything mapping money.subtotal to
+     gross revenue silently under-reported by the discount on every coupon. */
+  const gross = 8500, discount = 425, net = gross - discount;
+  const ev = buildPaymentEvent({
+    ...LEAD,
+    pax: 1,
+    seatPrice: gross,                       // PRE-coupon, as settle.ts now passes
+    coupon: { code: "FIRSTTRIP", label: "5% off", discount },
+    quote: {
+      totalPaise: net * 100,
+      holdBasePaise: 40375, holdGstPaise: 2019, holdTotalPaise: 42394,
+      advanceBalancePaise: 121125, departureBalancePaise: 646000,
+      holdPercent: 5, gstPercent: 5, advancePercent: 20,
+    },
+    payment: { status: "paid", orderId: "TW-TEST" },
+  });
+  const m = ev.money;
+  assert.equal(m.seatPrice, gross, "seatPrice must be the rate BEFORE any coupon");
+  assert.equal(m.subtotal, gross, "subtotal must be pre-discount");
+  assert.equal(m.discount, discount);
+  assert.equal(m.tripTotal, net, "tripTotal is what the traveller actually owes");
+  assert.equal(m.subtotal - m.discount, m.tripTotal, "subtotal - discount MUST equal tripTotal");
+  ok("subtotal - discount === tripTotal on a coupon booking");
+
+  // and the paise twins have to agree with the rupee figures they mirror
+  assert.equal(m.subtotalPaise, gross * 100);
+  assert.equal(m.discountPaise, discount * 100);
+  assert.equal(m.tripTotalPaise, net * 100);
+  assert.equal(m.subtotalPaise - m.discountPaise, m.tripTotalPaise);
+  ok("the paise twins reconcile the same way");
+}
+
+console.log("\nwebhook — a lead carries its coupon");
+{
+  /* /api/lead built the event with no coupon at all, so someone who applied a
+     code and took the WhatsApp route reached the CRM at full price with no
+     record of the code — contradicting the discounted figure on the same row
+     in Admin → Bookings. */
+  const ev = buildLeadEvent({
+    ...LEAD, pax: 1, seatPrice: 8500,
+    coupon: { code: "FIRSTTRIP", label: "5% off", discount: 425 },
+  });
+  assert.equal(ev.money.couponCode, "FIRSTTRIP");
+  assert.equal(ev.money.couponLabel, "5% off");
+  assert.equal(ev.money.couponDiscount, 425);
+  assert.equal(ev.money.subtotal - ev.money.discount, ev.money.tripTotal);
+  ok("a coupon applied on the lead path reaches the CRM and still adds up");
+}
+
+console.log("\nwebhook — the college block exists on every event");
+{
+  /* The college form used to POST a completely different flat payload to the
+     SAME url, so one n8n mapping could not read both and a college enquiry
+     errored the workflow. Same envelope now — which only works if the college
+     paths are present, as null, on trip events too. */
+  const lead = buildLeadEvent(LEAD);
+  const paid = buildPaymentEvent({
+    ...LEAD,
+    quote: {
+      totalPaise: 4900000, holdBasePaise: 245000, holdGstPaise: 12250, holdTotalPaise: 257250,
+      advanceBalancePaise: 735000, departureBalancePaise: 3920000,
+      holdPercent: 5, gstPercent: 5, advancePercent: 20,
+    },
+    payment: { status: "paid", orderId: "TW-X" },
+  });
+  for (const [what, ev] of [["lead", lead], ["payment", paid]]) {
+    assert.ok("college" in ev, `${what} is missing the college block entirely`);
+    for (const [k, v] of Object.entries(ev.college)) {
+      assert.equal(v, null, `${what}.college.${k} should be null on a trip event`);
+    }
+  }
+  ok("college paths are present and null on trip events");
+
+  const college = buildLeadEvent({
+    id: "c1", phone: "9625330270", name: "Ritu",
+    packageName: "College trip enquiry", destination: "Goa", pax: 60, seatPrice: 7000,
+    source: { page: "/college-trips", surface: "college-quote" },
+    college: { institution: "SRCC", students: 60, budgetPerStudent: 7000, month: "November", notes: "post-exams" },
+  });
+  assert.equal(college.college.institution, "SRCC");
+  assert.equal(college.college.students, 60);
+  assert.equal(college.college.budgetPerStudent, 7000);
+  assert.equal(college.college.budgetPerStudentPaise, 700000);
+  assert.equal(college.college.month, "November");
+  assert.equal(college.college.notes, "post-exams");
+  ok("a college enquiry fills the block and keeps every leaf scalar");
+
+  // rule 2: the college block must never nest
+  for (const path of flattenKeys(college.college, "college")) {
+    assert.ok(!path.split(".").slice(2).length, `${path} nests — every leaf must be scalar`);
+  }
+  ok("the college block has no nested objects");
+}
+
 console.log(`\n${n} assertions passed.\n`);

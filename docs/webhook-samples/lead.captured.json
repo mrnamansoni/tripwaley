@@ -2,7 +2,7 @@
   "event": "lead.captured",
   "eventId": "evt_lead_68692f65",
   "schemaVersion": 1,
-  "occurredAt": "2026-09-06T15:30:23.572Z",
+  "occurredAt": "2026-09-07T10:30:55.392Z",
   "environment": "development",
   "contact": {
     "name": "Priya",
@@ -75,6 +75,14 @@
     "method": null,
     "paidAt": null
   },
+  "college": {
+    "institution": null,
+    "students": null,
+    "budgetPerStudent": null,
+    "budgetPerStudentPaise": null,
+    "month": null,
+    "notes": null
+  },
   "crm": {
     "dealName": "Manali Exploration — Priya (2 pax, Sat, 5 Dec)",
     "dealValue": 16000,
@@ -83,6 +91,6 @@
     "expectedCloseDate": "2026-11-28"
   },
   "links": {
-    "tripUrl": "http://localhost:3000/trips/manali-exploration"
+    "tripUrl": "https://tripwaley.com/trips/manali-exploration"
   }
 }

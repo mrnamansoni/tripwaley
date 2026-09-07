@@ -1,6 +1,6 @@
 import { getOrder, updateOrder, type Order } from "./orders";
 import { orderStatus } from "./phonepe";
-import { formatPaise } from "./money";
+import { formatPaise, preCouponSeatPrice } from "./money";
 import { getPackage } from "./catalog";
 import { buildPaymentEvent } from "./webhookPayload";
 import { sendToCrm, withCreatorName } from "./webhooks";
@@ -26,6 +26,14 @@ function notifyOps(order: Order) {
   const pkg = getPackage(order.packageSlug);
   const paxSafe = order.pax || 1;
 
+  // pre-coupon, so the CRM's subtotal - discount === tripTotal actually holds
+  const seatPrice = preCouponSeatPrice({
+    totalPaise: order.quote.totalPaise,
+    couponDiscount: order.coupon?.discount,
+    pax: paxSafe,
+    stored: order.seatPrice,
+  });
+
   sendToCrm(
     withCreatorName(buildPaymentEvent({
       id: order.id,
@@ -41,8 +49,7 @@ function notifyOps(order: Order) {
       cityName: order.cityName,
       occupancy: order.occupancy,
       pax: paxSafe,
-      // per-seat rupees, derived from the frozen quote rather than re-priced
-      seatPrice: order.quote.totalPaise ? order.quote.totalPaise / 100 / paxSafe : null,
+      seatPrice,
       coupon: order.coupon ?? null,
       source: order.source,
       quote: order.quote,

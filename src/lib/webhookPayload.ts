@@ -27,7 +27,7 @@ export const SCHEMA_VERSION = 1;
 /** the top-level keys every event carries — asserted by the tests */
 export const EVENT_KEYS = [
   "event", "eventId", "schemaVersion", "occurredAt", "environment",
-  "contact", "trip", "money", "source", "payment", "crm", "links",
+  "contact", "trip", "money", "source", "payment", "college", "crm", "links",
 ] as const;
 
 const SITE = (process.env.NEXT_PUBLIC_SITE_URL || "https://tripwaley.com").replace(/\/+$/, "");
@@ -166,6 +166,8 @@ export interface EventInput {
 
   coupon?: { code: string; label: string; discount: number } | null;
   source?: LeadSource;
+  /** set only by the college enquiry form; null members on every other event */
+  college?: CollegeInput;
 }
 
 export interface PaymentInput extends EventInput {
@@ -275,6 +277,41 @@ const EMPTY_PAYMENT = {
   paidAt: null as string | null,
 };
 
+/* The college enquiry form asks for things no trip booking has — an institution,
+   a headcount, a per-student budget. Those used to ride in a completely
+   different, flat payload posted to the SAME webhook URL, so one n8n mapping
+   could not read both and a college lead errored the workflow. They live here
+   instead, present-and-null on every other event, exactly like `payment`. */
+const EMPTY_COLLEGE = {
+  institution: null as string | null,
+  students: null as number | null,
+  budgetPerStudent: null as number | null,
+  budgetPerStudentPaise: null as number | null,
+  month: null as string | null,
+  notes: null as string | null,
+};
+
+export interface CollegeInput {
+  institution?: string;
+  students?: number | null;
+  budgetPerStudent?: number | null;
+  /** free text as typed — "November", "2026-11", "after exams" */
+  month?: string;
+  notes?: string;
+}
+
+function collegeOf(c: CollegeInput | undefined) {
+  if (!c) return { ...EMPTY_COLLEGE };
+  return {
+    institution: nz(c.institution),
+    students: c.students ?? null,
+    budgetPerStudent: c.budgetPerStudent ?? null,
+    budgetPerStudentPaise: paiseOf(c.budgetPerStudent ?? null),
+    month: nz(c.month),
+    notes: nz(c.notes),
+  };
+}
+
 function crmOf(i: EventInput, src: Required<LeadSource>, stage: string, dealValue: number | null) {
   const who = nz(i.name) ?? "Traveller";
   const trip = nz(i.packageName) ?? "Trip";
@@ -312,6 +349,7 @@ export function buildLeadEvent(i: EventInput) {
     money,
     source: src,
     payment: { ...EMPTY_PAYMENT },
+    college: collegeOf(i.college),
     crm: crmOf(i, src, "lead", money.tripTotal),
     links: { tripUrl: i.packageSlug ? `${SITE}/trips/${i.packageSlug}` : null },
   };
@@ -336,6 +374,7 @@ export function buildPaymentEvent(i: PaymentInput) {
       method: nz(i.payment.method),
       paidAt: nz(i.payment.paidAt),
     },
+    college: collegeOf(i.college),
     crm: crmOf(i, src, paid ? "seat_held" : "payment_failed", money.tripTotal),
     links: { tripUrl: i.packageSlug ? `${SITE}/trips/${i.packageSlug}` : null },
   };

@@ -44,11 +44,15 @@ export default function HoldSeatModal({ mode, initialTrip, trips, rates, default
   const firstFieldRef = useRef<HTMLInputElement>(null);
 
   const selected: BookingTrip =
-    trips.find((t) => t.slug === trip) ?? trips[0] ?? { slug: "", name: "your trip", dateLabel: "next batch", priceFrom: 0 };
+    trips.find((t) => t.slug === trip) ?? trips[0] ?? { slug: "", name: "your trip", dateLabel: "next batch", date: "", priceFrom: 0 };
 
   /* what the hold would cost — display only; /api/pay/create prices it again */
   const quote = holdQuote({ total: selected.priceFrom, ...rates });
-  const canPay = payEnabled && quote.chargeable;
+  /* A trip with no published departure cannot be paid for: /api/pay/create
+     refuses an order without a real date, and taking the money for a booking
+     nobody can date would be worse if it didn't. The free 24h hold still
+     works — that path is exactly the right one for "tell me when it runs". */
+  const canPay = payEnabled && quote.chargeable && Boolean(selected.date);
 
   /* Focus management + Escape to close + scroll lock */
   useEffect(() => {
@@ -101,7 +105,7 @@ export default function HoldSeatModal({ mode, initialTrip, trips, rates, default
           name,
           phone,
           package: selected.slug,
-          date: selected.dateLabel,
+          date: selected.date,
           price: selected.priceFrom > 0 ? selected.priceFrom : null,
           source: leadSource(mode === "token" ? "hold-modal-token" : "hold-modal", { packageSlug: selected.slug }),
         }),
@@ -127,7 +131,7 @@ export default function HoldSeatModal({ mode, initialTrip, trips, rates, default
           phone: lead.phone,
           packageSlug: selected.slug,
           citySlug: defaultCity,
-          date: selected.dateLabel,
+          date: selected.date,
           occupancy: "triple",
           pax: 1,
           source: leadSource("hold-modal", { packageSlug: selected.slug }),

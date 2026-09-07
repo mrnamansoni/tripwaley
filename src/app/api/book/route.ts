@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { clientIp, publicRateLimit } from "@/lib/auth";
-import { crmWebhookUrl } from "@/lib/webhooks";
+import { sendToCrm, withCreatorName } from "@/lib/webhooks";
+import { buildLeadEvent, resolveSource, type LeadSource } from "@/lib/webhookPayload";
 import { getPackage, getCity, priceFor, getSettings } from "@/lib/catalog";
 
 /**
@@ -9,7 +10,10 @@ import { getPackage, getCity, priceFor, getSettings } from "@/lib/catalog";
  * If the webhook is down the client still gets its WhatsApp handoff —
  * no lead is ever silently lost on the visitor's side.
  *
- * The webhook URL comes from lib/webhooks.ts, shared with every other sender.
+ * The webhook URL comes from lib/webhooks.ts, shared with every other sender,
+ * and so does the payload SHAPE — this route used to post a flat
+ * `booking_intent` object of its own to the same URL, which no single n8n
+ * mapping could read alongside the structured events every other sender emits.
  *
  * NOTE: nothing on the site calls this route today — the booking bar and the
  * seat-hold modal both post to /api/lead. It is kept because it prices
@@ -56,33 +60,30 @@ export async function POST(req: NextRequest) {
   const advance = total != null ? Math.round((total * settings.advancePercent) / 100) : null;
 
   const bookingId = `TW-${Date.now().toString(36).toUpperCase()}`;
-  const payload = {
-    event: "booking_intent",
+
+  sendToCrm(
+    withCreatorName(buildLeadEvent({
+      id: bookingId,
+      name,
+      phone,
+      packageSlug: pkg.slug,
+      packageName: pkg.name,
+      packageCode: pkg.code,
+      destination: pkg.destination,
+      nights: pkg.nights ?? null,
+      date,
+      citySlug: city.slug,
+      cityName: city.name,
+      occupancy,
+      pax,
+      seatPrice: seat ?? null,
+      source: resolveSource(body.source as LeadSource | undefined, req.headers.get("referer")),
+    }))
+  );
+
+  return NextResponse.json({
+    ok: true,
     bookingId,
-    createdAt: new Date().toISOString(),
-    package: { slug: pkg.slug, code: pkg.code, name: pkg.name },
-    fromCity: { slug: city.slug, name: city.name },
-    date,
-    occupancy,
-    pax,
     quote: { seat, total, advancePercent: settings.advancePercent, advance, currency: "INR" },
-    contact: { name, phone },
-    utm: body.utm ?? null,
-    source: "website",
-  };
-
-  // fire-and-forget to ops; a CRM hiccup must never block the visitor
-  const hook = crmWebhookUrl();
-  if (hook) {
-    fetch(hook, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(payload),
-      signal: AbortSignal.timeout(4000),
-    }).catch((e) => console.error("[book] webhook failed:", e?.message));
-  } else {
-    console.log("[book] lead (no webhook configured):", JSON.stringify(payload));
-  }
-
-  return NextResponse.json({ ok: true, bookingId, quote: payload.quote });
+  });
 }

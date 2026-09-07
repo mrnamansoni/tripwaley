@@ -1,5 +1,6 @@
 import { citiesPricedFor, upcomingDepartures, getPackage, getSettings, holdRates } from "./catalog";
 import { phonepeConfigured } from "./phonepe";
+import { resolveBarDepartures } from "./departureDates";
 
 /**
  * Everything <BookingBar> needs for one package, resolved server-side.
@@ -23,16 +24,30 @@ export interface BookingBarProps {
   payEnabled: boolean;
 }
 
-export function bookingBarProps(slug: string, name: string, departureLimit = 12): BookingBarProps {
+export function bookingBarProps(
+  slug: string,
+  name: string,
+  opts: { departureLimit?: number; fallbackDates?: string[] } = {}
+): BookingBarProps {
+  const { departureLimit = 12, fallbackDates = [] } = opts;
   const pkg = getPackage(slug);
   const priced = citiesPricedFor(slug);
   const deps = upcomingDepartures({ packageSlug: slug, limit: departureLimit });
   const settings = getSettings();
+  const citySlugs = priced.map(({ city }) => city.slug);
+
+  // see departureDates.ts — creator dates fill the gap, never merge into it
+  const departures = resolveBarDepartures(
+    deps.map((d) => ({ date: d.date, citySlugs: d.cities.map((c) => c.slug) })),
+    fallbackDates,
+    citySlugs,
+    departureLimit
+  );
 
   return {
     packageSlug: slug,
     packageName: name,
-    departures: deps.map((d) => ({ date: d.date, citySlugs: d.cities.map((c) => c.slug) })),
+    departures,
     prices: Object.fromEntries(priced.map(({ city, rule }) => [city.slug, { triple: rule.triple, double: rule.double }])),
     whatsapp: settings.whatsapp.replace(/\D/g, ""),
     rates: holdRates(),
