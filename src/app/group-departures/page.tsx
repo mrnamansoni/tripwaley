@@ -13,8 +13,11 @@ import {
 } from "@/components/site/TripTypeSections";
 import { getCities, getSettings, slot, slotOne, text } from "@/lib/catalog";
 import { buildTypeCards, categoryStats } from "@/lib/tripType";
+import { canonical } from "@/lib/seo";
+import { itemListJsonLd, breadcrumbJsonLd, jsonLdScript } from "@/lib/schema";
 
 export const metadata: Metadata = {
+  ...canonical("/group-departures"),
   title: "Group departures — fixed-date trips across India | Tripwaley",
   description:
     "Guaranteed group departures with a certified trip captain, boarding from 10+ Indian cities. Stays, transport and permits handled — you just show up.",
@@ -30,6 +33,17 @@ export default function GroupDeparturesPage() {
     <CityProvider cities={getCities()} defaultCity={settings.defaultCity}>
       <Navbar overDarkHero />
       <main id="main">
+        {/* The listing itself, so Google can show these as a set rather than
+            guessing at the page's contents from markup alone. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLdScript([
+            breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Group departures", path: "/group-departures" }]),
+            ...(itemListJsonLd("Group departures", cards.map((c) => ({ name: c.name, path: `/trips/${c.slug}` })))
+              ? [itemListJsonLd("Group departures", cards.map((c) => ({ name: c.name, path: `/trips/${c.slug}` })))!]
+              : []),
+          ]) }}
+        />
         <TripTypeHero
           media={slotOne("group.hero")}
           eyebrow={text("group.eyebrow")}

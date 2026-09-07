@@ -5,8 +5,10 @@ import CityProvider from "@/components/site/CityProvider";
 import CurtainFooter from "@/components/site/CurtainFooter";
 import { MonthsBand, SeasonsBand, CtaBand } from "@/components/site/PageExtras";
 import { getCities, getSettings, getCollections } from "@/lib/catalog";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/collections"),
   title: "Collections — trips by mood | Tripwaley",
   description: "Snow, treks, parties, spiritual resets — Tripwaley group departures curated by the mood you're chasing.",
 };

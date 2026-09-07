@@ -5,8 +5,10 @@ import CityProvider from "@/components/site/CityProvider";
 import CurtainFooter from "@/components/site/CurtainFooter";
 import { CaptainsBand, SafetyBand, CtaBand } from "@/components/site/PageExtras";
 import { getCities, getSettings, getLivePackages, getPricedCities, getFaqs, slotOne } from "@/lib/catalog";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/about"),
   title: "About Tripwaley — the crew behind the batches",
   description: "Multi-city group departures with trip captains, guaranteed batches and a community of 12,000+ wanderers. This is who runs it.",
 };

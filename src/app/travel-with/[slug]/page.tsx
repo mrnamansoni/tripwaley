@@ -9,6 +9,8 @@ import SiteMedia from "@/components/site/SiteMedia";
 import CreatorFigure from "@/components/creator/CreatorFigure";
 import { PerksBand, InTheirWords, CreatorGallery, CreatorTripCards } from "@/components/creator/CreatorSections";
 import { getCities, getSettings, getCreators, getCreator, creatorTrips, inr, minRate, shortDate, resolveFigure, normalizeMediaUrl } from "@/lib/catalog";
+import { canonical } from "@/lib/seo";
+import { personJsonLd, faqJsonLd, breadcrumbJsonLd, jsonLdScript } from "@/lib/schema";
 
 export function generateStaticParams() {
   return getCreators().map((c) => ({ slug: c.slug }));
@@ -21,6 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const title = `Travel with ${c.firstName} — ${c.name} × Tripwaley`;
   const description = `${c.tagline} Book a seat on ${c.firstName}'s actual batch: real dates, real trips, ${c.niche.toLowerCase()}.`;
   return {
+    ...canonical(`/travel-with/${c.slug}`),
     title,
     description,
     openGraph: { title, description, images: [{ url: normalizeMediaUrl(c.cover) }], type: "profile" },
@@ -56,6 +59,27 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
     <CityProvider cities={getCities()} defaultCity={settings.defaultCity}>
       <Navbar overDarkHero />
       <main id="main">
+        {/* Person + FAQ, both built from what this page already renders: the
+            creator's bio, portrait and socials, and the Q&A block below. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLdScript([
+            personJsonLd({
+              name: creator.name,
+              slug: creator.slug,
+              bio: creator.bio,
+              portrait: creator.portrait,
+              niche: creator.niche,
+              socials: creator.socials,
+            }),
+            breadcrumbJsonLd([
+              { name: "Home", path: "/" },
+              { name: "Creators", path: "/travel-with-creator" },
+              { name: creator.name, path: `/travel-with/${creator.slug}` },
+            ]),
+            ...(faqJsonLd(creator.qa ?? []) ? [faqJsonLd(creator.qa ?? [])!] : []),
+          ]) }}
+        />
         {/* ---------------- the poster ---------------- */}
         <section className="relative overflow-hidden bg-ink pt-28 sm:pt-32">
           <div aria-hidden="true" className="absolute inset-0 opacity-[0.62]">

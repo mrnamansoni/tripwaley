@@ -5,8 +5,10 @@ import CityProvider from "@/components/site/CityProvider";
 import CurtainFooter from "@/components/site/CurtainFooter";
 import { LEGAL_PAGES } from "@/components/site/LegalPage";
 import { getCities, getSettings } from "@/lib/catalog";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/contact"),
   title: "Contact Tripwaley — talk to a human",
   description:
     "Phone, WhatsApp, email and registered address for Tripwaley. A human answers — usually before the second ring.",

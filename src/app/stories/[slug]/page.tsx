@@ -5,15 +5,31 @@ import { notFound } from "next/navigation";
 import Navbar from "@/components/sections/Navbar";
 import CurtainFooter from "@/components/site/CurtainFooter";
 import { getPost, getPosts, getSettings, shortDate, normalizeMediaUrl } from "@/lib/catalog";
+import { canonical } from "@/lib/seo";
+import { articleJsonLd, breadcrumbJsonLd, jsonLdScript } from "@/lib/schema";
+
+/** first ~155 characters of real prose, cut on a word boundary */
+function summarise(body: string): string {
+  const flat = (body ?? "").replace(/\s+/g, " ").trim();
+  if (flat.length <= 155) return flat;
+  return flat.slice(0, 152).replace(/\s+\S*$/, "") + "…";
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const post = getPost(slug);
   if (!post) return { title: "Story not found | Tripwaley" };
+  /* Every published story shipped with an EMPTY meta description, because each
+     one has a blank `excerpt` and this read it directly. Google then wrote its
+     own snippet for the whole blog. Falling back to the opening of the body
+     means a description can never be missing again, whatever the admin field
+     holds. */
+  const description = post.excerpt?.trim() || summarise(post.body);
   return {
+    ...canonical(`/stories/${post.slug}`),
     title: `${post.title} | Tripwaley Stories`,
-    description: post.excerpt,
-    openGraph: { title: post.title, description: post.excerpt, images: [{ url: normalizeMediaUrl(post.cover) }], type: "article" },
+    description,
+    openGraph: { title: post.title, description, images: [{ url: normalizeMediaUrl(post.cover) }], type: "article" },
   };
 }
 
@@ -30,9 +46,27 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
     <>
       <Navbar />
       <main id="main" className="bg-cream">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLdScript([
+            articleJsonLd({
+              title: post.title,
+              description: post.excerpt?.trim() || summarise(post.body),
+              slug: post.slug,
+              image: post.cover,
+              published: post.date,
+              author: post.author,
+            }),
+            breadcrumbJsonLd([
+              { name: "Home", path: "/" },
+              { name: "Stories", path: "/stories" },
+              { name: post.title, path: `/stories/${post.slug}` },
+            ]),
+          ]) }}
+        />
         {/* cover */}
         <section className="relative h-[52vh] min-h-[22rem] w-full overflow-hidden">
-          <SiteMedia src={post.cover} alt="" fill priority sizes="100vw" className="object-cover" />
+          <SiteMedia src={post.cover} alt={post.title} fill priority sizes="100vw" className="object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-ink/20" aria-hidden="true" />
           <div className="absolute inset-x-0 bottom-0 mx-auto w-full max-w-3xl px-5 pb-10 sm:px-8">
             <div className="mb-3 flex flex-wrap gap-2">

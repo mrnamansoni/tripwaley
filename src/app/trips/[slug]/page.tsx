@@ -47,7 +47,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const pkg = getPackage(slug);
   if (!pkg) return {};
-  const title = `${pkg.name} — ${nightsLabel(pkg)} group departure | Tripwaley`;
+  /* Google truncates titles at roughly 580 PIXELS, not a character count, and
+     25 trip titles were overflowing it — the worst ran 79 characters, so
+     "group departure | Tripwaley" was cut off and the reader never saw the
+     brand. Long trip names therefore drop the nights suffix and keep the name
+     plus the brand, which are the two parts that earn the click. */
+  const full = `${pkg.name} — ${nightsLabel(pkg)} group departure | Tripwaley`;
+  const title = full.length > 60 ? `${pkg.name} | Tripwaley` : full;
   const description = `${pkg.name}: ${pkg.destination || pkg.route}. Fixed group departures from ${citiesPricedFor(slug).length} cities with captains, stays & transport included.`;
   // Without these, every trip fell back to the site-wide default — so all 27
   // shared one Ladakh photo and one generic title in every WhatsApp share,
@@ -308,8 +314,14 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
                   <tbody>
                     {priced.map(({ city, rule }, i) => (
                       <tr key={city.slug} className={`border-t border-white/[0.06] transition-colors hover:bg-white/[0.04] ${i % 2 ? "bg-white/[0.02]" : ""}`}>
+                        {/* The city name links to its departures page. Those
+                            pages had ZERO inbound links site-wide and were
+                            reachable only via the sitemap; this is the most
+                            relevant place on the site to link them from. */}
                         <td className="px-6 py-3.5 font-bold text-white">
-                          {city.name}
+                          <Link href={`/from/${city.slug}`} className="transition-colors hover:text-gold">
+                            {city.name}
+                          </Link>
                           <span className="ml-2 text-[0.58rem] font-semibold uppercase text-white/30">{city.state}</span>
                         </td>
                         <td className="px-6 py-3.5 font-display text-lg font-extrabold text-gold">{rule.triple ? inr(rule.triple) : "—"}</td>

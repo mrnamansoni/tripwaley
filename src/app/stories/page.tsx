@@ -4,8 +4,10 @@ import Link from "next/link";
 import Navbar from "@/components/sections/Navbar";
 import CurtainFooter from "@/components/site/CurtainFooter";
 import { getPosts, getSettings, shortDate } from "@/lib/catalog";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/stories"),
   title: "Stories — field notes from the batches | Tripwaley",
   description: "Trip diaries, packing guides and route notes from Tripwaley's group departures across India.",
 };

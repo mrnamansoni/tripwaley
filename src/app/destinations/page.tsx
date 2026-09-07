@@ -10,8 +10,10 @@ import ZodiacRing from "@/components/site/ZodiacRing";
 import DayNightSeam from "@/components/site/DayNightSeam";
 import AlbumWall from "@/components/site/AlbumWall";
 import { getCities, getSettings, getLivePackages, getVideoTestimonial, sectionOn, slotOne, text, fromPrice, inr, nightsLabel, slot } from "@/lib/catalog";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/destinations"),
   title: "Destinations — where the batches go | Tripwaley",
   description: "Himachal, Uttarakhand, Kashmir, Rajasthan, Goa — every region Tripwaley runs group departures to, with live packages and prices.",
 };

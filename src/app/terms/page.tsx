@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import LegalPage, { Clause } from "@/components/site/LegalPage";
 import { getSettings, holdRates } from "@/lib/catalog";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/terms"),
   title: "Terms & Conditions | Tripwaley",
   description:
     "The terms that apply when you book a Tripwaley group departure — booking and payment, cancellation, conduct, liability and governing law.",

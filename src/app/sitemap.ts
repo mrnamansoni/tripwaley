@@ -75,9 +75,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.5,
     });
   }
+  /* A creator trip renders only when the UNDERLYING package is live too — see
+     resolveTrip() in catalog.ts. Filtering on `published` alone listed trips
+     whose package had since gone to draft, and the sitemap served Google a 404
+     (/travel-with/sam/udaipur-golden-circuit). Same liveness test as the page. */
+  const liveSlugs = new Set(getLivePackages().map((p) => p.slug));
   for (const cr of getCreators()) {
     entries.push({ url: url(`/travel-with/${cr.slug}`), lastModified: now, changeFrequency: "weekly", priority: 0.6 });
-    for (const t of cr.trips.filter((x) => x.published)) {
+    for (const t of cr.trips.filter((x) => x.published && liveSlugs.has(x.packageSlug))) {
       entries.push({
         url: url(`/travel-with/${cr.slug}/${t.packageSlug}`),
         lastModified: now,

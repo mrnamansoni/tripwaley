@@ -39,6 +39,53 @@ Tripwaley is a production-grade travel booking website for a premium, group-depa
 
 ## Recent Changes
 
+### 2026-09-07 — SEO: the site was telling Google to de-index two thirds of itself
+
+A full live crawl of all 76 sitemap URLs (not a code read — actual responses) found one dominant
+problem and a set of smaller ones. Report artifact: search "Tripwaley Search Audit".
+
+**The big one.** `src/app/layout.tsx` declared `alternates: { canonical: "/" }`. In the App Router a
+page that doesn't set its own `alternates` INHERITS the layout's, so **52 of 76 URLs were telling
+Google they were duplicates of the homepage** — /solo, /honeymoon, /college-trips,
+/group-departures, every /from/[city], every creator page. The sitemap said "index these"; the
+canonical said "don't". Google believes the canonical. That is why well-written pages were not
+ranking. Fixed via `src/lib/seo.ts`: the layout sets none, every route declares its own. The failure
+mode of forgetting is now "no canonical" (harmless self-canonicalisation), not silent de-indexing.
+
+**Also fixed, none of which needed new content:**
+- All ten `/from/[city]` pages had ZERO inbound internal links — reachable only via the sitemap.
+  Now linked from `/trips` and, contextually, from every trip page's fare board (the city name in
+  the board is the link, so the anchor text is the city's real name).
+- The sitemap served a 404: it filtered creator trips on `published` but the page also requires the
+  underlying package to be live. Same liveness check now applies in `sitemap.ts`.
+- Structured data reached only `/trips/[slug]`. Added `articleJsonLd`, `faqJsonLd`, `personJsonLd`,
+  `itemListJsonLd` to `lib/schema.ts` and wired them into stories, creator pages and the four
+  category pages, plus breadcrumbs on all of them. Every one is built from data the templates
+  already held — creator Q&As, story bodies, trip lists.
+- All six story pages shipped with an EMPTY meta description: the template read `post.excerpt` and
+  no post has one. It now falls back to the first ~155 characters of the body, so it can never be
+  blank again whatever the admin field holds. Story covers also had `alt=""`; they use the title.
+- Homepage title was 598px against Google's ~580px limit and the description 1194px against ~1000px.
+  Both trimmed (55 chars / 139 chars), keyword first, brand last.
+- 25 trip titles exceeded 60 chars; long ones now drop the nights suffix rather than losing the
+  brand to truncation. Creator-trip descriptions ran as short as 40 chars; now composed to ~158.
+- Organisation entity enriched (logo, email, telephone from settings, address, `knowsAbout`) — this
+  is what AI answer engines read. Added `/llms.txt`, generated from the live catalog so it cannot
+  drift from what is on sale. Added an Apple touch icon.
+
+**Two findings in my own audit were WRONG and are corrected here**, because both would have caused
+pointless churn if acted on:
+- *"No BreadcrumbList anywhere."* False — trip pages already had it. My scan truncated the schema
+  type list at 36 characters and hid it. Always print the full type list.
+- *"The LCP hero image is not prioritised."* False — Next emits `<link rel="preload" as="image">`
+  in the head for it, which is the better mechanism than `fetchpriority` on the tag. I had looked
+  for the wrong signal. The hero's `alt=""` is also correct: it is decorative, the h1 carries the
+  meaning.
+
+**Not a regression, but worth knowing:** the homepage returns 500 in `next dev` — "Image with
+src /images/tw-hero-deodar.jpg has both fill and style.width". It builds and serves fine in
+production. Confirmed pre-existing on HEAD before this work.
+
 ### 2026-09-07 — Fixed: 8 bugs found reviewing the booking + webhook work
 
 A code review of `d10aafe` + `73fe8d3`, prompted by a real production event the owner pasted from
@@ -311,14 +358,15 @@ Booking money now arrives in three stages, and only the first is taken on the we
 Verified against production on 2026-09-05 unless marked otherwise.
 
 ### Do this first
-1. **Rebuild the n8n mapping** against `docs/webhook-samples/` — the payload shape changed again on
+1. **Rebuild the n8n mapping** against `docs/webhook-samples/` — the payload shape changed on
    2026-09-07 (a `college` block was added, and `money.subtotal` is now correctly pre-discount).
-   `docs/webhooks.md` is the reference. Then press **Send test event** in Admin → Bookings, which
-   shows where the URL came from and the last 40 delivery attempts.
-2. **Add real departures for the live packages that have none.** Admin → Departures. A trip with no
+   `docs/webhooks.md` is the reference. Then press **Send test event** in Admin → Bookings.
+2. **Search Console, once the SEO deploy lands.** Resubmit the sitemap and request re-indexing of
+   /solo, /honeymoon, /college-trips, /group-departures and the /from/ pages. They spent months
+   telling Google they were duplicates of the homepage; re-indexing is what tells it otherwise.
+3. **Add real departures for the live packages that have none.** Admin → Departures. A trip with no
    rows there cannot be booked or paid for online — the site now says "dates on request" and offers
-   only the WhatsApp path, which is honest but is not a sale. This is what produced the dateless
-   paid booking on 2026-09-06.
+   only the WhatsApp path. This is what produced the dateless paid booking on 2026-09-06.
 
 ### Payments — live, but still on sandbox
 - [ ] **Complete one real end-to-end sandbox payment through a browser.** The gateway is confirmed

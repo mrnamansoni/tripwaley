@@ -16,8 +16,11 @@ import {
 } from "@/components/site/TripTypeSections";
 import { getCities, getSettings, holdRates, slot, slotOne, text } from "@/lib/catalog";
 import { buildTypeCards, categoryStats } from "@/lib/tripType";
+import { canonical } from "@/lib/seo";
+import { itemListJsonLd, breadcrumbJsonLd, jsonLdScript } from "@/lib/schema";
 
 export const metadata: Metadata = {
+  ...canonical("/honeymoon"),
   title: "Honeymoon packages — private, unhurried trips for two | Tripwaley",
   description:
     "Handpicked honeymoon trips across India. Private cabs, rooms chosen for the view, candlelit dinners and an itinerary with room to do nothing at all.",
@@ -36,6 +39,17 @@ export default function HoneymoonPage() {
     <CityProvider cities={getCities()} defaultCity={settings.defaultCity}>
       <Navbar overDarkHero />
       <main id="main">
+        {/* The listing itself, so Google can show these as a set rather than
+            guessing at the page's contents from markup alone. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLdScript([
+            breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Honeymoon trips", path: "/honeymoon" }]),
+            ...(itemListJsonLd("Honeymoon trips", cards.map((c) => ({ name: c.name, path: `/trips/${c.slug}` })))
+              ? [itemListJsonLd("Honeymoon trips", cards.map((c) => ({ name: c.name, path: `/trips/${c.slug}` })))!]
+              : []),
+          ]) }}
+        />
         <TripTypeHero
           media={slotOne("honeymoon.hero")}
           eyebrow={text("honeymoon.eyebrow")}

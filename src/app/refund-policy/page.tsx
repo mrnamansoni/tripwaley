@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import LegalPage, { Clause, PolicyPreamble } from "@/components/site/LegalPage";
 import { getSettings, holdRates } from "@/lib/catalog";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/refund-policy"),
   title: "Cancellation & Refund Policy | Tripwaley",
   description:
     "Cancellation windows, refund slabs, how refunds are processed and how long they take for Tripwaley group departures.",

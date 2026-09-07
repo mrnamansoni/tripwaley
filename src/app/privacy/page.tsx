@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import LegalPage, { Clause } from "@/components/site/LegalPage";
 import { getSettings } from "@/lib/catalog";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/privacy"),
   title: "Privacy Policy | Tripwaley",
   description:
     "How Tripwaley collects, uses, shares, stores and protects your personal data, your rights over it, and how to reach our Grievance Officer.",

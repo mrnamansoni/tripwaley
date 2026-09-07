@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { canonical } from "@/lib/seo";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/sections/Navbar";
@@ -41,10 +42,22 @@ export async function generateMetadata({
   const view = creatorTrip(slug, trip);
   if (!view) return {};
   const title = `${view.headline} with ${view.creator.firstName} | Tripwaley`;
-  const description =
-    view.trip.pitch?.trim() ||
-    `${view.creator.name} (${view.creator.handle}) is on this batch. ${view.package.destination || view.package.route}. Real dates, real seats.`;
+  /* The pitch alone ran as short as 40 characters ("leave friday, be back
+     monday, tell nobody"), which wastes most of the ~1000px Google will render.
+     The creator, the destination and what's included are appended so every
+     creator trip fills the snippet with something a reader can act on. */
+  const pitch = view.trip.pitch?.trim();
+  const where = view.package.destination || view.package.route || "";
+  const description = [
+    pitch ? `${pitch.charAt(0).toUpperCase()}${pitch.slice(1)}.` : "",
+    `${view.creator.name} is on this batch the whole way${where ? ` — ${where}` : ""}.`,
+    "Real dates, real seats, stays and transport included.",
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .slice(0, 158);
   return {
+    ...canonical(`/travel-with/${slug}/${trip}`),
     title,
     description,
     openGraph: { title, description, images: [{ url: normalizeMediaUrl(view.heroMedia) }], type: "website" },

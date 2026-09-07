@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { canonical } from "@/lib/seo";
 import SiteMedia from "@/components/site/SiteMedia";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -31,6 +32,7 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
   const city = getCity(slug);
   if (!city) return {};
   return {
+    ...canonical(`/from/${city.slug}`),
     title: `Group trips from ${city.name} — fixed departures | Tripwaley`,
     description: `Board in ${city.name}: group departures to Himachal, Uttarakhand, Kashmir & more with stays, transport and trip captains included. No detour to Delhi needed.`,
   };

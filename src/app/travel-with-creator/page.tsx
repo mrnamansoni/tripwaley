@@ -8,8 +8,10 @@ import { CtaBand } from "@/components/site/PageExtras";
 import CreatorCalendar, { type CalendarDate } from "@/components/creator/CreatorCalendar";
 import { CreatorRoster, HowItWorks, CreatorStrip } from "@/components/creator/CreatorSections";
 import { getCities, getSettings, getCreators, creatorDates } from "@/lib/catalog";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/travel-with-creator"),
   title: "Travel with a creator — real trips, real seats | Tripwaley",
   description:
     "Book the same bus as the creators you follow. See who's travelling where and when, pick a date, and take a seat on the actual batch.",

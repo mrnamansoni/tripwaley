@@ -5,8 +5,10 @@ import CityProvider from "@/components/site/CityProvider";
 import CurtainFooter from "@/components/site/CurtainFooter";
 import { CaptainsBand, CtaBand } from "@/components/site/PageExtras";
 import { getCities, getSettings } from "@/lib/catalog";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/vibe-check"),
   title: "Vibe check — find your kind of trip | Tripwaley",
   description: "Answer honestly, travel accordingly — match your mood to a Tripwaley group departure.",
 };

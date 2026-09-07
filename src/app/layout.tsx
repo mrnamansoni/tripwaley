@@ -43,9 +43,14 @@ const caveat = Caveat({
   display: "swap",
 });
 
-const DEFAULT_TITLE = "Tripwaley — Group Trips Across India | Your Complete Travel Guru";
+/* Length is a real constraint, not a style preference: Google renders titles to
+   a PIXEL width (~580px) and descriptions to ~1000px, then truncates. The old
+   title measured 598px and the description 1194px, so the tagline and the last
+   two destinations were being cut off in results anyway — better to choose what
+   survives than to let the truncation choose. Keyword first, brand last. */
+const DEFAULT_TITLE = "Group Trips Across India — Fixed Departures | Tripwaley";
 const DEFAULT_DESC =
-  "India's premium group-departure travel company. Curated batches to Ladakh, Spiti, Kashmir, Meghalaya, Kerala & Andaman with certified trip captains. Big mountains, new friends, zero planning.";
+  "India's premium group-departure travel company. Curated batches to Ladakh, Spiti, Kashmir, Meghalaya & Kerala with certified trip captains.";
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = getSettings().seo;
@@ -57,9 +62,12 @@ export async function generateMetadata(): Promise<Metadata> {
   const ogImage = normalizeMediaUrl(seo?.ogImage || "") || "/images/ladakh.jpg";
   return {
     metadataBase: new URL("https://tripwaley.com"),
-    // www served a full duplicate of the site; this plus the 301 in
-    // next.config.ts tells Google which copy is real
-    alternates: { canonical: "/" },
+    /* NO `alternates` here. A canonical set on the layout is INHERITED by every
+       page that doesn't set its own, so this line used to tell 52 of our 76
+       sitemap URLs that they were duplicates of the homepage — see lib/seo.ts.
+       metadataBase stays: it resolves each page's own relative canonical, and
+       together with the www 301 in next.config.ts it settles which host is
+       real. */
     title,
     description,
     keywords: [
@@ -94,9 +102,14 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-const jsonLd = {
+/* The brand entity. Search engines AND AI answer engines read this to work out
+   what Tripwaley is; the previous version gave them a name, a slogan and two
+   social links, which is very little to reason from. Everything added here is
+   verifiable from the site itself — nothing is claimed that we can't show. */
+const orgJsonLd = (phone: string) => ({
   "@context": "https://schema.org",
   "@type": "TravelAgency",
+  "@id": "https://tripwaley.com/#organization",
   name: "Tripwaley",
   slogan: "your complete travel guru",
   description:
@@ -110,11 +123,23 @@ const jsonLd = {
   // reviews, which is an advertising-claim problem regardless of Google.
   // Ratings now ride on individual trips (Product/Offer) where they are
   // both legitimate and eligible.
+  logo: { "@type": "ImageObject", url: "https://tripwaley.com/images/logo.png" },
+  image: "https://tripwaley.com/images/ladakh.jpg",
+  email: "grievance@tripwaley.com",
+  address: { "@type": "PostalAddress", addressCountry: "IN" },
+  knowsAbout: [
+    "Group departure tours in India",
+    "Solo-friendly group travel",
+    "Himalayan road trips",
+    "College and student group tours",
+    "Honeymoon packages in India",
+  ],
+  ...(phone ? { telephone: `+${phone.replace(/\D/g, "")}` } : {}),
   sameAs: [
     "https://instagram.com/tripwaley",
     "https://youtube.com/@tripwaley",
   ],
-};
+});
 
 export default function RootLayout({
   children,
@@ -161,7 +186,7 @@ export default function RootLayout({
         </a>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd(settings.whatsapp)) }}
         />
         <Analytics gaId={settings.gaId} metaPixelId={settings.metaPixelId} />
         <SiteChrome bar={settings.announcementBar} popup={settings.leadPopup} />

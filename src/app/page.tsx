@@ -28,6 +28,12 @@ import {
   slot,
   slotOne,
 } from "@/lib/catalog";
+import type { Metadata } from "next";
+import { canonical } from "@/lib/seo";
+
+/* The homepage's own canonical. It used to come from the root layout, which is
+   exactly why every other page inherited one pointing here. */
+export const metadata: Metadata = { ...canonical("/") };
 
 /* pull a short scarcity chip out of the ops note, only if it actually reads scarce */
 function scarcityChip(note: string): string {

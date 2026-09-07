@@ -128,3 +128,103 @@ export function breadcrumbJsonLd(trail: { name: string; path: string }[]): Recor
 /** one <script> payload for however many nodes a page needs */
 export const jsonLdScript = (nodes: Record<string, unknown>[]): string =>
   JSON.stringify(nodes.length === 1 ? nodes[0] : nodes);
+
+/* ------------------------------------------------------------------------
+   Everything below covers the pages structured data never reached: breadcrumbs
+   stopped at /trips/[slug], and stories, creators and the category listings
+   emitted nothing but the site-wide TravelAgency. All of it is built from data
+   the templates already hold, so none of it needs new content — only markup.
+
+   One rule throughout: never describe something the page does not show. Markup
+   that disagrees with the visible page is a manual-action risk, not a shortcut.
+   ------------------------------------------------------------------------ */
+
+const absUrl = (path: string) => (path.startsWith("http") ? path : `${ORIGIN}${path.startsWith("/") ? path : `/${path}`}`);
+
+/** drop empty members — validators reject an explicit null where we'd rather omit */
+function omitEmpty<T extends Record<string, unknown>>(o: T): T {
+  const out = {} as T;
+  for (const [k, v] of Object.entries(o)) {
+    if (v === undefined || v === null || v === "" || (Array.isArray(v) && !v.length)) continue;
+    out[k as keyof T] = v as T[keyof T];
+  }
+  return out;
+}
+
+export function articleJsonLd(p: {
+  title: string;
+  description?: string;
+  slug: string;
+  image?: string;
+  published?: string;
+  author?: string;
+}): Record<string, unknown> {
+  return omitEmpty({
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: p.title.slice(0, 110), // Google ignores headlines past ~110 chars
+    description: p.description,
+    image: p.image ? [absUrl(p.image)] : undefined,
+    datePublished: p.published,
+    dateModified: p.published,
+    author: { "@type": p.author ? "Person" : "Organization", name: p.author || "Tripwaley" },
+    publisher: { "@type": "Organization", name: "Tripwaley", url: ORIGIN },
+    mainEntityOfPage: { "@type": "WebPage", "@id": `${ORIGIN}/stories/${p.slug}` },
+  });
+}
+
+/**
+ * Only ever call this with Q&As the page actually RENDERS — the creator pages
+ * show their `qa` list, which is what makes them eligible for FAQ results.
+ */
+export function faqJsonLd(qa: { q: string; a: string }[]): Record<string, unknown> | null {
+  const items = (qa ?? []).filter((x) => x?.q?.trim() && x?.a?.trim());
+  if (!items.length) return null;
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((x) => ({
+      "@type": "Question",
+      name: x.q.trim(),
+      acceptedAnswer: { "@type": "Answer", text: x.a.trim() },
+    })),
+  };
+}
+
+export function personJsonLd(c: {
+  name: string;
+  slug: string;
+  bio?: string;
+  portrait?: string;
+  niche?: string;
+  socials?: { url?: string }[];
+}): Record<string, unknown> {
+  return omitEmpty({
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: c.name,
+    url: `${ORIGIN}/travel-with/${c.slug}`,
+    image: c.portrait ? absUrl(c.portrait) : undefined,
+    description: c.bio?.split("\n")[0]?.slice(0, 300),
+    jobTitle: c.niche ? `Travel creator — ${c.niche}` : undefined,
+    worksFor: { "@type": "Organization", name: "Tripwaley", url: ORIGIN },
+    sameAs: (c.socials ?? []).map((s) => s?.url).filter((u): u is string => Boolean(u?.startsWith("http"))),
+  });
+}
+
+/** a listing page's trips, in the order the page shows them */
+export function itemListJsonLd(name: string, items: { name: string; path: string }[]): Record<string, unknown> | null {
+  if (!items.length) return null;
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name,
+    numberOfItems: items.length,
+    itemListElement: items.map((it, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: it.name,
+      url: `${ORIGIN}${it.path}`,
+    })),
+  };
+}

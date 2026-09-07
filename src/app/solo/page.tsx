@@ -16,8 +16,11 @@ import {
 } from "@/components/site/TripTypeSections";
 import { getCities, getSettings, slot, slotOne, text } from "@/lib/catalog";
 import { buildTypeCards, categoryStats } from "@/lib/tripType";
+import { canonical } from "@/lib/seo";
+import { itemListJsonLd, breadcrumbJsonLd, jsonLdScript } from "@/lib/schema";
 
 export const metadata: Metadata = {
+  ...canonical("/solo"),
   title: "Solo trips — book one seat, land in a crew | Tripwaley",
   description:
     "Solo-friendly group trips across India with no single supplement. Roommates matched by age and gender, women-only rooms on request, and a captain on every batch.",
@@ -35,6 +38,17 @@ export default function SoloPage() {
     <CityProvider cities={getCities()} defaultCity={settings.defaultCity}>
       <Navbar overDarkHero />
       <main id="main">
+        {/* The listing itself, so Google can show these as a set rather than
+            guessing at the page's contents from markup alone. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLdScript([
+            breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Solo trips", path: "/solo" }]),
+            ...(itemListJsonLd("Solo trips", cards.map((c) => ({ name: c.name, path: `/trips/${c.slug}` })))
+              ? [itemListJsonLd("Solo trips", cards.map((c) => ({ name: c.name, path: `/trips/${c.slug}` })))!]
+              : []),
+          ]) }}
+        />
         <TripTypeHero
           media={slotOne("solo.hero")}
           eyebrow={text("solo.eyebrow")}

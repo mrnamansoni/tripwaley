@@ -5,8 +5,10 @@ import CityProvider from "@/components/site/CityProvider";
 import CurtainFooter from "@/components/site/CurtainFooter";
 import { LEGAL_PAGES } from "@/components/site/LegalPage";
 import { getCities, getSettings } from "@/lib/catalog";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/policies"),
   title: "Policies | Tripwaley",
   description:
     "Terms & Conditions, Privacy Policy, Cancellation & Refund Policy, Service Delivery and Return Policy for Tripwaley group departures.",

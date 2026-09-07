@@ -18,8 +18,11 @@ import { CollegeWall, CollegeSteps } from "@/components/site/CollegeSections";
 import CollegeQuoteForm from "@/components/site/CollegeQuoteForm";
 import { getCities, getSettings, getCollegeTrips, collegeStats, slot, slotOne, text } from "@/lib/catalog";
 import { buildTypeCards, categoryStats } from "@/lib/tripType";
+import { canonical } from "@/lib/seo";
+import { itemListJsonLd, breadcrumbJsonLd, jsonLdScript } from "@/lib/schema";
 
 export const metadata: Metadata = {
+  ...canonical("/college-trips"),
   title: "College trips — batch tours priced per student | Tripwaley",
   description:
     "Farewell trips, industrial visits, adventure weeks and fest getaways for whole college batches. Per-student pricing, captains for every 20 students, and paperwork the college office actually accepts.",
@@ -41,6 +44,17 @@ export default function CollegeTripsPage() {
     <CityProvider cities={getCities()} defaultCity={settings.defaultCity}>
       <Navbar overDarkHero />
       <main id="main">
+        {/* The listing itself, so Google can show these as a set rather than
+            guessing at the page's contents from markup alone. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLdScript([
+            breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "College trips", path: "/college-trips" }]),
+            ...(itemListJsonLd("College trips", cards.map((c) => ({ name: c.name, path: `/trips/${c.slug}` })))
+              ? [itemListJsonLd("College trips", cards.map((c) => ({ name: c.name, path: `/trips/${c.slug}` })))!]
+              : []),
+          ]) }}
+        />
         <TripTypeHero
           media={slotOne("college.hero")}
           eyebrow={text("college.eyebrow")}

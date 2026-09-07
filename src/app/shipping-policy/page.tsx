@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import LegalPage, { Clause, PolicyPreamble } from "@/components/site/LegalPage";
 import { getSettings } from "@/lib/catalog";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/shipping-policy"),
   title: "Service Delivery & Shipping Policy | Tripwaley",
   description:
     "Tripwaley sells travel services, not physical goods. How your booking confirmation, itinerary and trip documents are delivered, and when.",

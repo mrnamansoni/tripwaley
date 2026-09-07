@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import LegalPage, { Clause, PolicyPreamble } from "@/components/site/LegalPage";
 import { getSettings } from "@/lib/catalog";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/return-policy"),
   title: "Return Policy | Tripwaley",
   description:
     "Tripwaley sells travel services with no physical goods, so nothing can be returned. Bookings are cancelled and refunded instead, under our Cancellation & Refund Policy.",
