@@ -79,8 +79,17 @@ export default function SiteMedia({
 
   /* ---- uploaded photo: full AVIF/WebP + resize pipeline ---- */
   if (isLocalMedia(url)) {
+    /* `fill` always renders at 100% — next/image THROWS if a style also sets a
+       width or height, and because that throw happens during render it takes
+       the whole route down with it. The homepage was returning 500 in dev for
+       exactly this reason (a content-configured photo carried a sized style).
+       A caller shouldn't have to know the rule, so the conflict is dropped
+       here rather than trusted not to happen. */
+    const fillStyle = style
+      ? Object.fromEntries(Object.entries(style).filter(([k]) => k !== "width" && k !== "height"))
+      : undefined;
     return fill ? (
-      <Image src={url} alt={alt} fill sizes={sizes} priority={priority} className={className} style={style} draggable={draggable} />
+      <Image src={url} alt={alt} fill sizes={sizes} priority={priority} className={className} style={fillStyle} draggable={draggable} />
     ) : (
       <Image
         src={url}

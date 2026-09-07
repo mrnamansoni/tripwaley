@@ -18,7 +18,7 @@ import { collectRemovals, keepForMerge, mergeRemovals, SEED_SECTIONS } from "./s
 /** Bump when src/data/catalog.json gains packages/prices/departures that an
  *  already-running install should receive. mergeSeedContent() then adds only
  *  the rows whose keys are missing — admin edits are never overwritten. */
-const SEED_VERSION = 9;
+const SEED_VERSION = 10;
 
 /* The version at which deletions started being recorded. An install older than
    this has deletions the catalog knows nothing about, so the merge captures

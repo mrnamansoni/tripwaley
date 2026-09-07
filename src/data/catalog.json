@@ -2341,6 +2341,133 @@
    "categories": [
     "solo"
    ]
+  },
+  {
+   "type": "Group Departure",
+   "transport": "Tempo Traveller / SUV",
+   "route": "Leh \u00b7 Nubra \u00b7 Pangong \u00b7 Khardung La",
+   "addons": [],
+   "trekOptions": [],
+   "travelTips": [],
+   "thingsToCarry": [],
+   "cityDetails": {},
+   "status": "draft",
+   "rich": true,
+   "hasDepartures": true,
+   "itineraryPdf": "",
+   "heroMedia": "",
+   "code": "TRWLY-LDK01",
+   "slug": "ladakh-leh-nubra-pangong-circuit",
+   "name": "Ladakh \u2014 Leh, Nubra & Pangong",
+   "destination": "Leh \u00b7 Nubra \u00b7 Pangong \u00b7 Khardung La",
+   "nights": 6,
+   "bestTime": "June\u2013September",
+   "departureHubs": "Delhi / Manali / Srinagar",
+   "images": [
+    "/images/ladakh.jpg",
+    "/images/stars.jpg",
+    "/images/tw-snow-road.jpg"
+   ],
+   "summaryFromDelhi": "LADAKH \u2014 LEH, NUBRA & PANGONG\n6 Nights / 7 Days \u00b7 Fixed-date group batch\n\nThe one everybody means when they say they want to see the Himalayas properly. Leh at 3,500m, the Nubra valley over Khardung La, and two nights on the shore of Pangong where the lake changes colour about four times before lunch.\n\nThe route is built around altitude rather than against it. You get two full days in Leh before going anywhere high \u2014 that is not padding, it is the difference between enjoying Khardung La and spending it with a headache in the back of the car.\n\nWHO THIS IS FOR\nFirst-timers to Ladakh, and anyone who would rather have the permits, the oxygen and the driver handled than work out the Inner Line paperwork themselves. Batch size is capped, and solo travellers are matched into twin-share rooms by age and gender at no single supplement.",
+   "socialProof": "Third time in Ladakh and the first time I actually acclimatised properly. The two nights in Leh before Nubra make the whole trip.",
+   "scarcityNote": "Ladakh runs a short season \u2014 June to September only, and the Pangong camps sell out first.",
+   "inclusions": [
+    "6 nights stay \u2014 hotels in Leh, guesthouse in Nubra and a camp at Pangong",
+    "All breakfasts and dinners",
+    "All transfers in Ladakh, including Khardung La and Chang La",
+    "Inner Line Permits for Nubra and Pangong",
+    "Certified trip captain for the whole batch",
+    "Oxygen cylinder and a first-aid kit in every vehicle",
+    "Twin-share room matched by age and gender \u2014 no single supplement"
+   ],
+   "exclusions": [
+    "Flights or road travel to Leh and back",
+    "Lunches on the road",
+    "Monastery entry tickets and anything personal",
+    "Travel insurance",
+    "Costs from roadblocks, weather or permit changes beyond our control"
+   ],
+   "itinerary": [
+    {
+     "day": 1,
+     "title": "Arrive Leh \u2014 do nothing, on purpose",
+     "body": "Land at Leh and go straight to the hotel. The whole day is rest, because 3,500m is 3,500m and the people who ignore this are the people who miss Nubra. Short walk to the market in the evening if you're feeling fine.",
+     "image": "/images/ladakh.jpg",
+     "meals": [
+      "dinner"
+     ],
+     "stay": true
+    },
+    {
+     "day": 2,
+     "title": "Leh \u2014 Shanti Stupa, Leh Palace, Hall of Fame",
+     "body": "A gentle acclimatisation day at Leh's own altitude: Shanti Stupa for the valley from above, the old palace, and the Hall of Fame museum. Nothing above 4,000m today. Permits for Nubra and Pangong get sorted while you're out.",
+     "image": "/images/tw-hero-deodar.jpg",
+     "meals": [
+      "breakfast",
+      "dinner"
+     ],
+     "stay": true
+    },
+    {
+     "day": 3,
+     "title": "Leh \u2192 Khardung La \u2192 Nubra Valley",
+     "body": "Over Khardung La \u2014 one of the highest motorable passes anywhere \u2014 and down into Nubra, which is a cold desert with sand dunes and double-humped camels in it. Stop at the top is deliberately short; you feel much better 1,500m lower.",
+     "image": "/images/tw-snow-road.jpg",
+     "meals": [
+      "breakfast",
+      "dinner"
+     ],
+     "stay": true
+    },
+    {
+     "day": 4,
+     "title": "Nubra \u2192 Shyok \u2192 Pangong Tso",
+     "body": "The Shyok river route into Pangong, which is rougher than the Chang La road and much better looking. First sight of the lake usually stops conversation in the vehicle for a minute. Night at a camp on the shore.",
+     "image": "/images/stars.jpg",
+     "meals": [
+      "breakfast",
+      "dinner"
+     ],
+     "stay": true
+    },
+    {
+     "day": 5,
+     "title": "Pangong sunrise \u2192 Chang La \u2192 Leh",
+     "body": "Up for sunrise on the lake, which is the reason for staying the night rather than day-tripping it. Back to Leh over Chang La, with the Thiksey and Shey monasteries on the way in if the light holds.",
+     "image": "/images/ladakh.jpg",
+     "meals": [
+      "breakfast",
+      "dinner"
+     ],
+     "stay": true
+    },
+    {
+     "day": 6,
+     "title": "Sham valley \u2014 Magnetic Hill, Sangam, Alchi",
+     "body": "The gentler western loop: the Magnetic Hill optical illusion, the Indus\u2013Zanskar confluence at Sangam, and Alchi monastery, whose 11th-century wall paintings are the oldest surviving in Ladakh. Last night in Leh.",
+     "image": "/images/tw-hero-deodar.jpg",
+     "meals": [
+      "breakfast",
+      "dinner"
+     ],
+     "stay": true
+    },
+    {
+     "day": 7,
+     "title": "Leh \u2192 home",
+     "body": "Morning transfer to the airport. Flights out of Leh leave early because the wind picks up later \u2014 we build that in rather than fight it.",
+     "image": "/images/tw-g-nightbus2.jpg",
+     "meals": [
+      "breakfast"
+     ],
+     "stay": false
+    }
+   ],
+   "categories": [
+    "group",
+    "solo"
+   ]
   }
  ],
  "prices": [
@@ -5424,8 +5551,8 @@
  "content": {
   "deck.eyebrow": "",
   "hero.eyebrow": "tripwaley presents \u00b7 a film by youuuuuu",
-  "hero.headline": "Your city. Your crew.",
-  "hero.headlineAccent": "Your opening shot.",
+  "hero.headline": "Group trips across India.",
+  "hero.headlineAccent": "Your city. Your crew.",
   "hero.scrollCue": "scroll \u2014 roll camera",
   "rack.hook": "Every destination's next batch \u2014 tear one off.",
   "rack.footnote": "every fare is your city's real seat price \u2014 not a headline teaser",

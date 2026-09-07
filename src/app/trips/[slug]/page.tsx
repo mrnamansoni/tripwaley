@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { tripJsonLd, breadcrumbJsonLd, jsonLdScript, reviewMatchesTrip } from "@/lib/schema";
 import Navbar from "@/components/sections/Navbar";
 import CityProvider from "@/components/site/CityProvider";
@@ -27,6 +27,7 @@ import {
   upcomingDepartures,
   fromPrice,
   packageImages,
+  resolveSlugAlias,
   normalizeMediaUrl,
   getReviews,
   getCaptains,
@@ -50,10 +51,16 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   /* Google truncates titles at roughly 580 PIXELS, not a character count, and
      25 trip titles were overflowing it — the worst ran 79 characters, so
      "group departure | Tripwaley" was cut off and the reader never saw the
-     brand. Long trip names therefore drop the nights suffix and keep the name
-     plus the brand, which are the two parts that earn the click. */
+     brand.
+     What gets dropped matters: "group departure" is generic, but the NIGHTS are
+     often the only thing separating two similar trips — Jibhi-Raghupur runs as
+     both a 5N/6D and a 4N/5D batch, and a title without the nights makes them
+     look like the same page competing for the same search. So the nights stay
+     and the generic phrase goes; only if it still doesn't fit does the name
+     stand alone. */
   const full = `${pkg.name} — ${nightsLabel(pkg)} group departure | Tripwaley`;
-  const title = full.length > 60 ? `${pkg.name} | Tripwaley` : full;
+  const medium = `${pkg.name} — ${nightsLabel(pkg)} | Tripwaley`;
+  const title = full.length <= 60 ? full : medium.length <= 60 ? medium : `${pkg.name} | Tripwaley`;
   const description = `${pkg.name}: ${pkg.destination || pkg.route}. Fixed group departures from ${citiesPricedFor(slug).length} cities with captains, stays & transport included.`;
   // Without these, every trip fell back to the site-wide default — so all 27
   // shared one Ladakh photo and one generic title in every WhatsApp share,
@@ -82,7 +89,16 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function PackagePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const pkg = getPackage(slug);
-  if (!pkg || pkg.status !== "live") notFound();
+  if (!pkg || pkg.status !== "live") {
+    /* A renamed slug keeps working: 301 to its current address rather than
+       404ing, so fixing a typo in a slug costs nothing that was already
+       earned. permanentRedirect() is the 308 form — the method and body are
+       irrelevant for a GET page, and it is the signal Google treats as
+       "move the ranking". */
+    const to = resolveSlugAlias(slug);
+    if (to) permanentRedirect(`/trips/${to}`);
+    notFound();
+  }
 
   const settings = getSettings();
   const rates = holdRates();

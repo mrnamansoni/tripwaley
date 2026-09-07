@@ -156,6 +156,19 @@ function normalizePackage(p: Package): Package {
 
 export const getLivePackages = (): Package[] => readCatalog().packages.filter((p) => p.status === "live").map(normalizePackage);
 /** live trips that belong on a given landing page (group / honeymoon / solo) */
+/**
+ * The slug that replaced an old one, or undefined if this isn't a renamed slug.
+ * Used by /trips/[slug] to 301 an old URL instead of 404ing it — a rename in
+ * the admin used to silently throw away that address's ranking and any links
+ * pointing at it.
+ */
+export const resolveSlugAlias = (slug: string): string | undefined => {
+  const to = readCatalog().slugAliases?.[slug];
+  // never redirect to a package that no longer exists, or to itself
+  if (!to || to === slug) return undefined;
+  return readCatalog().packages.some((p) => p.slug === to && p.status === "live") ? to : undefined;
+};
+
 export const getPackagesByCategory = (cat: TripCategory): Package[] =>
   getLivePackages().filter((p) => inCategory(p, cat));
 export const getRichPackages = (): Package[] => getLivePackages().filter((p) => p.rich || p.itinerary.length > 0);

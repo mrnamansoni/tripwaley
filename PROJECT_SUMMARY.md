@@ -39,6 +39,39 @@ Tripwaley is a production-grade travel booking website for a premium, group-depa
 
 ## Recent Changes
 
+### 2026-09-07 — SEO round two: the owner's decisions, implemented
+
+Four of the six items left open by the audit were settled by the owner and are done. Two
+(city-page depth, destination landing pages) were deliberately deferred.
+
+- **The two Jibhi trips are genuinely different trips**, so no merge and no redirect. The
+  cannibalisation risk was in the TITLES, and it was partly self-inflicted: the length trim added
+  earlier that day dropped the nights suffix, which is the only thing distinguishing them. The trim
+  now drops the generic "group departure" and KEEPS the nights, so they read as
+  `Jibhi-Sojha-Raghupur Fort — 5N / 6D` (47 chars) and `…Short Trip — 4N / 5D` (58). Both under the
+  limit, both clearly different trips.
+- **Slug renames no longer 404 the old URL.** `applySlugRenames` records a `slugAliases` map on the
+  catalog and `/trips/[slug]` issues a 308 to the current slug before falling through to notFound.
+  Chained renames collapse (a→b then b→c leaves a pointing at c, never a double hop), and a slug
+  reused by a real package releases its alias. This is the infrastructure that makes fixing the
+  misspelled `rajasthan-bagpacking-from-ayodhaya` slug safe — the rename itself is an admin action,
+  because that package exists only on the live volume, not in the seed.
+- **Ladakh package added** — `ladakh-leh-nubra-pangong-circuit`, 6N/7D, full itinerary, inclusions
+  and copy, built around a real acclimatisation schedule (two nights in Leh before anything high).
+  Shipped as **status: draft** on purpose: the seat price and the departure dates are a commercial
+  decision, not something to invent. SEED_VERSION bumped to 10 so the additive merge delivers it to
+  the running install.
+- **Homepage H1 rewritten** — "Your city. Your crew. Pick Your Shot." named no product, no country
+  and no destination, spending the strongest on-page signal the site has entirely on voice. Now
+  "Group trips across India." with "Your city. Your crew." as the gold accent line: head term first,
+  voice intact. Defaults, component fallbacks and both catalog seeds updated. **The live value is
+  admin-owned**, so production needs the two lines pasted into Admin → Content → Homepage · Hero.
+
+**Fixed in passing:** `SiteMedia` passed a caller's `style` straight into a `fill` next/image, which
+THROWS when that style carries a width — and because it throws during render it took the whole route
+down. The homepage had been returning 500 in `next dev` for this reason (production tolerated it).
+Conflicting width/height are now stripped when `fill` is set, so no caller has to know the rule.
+
 ### 2026-09-07 — SEO: the site was telling Google to de-index two thirds of itself
 
 A full live crawl of all 76 sitemap URLs (not a code read — actual responses) found one dominant
@@ -358,15 +391,21 @@ Booking money now arrives in three stages, and only the first is taken on the we
 Verified against production on 2026-09-05 unless marked otherwise.
 
 ### Do this first
-1. **Rebuild the n8n mapping** against `docs/webhook-samples/` — the payload shape changed on
-   2026-09-07 (a `college` block was added, and `money.subtotal` is now correctly pre-discount).
-   `docs/webhooks.md` is the reference. Then press **Send test event** in Admin → Bookings.
-2. **Search Console, once the SEO deploy lands.** Resubmit the sitemap and request re-indexing of
+1. **Three admin edits that code cannot make** (these rows live only on the production volume):
+   - Paste the new homepage H1 into Admin → Content → Homepage · Hero:
+     headline `Group trips across India.`, accent `Your city. Your crew.`
+   - Rename the misspelled slug `rajasthan-bagpacking-from-ayodhaya` →
+     `rajasthan-backpacking-from-ayodhya`, and fix the same two typos in the package NAME. The old
+     URL will 301 automatically now.
+   - Set a seat price and departure dates on the new **Ladakh — Leh, Nubra & Pangong** package, then
+     switch it from draft to live.
+2. **Search Console**, once the SEO deploy lands: resubmit the sitemap and request re-indexing for
    /solo, /honeymoon, /college-trips, /group-departures and the /from/ pages. They spent months
-   telling Google they were duplicates of the homepage; re-indexing is what tells it otherwise.
-3. **Add real departures for the live packages that have none.** Admin → Departures. A trip with no
-   rows there cannot be booked or paid for online — the site now says "dates on request" and offers
-   only the WhatsApp path. This is what produced the dateless paid booking on 2026-09-06.
+   telling Google they were duplicates of the homepage.
+3. **Rebuild the n8n mapping** against `docs/webhook-samples/` — the payload gained a `college`
+   block and `money.subtotal` is now correctly pre-discount. `docs/webhooks.md` is the reference.
+4. **Add real departures for the live packages that have none.** A trip with no rows in Admin →
+   Departures cannot be booked or paid for online.
 
 ### Payments — live, but still on sandbox
 - [ ] **Complete one real end-to-end sandbox payment through a browser.** The gateway is confirmed

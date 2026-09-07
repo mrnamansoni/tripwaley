@@ -262,6 +262,13 @@ export interface WireEntry {
 export interface Catalog {
   /** Seed rows the admin has deleted. The seed merge must never re-add these —
    *  see lib/seedGuard.ts. Keys are per-section; the shape is SeedRemovals. */
+  /* Old package slugs, mapped to the slug that replaced them.
+     A rename in the admin cascades through prices, departures and creator
+     trips (see slugCascade.ts) but the OLD URL simply started 404ing — losing
+     whatever ranking and inbound links that address had earned, which is
+     exactly what makes owners frightened of fixing a typo in a slug. Recorded
+     here so /trips/[slug] can 301 instead. */
+  slugAliases?: Record<string, string>;
   seedRemovals?: {
     cities?: string[];
     packages?: string[];
@@ -688,8 +695,12 @@ export interface ContentDef {
 
 export const CONTENT_DEFS: ContentDef[] = [
   { key: "hero.eyebrow", group: "Homepage · Hero", label: "Eyebrow (top line)", kind: "line", default: "tripwaley presents · a film by you" },
-  { key: "hero.headline", group: "Homepage · Hero", label: "Headline", kind: "line", default: "Your city. Your crew." },
-  { key: "hero.headlineAccent", group: "Homepage · Hero", label: "Headline accent (gold line)", kind: "line", default: "Your opening shot." },
+  /* The H1 is the strongest on-page signal the homepage has, and it used to
+     spend all of it on brand voice — "Your city. Your crew. Pick Your Shot."
+     names no product, no country and no destination. The head term leads now
+     and the voice follows it in gold, so the line still sounds like us. */
+  { key: "hero.headline", group: "Homepage · Hero", label: "Headline", kind: "line", default: "Group trips across India." },
+  { key: "hero.headlineAccent", group: "Homepage · Hero", label: "Headline accent (gold line)", kind: "line", default: "Your city. Your crew." },
   { key: "hero.scrollCue", group: "Homepage · Hero", label: "Scroll cue", kind: "line", default: "scroll — roll camera" },
   { key: "hero.markWord", group: "Homepage · Hero", label: "Giant mark — line 1 (≤7 letters)", kind: "line", default: "SCENE" },
   { key: "hero.markSub", group: "Homepage · Hero", label: "Giant mark — line 2 (≤8 letters)", kind: "line", default: "ON HAI" },

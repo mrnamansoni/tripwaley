@@ -83,6 +83,18 @@ export function applySlugRenames(cat: Catalog, renames: SlugRename[]): CascadeRe
     return { ...d, packageSlug: to };
   });
 
+  /* Remember the old address so it can 301 rather than 404. Any alias that
+     pointed at the OLD slug is re-pointed at the new one, so a slug renamed
+     twice still resolves from its original URL in one hop. */
+  const aliases: Record<string, string> = { ...(cat.slugAliases ?? {}) };
+  for (const [from, to] of map) {
+    aliases[from] = to;
+    for (const key of Object.keys(aliases)) if (aliases[key] === from) aliases[key] = to;
+    // a slug reused as a real package again must stop being an alias
+    delete aliases[to];
+  }
+  cat.slugAliases = aliases;
+
   if (cat.creators?.length) {
     cat.creators = cat.creators.map((c) => ({
       ...c,
