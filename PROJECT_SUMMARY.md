@@ -39,6 +39,41 @@ Tripwaley is a production-grade travel booking website for a premium, group-depa
 
 ## Recent Changes
 
+### 2026-09-07 — Destination landing pages, and real depth on the city pages
+
+The two items deferred from the SEO audit, now done.
+
+**`/destinations/[slug]` — 14 new landing pages** (18 defined; a destination with no live trip is
+never published, so goa/meghalaya/lansdowne/ladakh appear as soon as they have one). This closes the
+biggest gap in the audit: the site sold trips but had no page built to answer "spiti valley tour
+package" or "kashmir tour package", which are the head terms in this market. It only owned
+product-level trip pages, which are long-tail by definition.
+
+Each page carries the trips, dated batches, a per-boarding-city fare table, a planning block
+(season / access / what people get wrong), and five FAQs — 538-619 words, with BreadcrumbList,
+ItemList and FAQPage schema. Titles lead with the head term and fit: "Spiti Valley Tour Packages —
+Group Trips | Tripwaley" (52 chars).
+
+**`src/lib/destinations.ts` is the new taxonomy** and replaces the inline regex list on
+/destinations, which had the same two flaws as the old weather lookup: it matched
+`name + destination + route` CONCATENATED first-match-wins, and anything it didn't name was
+invisible — Kerala, Andaman and both Meghalaya trips appeared nowhere on that page at all. Matching
+is now by specificity (destination, then name, then route), a trip can legitimately belong to two
+destinations, and `test-destinations.mjs` asserts that EVERY live package matches at least one. That
+last assertion is the regression guard: it is what would have caught the original bug.
+
+**City pages went from 221-291 words to 664-773**, all of it derived from that city's own data
+rather than written per city: which destinations it is priced to and from what, when its batches
+actually leave (counted off the live board), trip-length mix, and four city-specific FAQs. They also
+now link to every destination page and to each other.
+
+**An honest caveat on the city pages.** Vocabulary overlap between them is still 95-99%, because
+every city is priced to the same 14 destinations — they share a template by design, like any
+category page set. What genuinely differs is the facts: prices vary across four to five bands per
+package (Manali is ₹7,000 from Delhi, ₹11,500 from Kochi, ₹11,000 from Ranchi), and the departure
+mix differs. That is real differentiation, but if Search Console later reports these as thin or
+duplicate, the fallback is consolidation to the strongest four cities rather than more words.
+
 ### 2026-09-07 — SEO round two: the owner's decisions, implemented
 
 Four of the six items left open by the audit were settled by the owner and are done. Two

@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { SITE_ORIGIN } from "./robots";
+import { DESTINATIONS, destinationsFor } from "@/lib/destinations";
 import {
   getLivePackages,
   getPricedCities,
@@ -75,6 +76,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.5,
     });
   }
+  /* Destination landing pages, but only where a live trip actually exists —
+     generateStaticParams applies the same rule, so the sitemap can never offer
+     Google a page the route will 404. */
+  const liveNow = getLivePackages();
+  for (const d of DESTINATIONS) {
+    if (!liveNow.some((p) => destinationsFor(p).some((x) => x.slug === d.slug))) continue;
+    entries.push({
+      url: url(`/destinations/${d.slug}`),
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    });
+  }
+
   /* A creator trip renders only when the UNDERLYING package is live too — see
      resolveTrip() in catalog.ts. Filtering on `published` alone listed trips
      whose package had since gone to draft, and the sitemap served Google a 404

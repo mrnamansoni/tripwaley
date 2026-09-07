@@ -11,6 +11,7 @@ import DayNightSeam from "@/components/site/DayNightSeam";
 import AlbumWall from "@/components/site/AlbumWall";
 import { getCities, getSettings, getLivePackages, getVideoTestimonial, sectionOn, slotOne, text, fromPrice, inr, nightsLabel, slot } from "@/lib/catalog";
 import { canonical } from "@/lib/seo";
+import { DESTINATIONS, destinationsFor } from "@/lib/destinations";
 
 export const metadata: Metadata = {
   ...canonical("/destinations"),
@@ -18,7 +19,10 @@ export const metadata: Metadata = {
   description: "Himachal, Uttarakhand, Kashmir, Rajasthan, Goa — every region Tripwaley runs group departures to, with live packages and prices.",
 };
 
-/* group live packages into destination regions */
+/* The regions below are the visual grouping for this page. Which PACKAGES sit
+   in each one now comes from lib/destinations.ts, because the old inline regex
+   list silently dropped anything it didn't name — Kerala, Andaman and both
+   Meghalaya trips appeared nowhere on this page at all. */
 const REGIONS: { slug: string; name: string; tag: string; test: RegExp; image: string }[] = [
   { slug: "himachal", name: "Himachal", tag: "passes, parvati & pine", test: /manali|kasol|himachal|shimla|jibhi|tirthan|mcleod|triund|bir|spiti|parvati/i, image: "/images/himalaya-sunrise.jpg" },
   { slug: "uttarakhand", name: "Uttarakhand", tag: "treks, temples & tungnath", test: /kedarkantha|chopta|rishikesh|uttrakhand|kedarnath|flower|haridwar|dehradun/i, image: "/images/snowtrek.jpg" },
@@ -34,10 +38,22 @@ export default function DestinationsPage() {
 
   const vt = getVideoTestimonial();
   const regionImgs = slot("destinations.regions");
+  /* every destination that actually has a live trip — an empty landing page is
+     worse than no link */
+  const liveDestSlugs = new Set(
+    DESTINATIONS.filter((d) => live.some((p) => destinationsFor(p).some((x) => x.slug === d.slug))).map((d) => d.slug)
+  );
+  const allDestPages = DESTINATIONS.filter((d) => liveDestSlugs.has(d.slug));
+
   const groups = REGIONS.map((r, i) => ({
     ...r,
     image: regionImgs[i] ?? r.image,
     packages: live.filter((p) => r.test.test(`${p.name} ${p.destination} ${p.route}`)),
+    // destination landing pages that belong to this region, so the hub links
+    // through to a real page rather than an on-page anchor
+    pages: DESTINATIONS.filter(
+      (d) => d.state.toLowerCase().includes(r.name.toLowerCase()) && liveDestSlugs.has(d.slug)
+    ),
   })).filter((g) => g.packages.length > 0);
 
   const albumCaptions = text("dest.album.captions").split("\n").map((l) => l.trim()).filter(Boolean);
@@ -134,6 +150,39 @@ export default function DestinationsPage() {
           script="fourteen states, one decision"
           title="Pick a direction. We pack the rest."
         />}
+
+        {/* EVERY destination we run, each linking to its own landing page. The
+            page previously offered only #anchors, so there was nothing for a
+            crawler to follow and nothing built to rank for "<place> tour
+            packages" — the head term in this market. */}
+        {allDestPages.length > 0 && (
+          <section className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-8">
+            <p className="font-mono text-[0.56rem] uppercase tracking-[0.4em] text-brand">every destination</p>
+            <h2 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
+              {allDestPages.length} places we run batches to.
+            </h2>
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink/60">
+              Each one has its own page: what the trip is, when to go, how to get there, what it costs
+              from your city, and which batches are currently on the board.
+            </p>
+            <ul className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {allDestPages.map((d) => (
+                <li key={d.slug}>
+                  <Link
+                    href={`/destinations/${d.slug}`}
+                    className="group flex h-full flex-col rounded-2xl border border-line bg-card p-5 transition-all hover:-translate-y-0.5 hover:border-brand hover:shadow-card-lg"
+                  >
+                    <span className="font-display text-lg font-extrabold text-ink group-hover:text-brand">
+                      {d.name} tour packages
+                    </span>
+                    <span className="mt-1 font-mono text-[0.55rem] uppercase tracking-[0.2em] text-ink/40">{d.state}</span>
+                    <span className="mt-2.5 text-[0.84rem] leading-relaxed text-ink/55">{d.tagline}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </main>
       <CurtainFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
     </CityProvider>
