@@ -39,6 +39,39 @@ Tripwaley is a production-grade travel booking website for a premium, group-depa
 
 ## Recent Changes
 
+### 2026-09-10 — Fixed: I flattened the creator cutouts pulling the Drive images
+
+**My regression, reported by the owner.** The Drive-image pull ran
+`sips -s format jpeg` over all 192 files and saved every one as `<id>.jpg`.
+JPEG has no alpha channel, so **8 transparent creator cutout portraits were
+flattened onto an opaque background** — the cutout is the entire visual device of
+the creator pages, and each one became an ordinary rectangular photo.
+
+There was a second, latent half to the same mistake: `localDrivePath()` hardcoded
+`.jpg`, so the moment the PNGs were restored under their real extension every one
+of them would have 404'd.
+
+**Fixed:**
+- `pull-drive-images.mjs` now preserves the source format instead of forcing one.
+  Only JPEGs get re-encoded; a PNG is resized and left alone.
+- `scripts/repull-png-cutouts.mjs` re-fetched the 13 PNGs by id. It targets ids
+  directly rather than crawling, because the site now serves the local copies and
+  those Drive URLs are no longer in the HTML to discover.
+- `localDriveImages.ts` is a MAP with the real extension, not a Set with an
+  assumed one.
+- The 5 PNGs that carry no alpha were converted to JPEG, since they lose nothing
+  by it — that took the library from 73MB back to 62MB.
+
+**Verified:** all 8 cutouts serve and optimise to AVIF (which carries alpha), and
+a cutout rendered against a solid background shows the background through it.
+
+**The lesson, and it generalises:** a format conversion is a lossy decision about
+someone else's content, not a compression setting. `-s format jpeg` looked like
+"make these smaller" and actually meant "discard every alpha channel on the
+site". Anything that rewrites media in bulk has to preserve what it does not
+understand. `hasAlpha` is also not the test for "is this a cutout" — several of
+these carry a fully-opaque alpha channel; the only real check is looking at one.
+
 ### 2026-09-10 — 192 Google Drive images pulled onto our own domain
 
 **The finding.** A cold mobile load of the homepage transferred 2,924KB, of which **2,843KB — 97% —

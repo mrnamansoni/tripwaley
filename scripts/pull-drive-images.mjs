@@ -16,9 +16,15 @@
  * our control — and it also removes the standing risk that a Drive link is
  * revoked, rate-limited or re-shared and the site quietly loses its photos.
  *
- * Sources are downscaled to 1920px on the long edge before being committed.
+ * Sources are downscaled to 1600px on the long edge before being committed.
  * next/image resizes per request from whatever we ship, so a 4000px original
  * would only bloat the Docker image without ever being served at that size.
+ *
+ * FORMAT IS PRESERVED, NEVER FORCED. An earlier version of this script ran
+ * `sips -s format jpeg` over everything, which silently flattened 13 transparent
+ * PNGs — the creator cutout portraits — onto an opaque background. They are the
+ * whole visual device of the creator pages. A cutout is a PNG *because* of its
+ * alpha channel, so the format a file arrives in is the format it keeps.
  *
  * Idempotent: an image already downloaded is skipped, so this can be re-run
  * after new photos are added in the admin.
@@ -32,7 +38,10 @@ const ROOT = path.resolve(import.meta.dirname, "..");
 const OUT_DIR = path.join(ROOT, "public", "images", "library");
 const MANIFEST = path.join(ROOT, "src", "data", "driveImages.json");
 const SITE = "https://tripwaley.com";
-const MAX_EDGE = 1920;
+const MAX_EDGE = 1600;
+
+/** content-type → the extension we store it under, alpha-preserving */
+const EXT_FOR = { "image/png": "png", "image/webp": "webp", "image/jpeg": "jpg", "image/jpg": "jpg" };
 
 const driveId = (url) =>
   url.match(/\/d\/([A-Za-z0-9_-]{20,})/)?.[1] ?? url.match(/[?&]id=([A-Za-z0-9_-]{20,})/)?.[1] ?? null;
@@ -76,24 +85,31 @@ async function main() {
   const failed = [];
 
   for (const id of ids) {
-    const rel = `/images/library/${id}.jpg`;
-    const abs = path.join(OUT_DIR, `${id}.jpg`);
-
-    if (existsSync(abs)) { manifest[id] = rel; skipped++; continue; }
+    // an already-pulled id may be stored under any extension
+    const existing = ["jpg", "png", "webp"].find((e) => existsSync(path.join(OUT_DIR, `${id}.${e}`)));
+    if (existing) { manifest[id] = `/images/library/${id}.${existing}`; skipped++; continue; }
 
     try {
       // the /d/<id> form serves the file itself; /file/d/<id>/view serves an HTML page
       const res = await fetch(`https://lh3.googleusercontent.com/d/${id}`, { redirect: "follow" });
       if (!res.ok) { failed.push([id, `HTTP ${res.status}`]); continue; }
-      const type = res.headers.get("content-type") ?? "";
+      const type = (res.headers.get("content-type") ?? "").split(";")[0].trim().toLowerCase();
       if (!type.startsWith("image/")) { failed.push([id, `not an image (${type.slice(0, 40)})`]); continue; }
+
+      const ext = EXT_FOR[type] ?? "jpg";
+      const rel = `/images/library/${id}.${ext}`;
+      const abs = path.join(OUT_DIR, `${id}.${ext}`);
 
       const before = Buffer.from(await res.arrayBuffer());
       writeFileSync(abs, before);
 
-      // downscale in place; sips is on every mac and needs no dependency
+      /* Downscale only. NO `-s format`: converting a PNG to JPEG discards its
+         alpha channel, and the creator cutouts depend on it. */
       try {
-        execFileSync("sips", ["-Z", String(MAX_EDGE), "-s", "format", "jpeg", "-s", "formatOptions", "82", abs, "--out", abs], { stdio: "ignore" });
+        const args = ["-Z", String(MAX_EDGE)];
+        // re-encoding a JPEG is what shrinks it; a PNG is left to its own encoder
+        if (ext === "jpg") args.push("-s", "formatOptions", "normal");
+        execFileSync("sips", [...args, abs, "--out", abs], { stdio: "ignore" });
       } catch { /* keep the original bytes if sips can't read this one */ }
 
       const after = readFileSync(abs);

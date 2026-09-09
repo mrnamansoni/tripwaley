@@ -4,7 +4,7 @@
  * lives in lib/catalog.ts / lib/store.ts.
  */
 
-import { LOCAL_DRIVE_IMAGES, localDrivePath } from "./localDriveImages";
+import { localDrivePath } from "./localDriveImages";
 
 export interface AnnouncementBar {
   enabled: boolean;
@@ -371,7 +371,8 @@ export function normalizeMediaUrl(raw: string): string {
        keeps its Drive links, every render uses the local copy, and reverting is
        deleting one branch. An id we have not pulled still falls through to
        Drive exactly as before. */
-    if (LOCAL_DRIVE_IMAGES.has(id)) return localDrivePath(id);
+    const local = localDrivePath(id);
+    if (local) return local;
     return `https://lh3.googleusercontent.com/d/${id}`;
   }
   // Dropbox: ?dl=0 serves an HTML page; raw=1 serves the bytes
