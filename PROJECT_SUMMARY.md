@@ -39,6 +39,47 @@ Tripwaley is a production-grade travel booking website for a premium, group-depa
 
 ## Recent Changes
 
+### 2026-09-10 — 192 Google Drive images pulled onto our own domain
+
+**The finding.** A cold mobile load of the homepage transferred 2,924KB, of which **2,843KB — 97% —
+came from eight images hosted on lh3.googleusercontent.com**. A crawl of all 90 pages found 194
+distinct Drive-hosted images site-wide. They are the single biggest performance problem on the site,
+and three separate optimisations were all powerless against them:
+
+- next/image cannot resize or re-encode a third-party URL, so they arrive at full original
+  resolution. One was displayed at 42x304 and downloaded at 1116x1600.
+- Cloudflare cannot cache or compress them, because those bytes never touch our domain.
+- They are also a standing availability risk: a revoked share link silently empties the page.
+
+**The fix, and why it needed no data migration.** The obvious approach — rewrite the catalog's image
+URLs — does not work here: the catalog lives on the production volume and is admin-owned, so code
+cannot edit it. But `normalizeMediaUrl()` in lib/types.ts already resolves every Drive share link at
+RENDER time, on every surface. Teaching it to prefer a local copy migrates the whole site without
+touching a single row of data, and reverting is deleting one branch.
+
+`scripts/pull-drive-images.mjs` crawls the live sitemap plus both catalogs, downloads each file,
+downscales it and writes `src/lib/localDriveImages.ts` — a Set of the ids we hold. An id in that Set
+resolves to `/images/library/<id>.jpg`; an id not in it falls through to Drive exactly as before.
+The script is idempotent, so re-run it after new photos are added in the admin.
+
+**Result per image** (measured on the worst offender): 853KB straight from Drive, versus **71KB AVIF
+at 640px** — the width a phone actually receives — through next/image. Roughly a 12x reduction, and
+that is before Cloudflare caches it.
+
+**Two things worth knowing for next time:**
+- `sips -s formatOptions 82` does NOT mean quality 82. The first pass "downscaled" 192 files and
+  made them 50MB BIGGER, because the numeric argument is not a percentage and it re-encoded at close
+  to maximum quality. The named levels behave sensibly: `low`/`normal`/`best`. Settled on
+  `-Z 1600 -s formatOptions normal`, which took the library from 128MB to 49MB.
+- Committing 49MB of images to the repo is deliberate. The alternative — fetching at build time —
+  would make every deploy depend on Google Drive staying reachable, which is the exact fragility
+  this change exists to remove. These are source files; next/image serves resized AVIF from them, so
+  their size affects the Docker image and nothing a visitor downloads.
+
+**One image could not be pulled**: `111xoaHzaitx0eXEBsS6T95Nxjx4CK97D` (on /trips/udaipur-trip-from-dehradun)
+returns HTML rather than an image, which means the share link is restricted. It still loads from
+Drive and still costs what it costs. Re-share it publicly and re-run the script.
+
 ### 2026-09-10 — Cloudflare migration checked, and agent-readiness implemented
 
 **The migration itself is sound.** Nameservers are on Cloudflare (jerry/novalee.ns.cloudflare.com)

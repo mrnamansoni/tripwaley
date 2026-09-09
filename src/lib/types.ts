@@ -4,6 +4,8 @@
  * lives in lib/catalog.ts / lib/store.ts.
  */
 
+import { LOCAL_DRIVE_IMAGES, localDrivePath } from "./localDriveImages";
+
 export interface AnnouncementBar {
   enabled: boolean;
   text: string;
@@ -337,7 +339,11 @@ export const isImageMedia = (src: string): boolean => !!src && !isVideoMedia(src
 /** pull the file id out of any Google Drive share URL shape */
 function driveId(url: string): string | null {
   const u = url.trim();
-  if (!/drive\.google\.com|docs\.google\.com/i.test(u)) return null;
+  /* lh3.googleusercontent.com is included because normalizeMediaUrl() has been
+     rewriting share links into that form for a long time, so the catalog now
+     holds both shapes. Recognising only drive.google.com would have left every
+     already-normalised URL pointing at Google. */
+  if (!/drive\.google\.com|docs\.google\.com|lh3\.googleusercontent\.com/i.test(u)) return null;
   const m =
     u.match(/\/file\/d\/([\w-]{10,})/) ??
     u.match(/[?&]id=([\w-]{10,})/) ??
@@ -352,7 +358,22 @@ export function normalizeMediaUrl(raw: string): string {
   const src = (raw ?? "").trim();
   if (!src) return "";
   const id = driveId(src);
-  if (id) return `https://lh3.googleusercontent.com/d/${id}`;
+  if (id) {
+    /* If we have pulled this file onto our own domain, serve that copy. A
+       third-party URL cannot go through next/image, so a Drive-hosted photo
+       arrives at full original resolution with no resize and no AVIF: eight of
+       them made up 2,843KB of the homepage's 2,924KB payload, one of them
+       displayed at 42x304 and downloaded at 1116x1600. Cloudflare cannot help
+       either, because those bytes never touch our domain.
+
+       Checked here rather than migrated into the catalog because the catalog
+       lives on the production volume and is admin-owned — this way the data
+       keeps its Drive links, every render uses the local copy, and reverting is
+       deleting one branch. An id we have not pulled still falls through to
+       Drive exactly as before. */
+    if (LOCAL_DRIVE_IMAGES.has(id)) return localDrivePath(id);
+    return `https://lh3.googleusercontent.com/d/${id}`;
+  }
   // Dropbox: ?dl=0 serves an HTML page; raw=1 serves the bytes
   if (/dropbox\.com/i.test(src)) return src.replace(/([?&])dl=0/, "$1raw=1");
   return src;
