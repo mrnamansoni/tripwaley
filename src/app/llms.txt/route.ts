@@ -1,5 +1,5 @@
 import { getLivePackages, getPricedCities, getCreators, getSettings } from "@/lib/catalog";
-import { SITE_ORIGIN } from "../robots";
+import { SITE_ORIGIN } from "../robots.txt/route";
 
 /**
  * /llms.txt — a plain-text brief for AI answer engines.

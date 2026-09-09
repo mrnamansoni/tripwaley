@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { SITE_ORIGIN } from "./robots";
+import { SITE_ORIGIN } from "./robots.txt/route";
 import { DESTINATIONS, destinationsFor } from "@/lib/destinations";
 import {
   getLivePackages,

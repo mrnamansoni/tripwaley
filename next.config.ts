@@ -44,6 +44,27 @@ const nextConfig: NextConfig = {
             key: "Cache-Control",
             value: "public, max-age=0, s-maxage=60, stale-while-revalidate=600",
           },
+          {
+            /* Agent discovery (RFC 8288): `describedby` points at the
+               machine-readable brief at /llms.txt.
+
+               Deliberately NOT advertising `api-catalog` or `service-desc`.
+               This site has no public API — everything under /api is internal
+               (admin, payments, lead capture) and is disallowed in robots.txt.
+               Publishing a catalogue would point agents at endpoints that take
+               bookings and money, which is worse than publishing nothing.
+
+               Markdown availability is not advertised here either: it applies
+               to four route families, not to every path this rule matches, and
+               a header claiming it site-wide would be wrong on /about. */
+            key: "Link",
+            /* NO rel="canonical" here. A canonical Link header applies to every
+               path this rule matches, so a single value would tell all 90 URLs
+               they are the homepage — which is the exact bug that was
+               suppressing this site from the index. Canonicals stay per-page in
+               generateMetadata, where they can differ. */
+            value: '</llms.txt>; rel="describedby"; type="text/plain"',
+          },
         ],
       },
       {

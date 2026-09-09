@@ -1,6 +1,6 @@
 # Project Summary: Tripwaley
 
-Last updated: 2026-09-07
+Last updated: 2026-09-10
 
 ## Project Overview
 Tripwaley is a production-grade travel booking website for a premium, group-departure travel brand in India. It is a Next.js 16 site with 3D/scroll-driven visuals (React Three Fiber, GSAP, Lenis), city-aware pricing, a lead-capture booking flow, and a full custom admin panel (CMS-style) so the owner can edit trips, prices, departures, cities, media, reviews, and bookings without touching code. There is no database — everything is stored in JSON files under `data/`.
@@ -38,6 +38,69 @@ Tripwaley is a production-grade travel booking website for a premium, group-depa
 - **New standing rule from the owner (2026-08-01, still in effect):** never push any change to GitHub directly. Always explain the plan in chat first and wait for a clear "yes" before making or pushing any change.
 
 ## Recent Changes
+
+### 2026-09-10 — Cloudflare migration checked, and agent-readiness implemented
+
+**The migration itself is sound.** Nameservers are on Cloudflare (jerry/novalee.ns.cloudflare.com)
+and the edge is live for the domain. Critically, the email records survived the switch — MX
+(mx1/mx2.hostinger.com), SPF and DMARC are all present, so grievance@tripwaley.com still delivers.
+That was the one thing flagged as able to break PhonePe compliance, and it did not.
+
+**Two DNS records did NOT survive** and are the owner's to re-add in Cloudflare: **DKIM** (no
+selector resolves — outbound mail is signed by SPF alone and more likely to be filtered as spam) and
+**autodiscover/autoconfig** CNAMEs (Outlook and Thunderbird can no longer auto-configure the
+mailbox; manual IMAP settings still work).
+
+**Measurement limitation worth knowing for next time.** From this environment, requests to
+tripwaley.com do NOT traverse Cloudflare — no `cf-ray`, and `/cdn-cgi/trace` returns the app's own
+404. Asking a Cloudflare edge IP directly with `Host: tripwaley.com` DOES answer with `cf-ray`, so
+the proxy is genuinely active; this network path just resolves past it. Edge cache behaviour
+therefore cannot be verified from here — check `cf-cache-status` from the owner's own machine or the
+Cloudflare dashboard instead.
+
+**One config note.** `next.config.ts` has carried `s-maxage=60, stale-while-revalidate=600` on every
+non-admin, non-api route since before the migration, with a comment saying it was "inert until
+Cloudflare is in front". It is no longer inert. Edge caching of HTML is now live and is safe by
+design: /admin and /api are excluded, so no authenticated page can be shared between visitors.
+
+**Agent-readiness — implemented:**
+- **Content Signals** in robots.txt: `search=yes, ai-input=yes, ai-train=no`. Note this deliberately
+  differs from Cloudflare's own example, which sets `ai-input=no`. Following that would have undone
+  the AI-visibility work: `ai-input` is what lets an assistant read a page to answer someone and
+  cite us, and AI referrals to travel are up 194% year on year. `ai-train` is the one that returns
+  nothing, so it is the one refused. robots.ts became `robots.txt/route.ts` because
+  `MetadataRoute.Robots` cannot emit a directive Next does not know about.
+- **Markdown for agents**: `Accept: text/markdown` on `/`, `/trips/*`, `/destinations/*`, `/from/*`
+  and `/stories/*` returns clean markdown instead of ~230KB of scroll-driven HTML. Written as a
+  renderer per route type (`lib/markdown.ts`) reading the catalog directly, not an HTML converter —
+  a converter would reproduce all the navigation noise and would drift whenever the design changed.
+- **Link header** `</llms.txt>; rel="describedby"` for discovery.
+
+**Agent-readiness — deliberately NOT implemented, and why:**
+- **API catalog (RFC 9727)** and **auth.md**: this site has no public API. Everything under /api is
+  internal — admin, payments, lead capture — and is disallowed in robots.txt. Publishing a catalogue
+  would point agents at endpoints that take bookings and money, and an auth.md would describe an
+  agent-registration flow that does not exist. Both scanners would go green while the site got worse.
+
+**Three traps hit and avoided while building this**, all recorded because they would each have been
+a silent production failure:
+1. The proxy matcher had to widen from `/admin` + `/api/admin` to the whole site for negotiation to
+   see page requests. Its fall-through 401s anything under /api, so widening it naively would have
+   made **/api/lead and /api/pay/create return 401 site-wide** — booking would have stopped. Hence
+   `guarded()`: anything not explicitly listed must reach `NextResponse.next()` untouched.
+2. A `Link: rel="canonical"` header was briefly added alongside `describedby`. A header applies to
+   every path its rule matches, so one value would have told all 90 URLs they were the homepage —
+   re-creating the exact bug fixed on 7 September. Canonicals stay per-page in `generateMetadata`.
+3. `next.config.ts` `headers()` are applied against the ORIGINAL path, BEFORE a proxy rewrite runs,
+   so the HTML rule's `s-maxage=60` was landing on markdown responses. Cloudflare does not key its
+   cache on an arbitrary `Vary: Accept`, so an agent could have left markdown in the edge cache for
+   the next human visitor. Markdown is now `private, no-store`, set on the rewrite itself.
+
+Content negotiation is guarded by `scripts/test-markdown.mjs`, whose real job is the Accept check:
+every browser sends a `*/*` wildcard, and treating it as "markdown is acceptable" would serve raw
+markdown to every visitor — a total outage that returns HTTP 200. That test also caught a real
+false positive in the first implementation (`application/text/markdown-x` matched a `\b` regex), so
+the header is now parsed into media types rather than pattern-matched.
 
 ### 2026-09-07 — Destination landing pages, and real depth on the city pages
 
