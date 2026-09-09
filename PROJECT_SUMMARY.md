@@ -530,21 +530,48 @@ Booking money now arrives in three stages, and only the first is taken on the we
 Verified against production on 2026-09-05 unless marked otherwise.
 
 ### Do this first
-1. **Three admin edits that code cannot make** (these rows live only on the production volume):
+
+*Every item below was re-verified against production on 2026-09-10 and is genuinely still open.*
+
+1. **Two DNS records did not survive the Cloudflare nameserver switch.** Add them in Cloudflare DNS,
+   copying the values from Hostinger's email panel:
+   - **DKIM** — no selector resolves, so outbound mail from grievance@tripwaley.com is signed by SPF
+     alone and is more likely to be filtered as spam. MX, SPF and DMARC all survived; this did not.
+   - **autodiscover / autoconfig CNAMEs** — Outlook and Thunderbird can no longer auto-configure the
+     mailbox. Manual IMAP settings still work, so this is an annoyance rather than an outage.
+
+2. **Three admin edits that code cannot make** (these rows live only on the production volume, and
+   the seed merge never overwrites an existing row):
    - Paste the new homepage H1 into Admin → Content → Homepage · Hero:
      headline `Group trips across India.`, accent `Your city. Your crew.`
+     *(still showing the old "Your city. Your crew. Pick Your Shot.")*
    - Rename the misspelled slug `rajasthan-bagpacking-from-ayodhaya` →
      `rajasthan-backpacking-from-ayodhya`, and fix the same two typos in the package NAME. The old
-     URL will 301 automatically now.
-   - Set a seat price and departure dates on the new **Ladakh — Leh, Nubra & Pangong** package, then
-     switch it from draft to live.
-2. **Search Console**, once the SEO deploy lands: resubmit the sitemap and request re-indexing for
-   /solo, /honeymoon, /college-trips, /group-departures and the /from/ pages. They spent months
-   telling Google they were duplicates of the homepage.
-3. **Rebuild the n8n mapping** against `docs/webhook-samples/` — the payload gained a `college`
+     URL will 301 automatically — see slugAliases in lib/slugCascade.ts.
+   - Set a seat price and departure dates on the **Ladakh — Leh, Nubra & Pangong** package, then
+     switch it from draft to live. The itinerary and copy are already written.
+
+3. **One Drive image is still restricted** and therefore still costs full size on every load:
+   `111xoaHzaitx0eXEBsS6T95Nxjx4CK97D` on /trips/udaipur-trip-from-dehradun returns HTML rather than
+   an image. Re-share it publicly, then re-run `node scripts/pull-drive-images.mjs` — it is
+   idempotent and will pick up only that one. **Re-run the same script whenever new photos are added
+   through the admin**, because those arrive as Drive links again.
+
+4. **Search Console.** Resubmit the sitemap and request re-indexing for /solo, /honeymoon,
+   /college-trips, /group-departures and the /from/ pages. They spent months telling Google they
+   were duplicates of the homepage, and whether that has been undone is only visible there.
+
+5. **Rebuild the n8n mapping** against `docs/webhook-samples/` — the payload gained a `college`
    block and `money.subtotal` is now correctly pre-discount. `docs/webhooks.md` is the reference.
-4. **Add real departures for the live packages that have none.** A trip with no rows in Admin →
-   Departures cannot be booked or paid for online.
+
+6. **Add real departures for the live packages that have none.** A trip with no rows in Admin →
+   Departures cannot be booked or paid for online — the site says "dates on request" and offers only
+   the WhatsApp path, which is honest but is not a sale.
+
+7. **Collect reviews, three per trip.** 0 of 23 trip pages carry a star rating, because the code
+   (correctly) refuses to emit one until three real reviews match a trip and only 8 exist site-wide.
+   Star ratings are among the highest click-through rich results there are; this is the best
+   effort-to-payoff item on the list and it is not a code change.
 
 ### Payments — live, but still on sandbox
 - [ ] **Complete one real end-to-end sandbox payment through a browser.** The gateway is confirmed
