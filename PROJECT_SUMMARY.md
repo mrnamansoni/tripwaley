@@ -9,7 +9,7 @@ Tripwaley is a production-grade travel booking website for a premium, group-depa
 1. `AGENTS.md` — **this Next.js version has breaking changes.** Read the relevant guide in
    `node_modules/next/dist/docs/` before relying on assumed framework behaviour. This has bitten
    real work: `sitemap.ts` was silently static, metadata routes ignore the layout's `force-dynamic`.
-2. **Standing rule:** never push to GitHub without stating the plan and getting an explicit yes.
+8. **Standing rule:** never push to GitHub without stating the plan and getting an explicit yes.
 3. Two data copies, and confusing them causes real bugs: `src/data/catalog.json` is the SEED baked
    into the Docker image; `data/catalog.json` is the LIVE catalog on the server volume that the
    admin panel edits. They diverge, and that divergence is deliberate — see the seed-guard entry.
@@ -38,6 +38,30 @@ Tripwaley is a production-grade travel booking website for a premium, group-depa
 - **New standing rule from the owner (2026-08-01, still in effect):** never push any change to GitHub directly. Always explain the plan in chat first and wait for a clear "yes" before making or pushing any change.
 
 ## Recent Changes
+
+### 2026-09-11 — Brand logo on the invoice; favicon still pending one asset
+
+The real wordmark now sits in the letterhead of all three invoice pages and as a watermark behind
+the content at 0.07 opacity — enough to survive a photocopy, light enough that 9pt terms printed
+across the lettering stay readable.
+
+**The supplied file is the horizontal wordmark, not the round badge**, and the two are not
+interchangeable. At 3.36:1 the wordmark squeezed into a 16×16 favicon is an illegible smear, and
+letterboxed into a square it is a hairline of text floating in empty space. So the favicon still
+needs the ROUND logo saved to `public/images/tripwaley-icon.png` on a square canvas, 512px or
+larger. Until then the site keeps its hand-drawn `icon.svg` approximation.
+
+The supplied file also carried 92px of transparent padding above the artwork and 56px below, which
+would have rendered the logo visibly high in its own box and smaller than its dimensions asked for.
+`scripts/make-brand-assets.mjs` trims it to the alpha bounding box and emits `tripwaley-mark.png`,
+which is what the PDF actually loads. That script is also the favicon generator: give it the square
+badge and it writes favicon.ico (16/32/48), apple-icon.png and icon.png, and deletes the old
+icon.svg — Next serves every `icon.*` it finds in app/, so leaving both would emit two competing
+`<link rel="icon">` tags.
+
+`MARK_ASPECT` in `src/lib/invoiceDoc.tsx` is declared rather than measured, because react-pdf sizes
+an image from its style box: a 3.36:1 wordmark in a square box is silently squashed. The script
+prints the aspect to set if the artwork is ever replaced.
 
 ### 2026-09-11 — Downloadable booking invoice (PDF)
 
@@ -650,7 +674,11 @@ Verified against production on 2026-09-05 unless marked otherwise.
 
 *Every item below was re-verified against production on 2026-09-10 and is genuinely still open.*
 
-1. **Two DNS records did not survive the Cloudflare nameserver switch.** Add them in Cloudflare DNS,
+1. **The favicon needs the ROUND logo.** Save it to `public/images/tripwaley-icon.png` — square
+   canvas, 512px or larger — then run `node scripts/make-brand-assets.mjs`. The horizontal wordmark
+   already supplied cannot do this job; see the 2026-09-11 entry above.
+
+2. **Two DNS records did not survive the Cloudflare nameserver switch.** Add them in Cloudflare DNS,
    copying the values from Hostinger's email panel:
    - **DKIM** — no selector resolves, so outbound mail from grievance@tripwaley.com is signed by SPF
      alone and is more likely to be filtered as spam. MX, SPF and DMARC all survived; this did not.

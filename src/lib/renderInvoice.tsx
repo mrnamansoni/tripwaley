@@ -22,7 +22,8 @@ import { InvoiceDocument } from "./invoiceDoc";
  *  absent logo must degrade to the text wordmark, not take down the one
  *  document a paying customer is trying to download. */
 function logoPath(): string | undefined {
-  for (const name of ["tripwaley-logo.png", "tripwaley-logo.jpg"]) {
+  // the trimmed derivative first: the raw master carries transparent padding
+  for (const name of ["tripwaley-mark.png", "tripwaley-logo.png"]) {
     const p = path.join(process.cwd(), "public", "images", name);
     if (fs.existsSync(p)) return p;
   }

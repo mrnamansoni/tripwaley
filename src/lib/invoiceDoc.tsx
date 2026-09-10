@@ -47,8 +47,19 @@ Font.registerHyphenationCallback((word) => [word]);
    that chain it comes out as a stray superscript, which is what happened. */
 const BODY = ["Instrument", "Bricolage"];
 
-/** watermark edge in points — roughly half the width of an A4 sheet */
-const WATERMARK = 300;
+/* The mark is the horizontal wordmark, trimmed to its artwork by
+   scripts/make-brand-assets.mjs. Its aspect is declared rather than measured:
+   react-pdf sizes an image from the style box, so giving a 3.36:1 wordmark a
+   square box silently squashes it. Re-run the script if the artwork changes —
+   it prints the aspect to set here. */
+const MARK_ASPECT = 3.363;
+
+/** watermark width in points — two thirds of an A4 sheet's width */
+const WATERMARK_W = 400;
+const WATERMARK_H = WATERMARK_W / MARK_ASPECT;
+
+/** letterhead mark width in points */
+const LOGO_W = 104;
 
 const C = {
   ink: "#1a1614",
@@ -65,20 +76,20 @@ const s = StyleSheet.create({
 
   brandRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" },
   wordmark: { fontFamily: "Bricolage", fontWeight: 800, fontSize: 20, lineHeight: 1.2, color: C.brand, letterSpacing: -0.4, marginBottom: 2 },
-  logo: { width: 54, height: 54, marginBottom: 3 },
+  logo: { width: LOGO_W, height: LOGO_W / MARK_ASPECT, marginBottom: 4 },
 
   /* The watermark. Centred on A4 (595.28 × 841.89pt) by arithmetic rather than
      by a centring layout, because it is positioned absolutely and out of flow.
-     Opacity 0.06: enough that a photocopy still shows it, light enough that
-     9pt terms printed over the dark ring stay legible. Anything past ~0.10 and
-     the ring competes with the table rules for attention. */
+     Opacity 0.07: enough that a photocopy still carries it, light enough that
+     9pt terms printed across the lettering stay legible. Past roughly 0.10 the
+     script strokes start competing with the table rules for attention. */
   watermark: {
     position: "absolute",
-    width: WATERMARK,
-    height: WATERMARK,
-    left: (595.28 - WATERMARK) / 2,
-    top: (841.89 - WATERMARK) / 2,
-    opacity: 0.06,
+    width: WATERMARK_W,
+    height: WATERMARK_H,
+    left: (595.28 - WATERMARK_W) / 2,
+    top: (841.89 - WATERMARK_H) / 2,
+    opacity: 0.07,
   },
   orgLine: { fontSize: 8, color: C.muted, maxWidth: 270, marginTop: 2 },
   docLabel: { fontFamily: "Bricolage", fontWeight: 700, fontSize: 13, letterSpacing: 2, textAlign: "right" },
