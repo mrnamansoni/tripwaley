@@ -143,7 +143,13 @@ export default async function PayReturn({ searchParams }: { searchParams: Promis
           </ol>
         </div>
 
-        <p className="mt-6 text-sm text-white/45">
+        <a
+          href={`/api/invoice?order=${encodeURIComponent(existing.id)}`}
+          className="mt-8 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-gold px-7 py-3 text-sm font-extrabold text-ink transition-colors hover:bg-gold/90 sm:w-auto"
+        >
+          Download invoice (PDF)
+        </a>
+        <p className="mt-3 text-sm text-white/45">
           Reference <span className="font-mono text-white/70">{existing.id}</span> — keep this for any query.
         </p>
         <Actions settings={settings} />

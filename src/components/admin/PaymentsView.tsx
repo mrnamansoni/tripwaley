@@ -172,6 +172,16 @@ export default function PaymentsView() {
                       {busy === o.id ? "checking…" : "re-check"}
                     </Btn>
                   )}
+                  {/* only a paid order has an invoice — the route refuses the
+                      rest, so offering the link would be a dead end */}
+                  {o.status === "paid" && (
+                    <a
+                      href={`/api/invoice?order=${encodeURIComponent(o.id)}`}
+                      className="inline-flex rounded-full border border-white/20 px-3 py-1.5 text-[0.65rem] font-bold text-white transition-colors hover:border-gold hover:text-gold"
+                    >
+                      invoice ↓
+                    </a>
+                  )}
                 </td>
               </tr>
             ))}

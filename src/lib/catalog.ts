@@ -21,7 +21,7 @@ import { readCatalog as readCatalogRaw, readReviews as readReviewsRaw } from "./
 const readCatalog = cache(readCatalogRaw);
 const readReviews = cache(readReviewsRaw);
 import type { BlogPost, Captain, City, CollegeTrip, Coupon, Creator, CreatorPose, CreatorTrip, CreatorTripDate, Departure, Faq, Package, PriceRule, Review, Settings, TripCategory, VideoTestimonial, WireEntry } from "./types";
-import { DEFAULT_CAPTAINS, DEFAULT_HOLD_PERCENT, DEFAULT_GST_PERCENT, normalizeCaptain, normalizeCollegeTrip, normalizeCouponCode, resolveSlot as resolveSlotPure, resolveContent as resolveContentPure, resolvePageSection, minRate, inCategory, normalizeCreator, packageImages, resolveFigure, DEFAULT_FAQS, DEFAULT_VIDEO_TESTIMONIAL } from "./types";
+import { DEFAULT_BANK, DEFAULT_CAPTAINS, DEFAULT_HOLD_PERCENT, DEFAULT_GST_PERCENT, normalizeCaptain, normalizeCollegeTrip, normalizeCouponCode, resolveSlot as resolveSlotPure, resolveContent as resolveContentPure, resolvePageSection, minRate, inCategory, normalizeCreator, packageImages, resolveFigure, DEFAULT_FAQS, DEFAULT_VIDEO_TESTIMONIAL } from "./types";
 import {
   collections as collectionDefaults,
   galleryPhotos as galleryDefaults,
@@ -93,6 +93,19 @@ export const holdRates = (): { holdPercent: number; gstPercent: number; advanceP
     holdPercent: s.holdPercent ?? DEFAULT_HOLD_PERCENT,
     gstPercent: s.gstPercent ?? DEFAULT_GST_PERCENT,
     advancePercent: s.advancePercent,
+  };
+};
+
+/** Bank details for the invoice's "Pay To" block, resolved against defaults.
+ *  Nullish coalescing on purpose: an admin who clears a field to "" means it,
+ *  and an empty field hides the whole block — a half-filled bank account on a
+ *  document asking for money is worse than none at all. */
+export const invoiceBank = (): { account: string; ifsc: string; holder: string } => {
+  const s = getSettings();
+  return {
+    account: s.bankAccount ?? DEFAULT_BANK.account,
+    ifsc: s.bankIfsc ?? DEFAULT_BANK.ifsc,
+    holder: s.bankHolder ?? DEFAULT_BANK.holder,
   };
 };
 

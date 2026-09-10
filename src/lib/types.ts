@@ -102,7 +102,24 @@ export interface Settings {
    *  for on a privacy policy. Name, designation and a reachable channel must
    *  all be published. */
   grievance?: GrievanceOfficer;
+
+  /* ---- bank details, printed in the "Pay To" block of the invoice PDF.
+     All three must be set or the block is hidden entirely: a half-filled
+     account on a document asking for money is worse than no account at all. ---- */
+  bankAccount?: string;
+  bankIfsc?: string;
+  bankHolder?: string;
 }
+
+/** Bank details printed in the invoice's "Pay To" block, from the owner's
+ *  existing Vyapar invoice template. Defaults rather than hardcoded values, so
+ *  they can be changed in the admin — and cleared to an empty string there,
+ *  which hides the block rather than resurrecting these. */
+export const DEFAULT_BANK = {
+  account: "50200095693917",
+  ifsc: "HDFC0006463",
+  holder: "Akshay Kumar",
+} as const;
 
 export interface GrievanceOfficer {
   name: string;
@@ -774,6 +791,18 @@ export const CONTENT_DEFS: ContentDef[] = [
   { key: "dest.album.accent", group: "Destinations page", label: "Album accent (gold word)", kind: "line", default: "happened." },
   { key: "dest.album.sub", group: "Destinations page", label: "Album sub-line", kind: "multiline", default: "Unstaged, uncropped, occasionally out of focus — exactly how memory works." },
   { key: "dest.album.captions", group: "Destinations page", label: "Album captions (one per line, in photo order)", kind: "multiline", default: "deodar cathedral, entry free\nsnow fight: everyone lost\nkasol huts, population us\nbonfire committee in session\nvalley lights, no filter\narms tired. worth it.\nshiva cafe sunlight\nhuddle up, day six\nfountain break, jaipur" },
+
+  /* ---- Invoice PDF ----
+     Every word of prose on the invoice a customer downloads. Kept here rather
+     than in the renderer so the terms can be changed from the admin without a
+     deploy — which matters because these are the lines that get quoted back at
+     you when someone cancels. One bullet per line in the multiline fields. */
+  { key: "invoice.cancellation", group: "Invoice (PDF)", label: "Cancellation policy (one bullet per line)", kind: "multiline", default: "The hold amount paid to reserve your seat is non-refundable.\nCancel before your advance is cleared and nothing further is charged.\nOnce the advance is cleared, \u20b94,000 per person is charged as a cancellation fee." },
+  { key: "invoice.important", group: "Invoice (PDF)", label: "Important information (one bullet per line)", kind: "multiline", default: "The remaining payment must be cleared at the time of group departure.\nAll sightseeing is managed through group transport (Traveller / Taxi / Sumo) arranged by Tripwaley.\nNo personal 4\u00d74 or separate taxi is provided in any case." },
+  { key: "invoice.disclaimer", group: "Invoice (PDF)", label: "Travel disclaimer (one bullet per line)", kind: "multiline", default: "In case of road blocks, snowfall, landslides or restrictions by traffic police, the travel programme or sightseeing may be changed, delayed or cancelled for safety reasons.\nTripwaley will arrange alternatives wherever possible, but no refunds are given for sightseeing missed due to such conditions, as they are beyond our control.\nGuests are requested to cooperate and understand these circumstances." },
+  { key: "invoice.whyUs", group: "Invoice (PDF)", label: "Why choose Tripwaley (one bullet per line)", kind: "multiline", default: "Hassle-free group travel planning.\nComfortable stays and reliable transport.\nCommitment to covering every sightseeing point mentioned." },
+  { key: "invoice.terms", group: "Invoice (PDF)", label: "Terms and conditions (one bullet per line)", kind: "multiline", default: "Thank you for booking with Tripwaley.\nThis invoice is issued against the seat hold recorded above and forms part of your booking record.\nPlease quote your booking reference in any correspondence." },
+  { key: "invoice.footerNote", group: "Invoice (PDF)", label: "Closing line above the signature", kind: "line", default: "With regards, Team Tripwaley" },
 
   /* ---- Group departures page ---- */
   { key: "group.eyebrow", group: "Group departures page", label: "Eyebrow (script)", kind: "line", default: "fixed dates · guaranteed departures" },

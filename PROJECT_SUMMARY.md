@@ -39,6 +39,52 @@ Tripwaley is a production-grade travel booking website for a premium, group-depa
 
 ## Recent Changes
 
+### 2026-09-11 — Downloadable booking invoice (PDF)
+
+Customers can now download an invoice from the payment confirmation page, and the owner can pull
+any paid order's invoice from Admin → Payments. Design: `docs/superpowers/specs/2026-09-11-booking-invoice-pdf-design.md`.
+
+**An Invoice, not a tax invoice.** No GSTIN exists in settings, the entity is an MSME sole
+proprietorship, and Vyapar already issues the real tax invoices under its own numbering (the
+template supplied was #144). A second system minting invoice numbers is how two documents end up
+sharing one at audit, so the booking reference is the invoice number. No HSN/SAC, no CGST/SGST
+split.
+
+**The payment summary reconciles, which the on-screen receipt does not.** The trip total excludes
+the GST charged on the hold; the amount paid includes it. Printing those either side of a balance
+leaves a reader short by exactly the GST when they check the subtraction — on the one document they
+are most likely to check. A new "Amount payable" subtotal closes the column:
+
+    Trip price ₹49,000 · Coupon −₹1,500 · Total ₹47,500 · GST 5% ₹118.75
+    Amount payable ₹47,618.75 − Paid now ₹2,493.75 = Balance due ₹45,125.00
+
+`invoiceLines()` and `amountInWords()` are pure and were written test-first (37 new assertions).
+The reconciliation is asserted for six shapes of order — coupon, no coupon, triple occupancy, GST
+off, a non-5% hold, a one-rupee trip — because a receipt that does not add up reads as an attempt
+to overcharge.
+
+**Three defects caught by rendering it and looking, not by the type checker:**
+- **Instrument Sans has no ₹ glyph.** Money set in it loses the rupee sign silently — no error, no
+  fallback box. It surfaced as `¹4,000` in the cancellation terms. Body text now declares
+  `["Instrument", "Bricolage"]` so the renderer falls back per glyph.
+- **Both brand faces ship variable-only upstream**, and @react-pdf has no variable-font support, so
+  every weight would have rendered at the axis default. `scripts/pull-invoice-fonts.mjs` downloads
+  the variable source and pins the axes with fonttools to produce four real static instances
+  (319KB, committed — they are inputs, not build output).
+- **react-pdf's `render` prop must return elements, not strings** in this version: a returned string
+  is spliced in as if it were a node and emits nothing. The footer now carries the booking
+  reference instead of "Page 2 of 3" — static, cannot go stale if admin-edited terms grow onto an
+  extra sheet, and more useful on a page that turns up on its own.
+
+All invoice prose (cancellation, important information, disclaimer, why-us, terms) is admin-editable
+under Content → Invoice (PDF), and resolves to its code default on production with no catalog
+migration. Bank details are in Admin → Settings, defaulting to the template's HDFC account; clear
+any one and the whole Pay To block hides.
+
+Files: `src/lib/{invoiceLines,amountInWords}.ts`, `src/lib/{invoiceDoc,renderInvoice}.tsx`,
+`src/app/api/invoice/route.ts`, `public/fonts/`, `scripts/pull-invoice-fonts.mjs`,
+`scripts/test-{invoice,amount-in-words}.mjs`.
+
 ### 2026-09-11 — First real payment taken; email capture, receipt printer, Ask-creator restored
 
 **PhonePe is live on production credentials and a real payment succeeded.** The integration is no

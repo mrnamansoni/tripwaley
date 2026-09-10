@@ -218,6 +218,24 @@ export default function SettingsEditor() {
           </div>
         </section>
 
+        {/* bank details — printed on the invoice PDF only */}
+        <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+          <p className={label}>bank details — invoice PDF</p>
+          <p className="mt-1 text-xs text-white/40">
+            Printed in the &ldquo;Pay To&rdquo; block on the last page of a customer&apos;s invoice.
+            Leave any one blank and the whole block is hidden. The holder name is what a customer
+            checks before transferring a balance — if it doesn&apos;t look like Tripwaley, expect
+            them to call before they pay.
+          </p>
+          <div className="mt-3 grid gap-4 sm:grid-cols-2">
+            <Field l="bank account number" v={s.bankAccount ?? ""} on={(v) => setS({ ...s, bankAccount: v })} />
+            <Field l="IFSC code" v={s.bankIfsc ?? ""} on={(v) => setS({ ...s, bankIfsc: v })} />
+            <div className="sm:col-span-2">
+              <Field l="account holder's name" v={s.bankHolder ?? ""} on={(v) => setS({ ...s, bankHolder: v })} />
+            </div>
+          </div>
+        </section>
+
         {/* analytics & ads */}
         <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
           <p className={label}>analytics &amp; ads</p>

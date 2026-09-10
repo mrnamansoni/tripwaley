@@ -1,7 +1,18 @@
 # Downloadable booking invoice (PDF)
 
 **Date:** 2026-09-11
-**Status:** approved, not yet implemented
+**Status:** implemented and shipped 2026-09-11
+
+**Deviations from this design, all discovered while rendering it:**
+1. The footer carries the booking reference, not "Page N of M" — react-pdf's `render` prop must
+   return elements rather than strings in this version, and a page number would also go wrong if
+   admin-edited terms ever push page 2 onto a second sheet.
+2. Body text declares a `["Instrument", "Bricolage"]` fallback chain: Instrument Sans has no ₹
+   glyph, so a rupee sign typed into admin prose printed as a stray superscript.
+3. Both brand faces are variable-only upstream, so the font script pins axes with fonttools to
+   produce static instances rather than simply downloading TrueType.
+4. Bank details resolve through `invoiceBank()` against `DEFAULT_BANK`, so the template's account
+   appears without the owner retyping it, while a field cleared to "" still hides the block.
 
 ## Problem
 
