@@ -91,7 +91,7 @@ export default function ReceiptPrinter({
         <div className="relative overflow-hidden rounded-xl border border-black/50 bg-[#0d0b0a] px-4 py-3 shadow-inner">
           <div className="flex items-baseline justify-between gap-3">
             <p className="min-w-0 truncate font-display text-sm font-extrabold text-white/85">{title}</p>
-            <p className="font-display text-base font-extrabold text-gold">{paidValue}</p>
+            <p className="shrink-0 font-display text-base font-extrabold text-gold">{paidValue}</p>
           </div>
           <p className="mt-0.5 font-mono text-[0.55rem] uppercase tracking-[0.2em] text-white/35">
             ref {reference}
@@ -106,11 +106,11 @@ export default function ReceiptPrinter({
       </div>
 
       {/* ---------------- the paper ---------------- */}
-      <div className="relative z-10 -mt-3 overflow-hidden px-3">
+      <div className="relative z-10 -mt-3 overflow-hidden px-1.5 sm:px-3">
         <div
           data-receipt-paper
           data-stage={stage}
-          className="relative bg-[#f7f2e4] px-6 pb-8 pt-7 text-ink shadow-card-lg"
+          className="relative bg-[#f7f2e4] px-4 pb-8 pt-7 text-ink shadow-card-lg sm:px-6"
         >
           <h2 className="text-center font-display text-xl font-extrabold leading-tight">{title}</h2>
           <p className="mt-1 text-center font-mono text-[0.55rem] uppercase tracking-[0.28em] text-ink/45">
@@ -122,8 +122,8 @@ export default function ReceiptPrinter({
           <dl className="space-y-2">
             {lines.map((l) => (
               <div key={l.label} className="flex items-baseline justify-between gap-4">
-                <dt className="font-mono text-[0.66rem] uppercase tracking-[0.12em] text-ink/55">{l.label}</dt>
-                <dd className={`text-right text-[0.82rem] ${l.strong ? "font-display text-base font-extrabold text-ink" : "font-semibold text-ink/80"}`}>
+                <dt className="min-w-0 font-mono text-[0.62rem] uppercase leading-snug tracking-[0.1em] text-ink/55 sm:text-[0.66rem] sm:tracking-[0.12em]">{l.label}</dt>
+                <dd className={`shrink-0 text-right text-[0.82rem] ${l.strong ? "font-display text-base font-extrabold text-ink" : "font-semibold text-ink/80"}`}>
                   {l.value}
                 </dd>
               </div>
@@ -141,7 +141,7 @@ export default function ReceiptPrinter({
 
           {/* a barcode, drawn rather than encoded — it is ornament, and a real
               one would imply it scans to something */}
-          <div className="mt-5 flex h-9 items-end justify-center gap-[2px]" aria-hidden="true">
+          <div className="mt-5 flex h-9 items-end justify-center gap-[2px] overflow-hidden" aria-hidden="true">
             {Array.from({ length: 42 }).map((_, i) => (
               <span key={i} className="w-[2px] bg-ink" style={{ height: `${45 + ((i * 53) % 55)}%` }} />
             ))}

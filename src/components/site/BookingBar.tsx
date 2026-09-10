@@ -279,8 +279,25 @@ export default function BookingBar({
           creates a containing block, which would otherwise trap this fixed overlay
           inside the ~60px bar and clip it off the bottom of the screen. */}
       {modal && (
-        <div className="fixed inset-0 z-[70] flex items-end justify-center bg-ink/70 p-4 backdrop-blur-sm sm:items-center" role="dialog" aria-modal="true" aria-label="Hold your seat">
-          <div ref={dialogRef} className="w-full max-w-md rounded-3xl border border-white/12 bg-[#181614] p-6 shadow-card-lg sm:p-8">
+        <div
+          className="fixed inset-0 z-[70] flex items-end justify-center overflow-y-auto overscroll-contain bg-ink/70 p-4 backdrop-blur-sm sm:items-center"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Hold your seat"
+        >
+          <div
+            ref={dialogRef}
+            /* The card grew past the phone viewport once email was added — 872px
+               of content in an 812px screen. With `items-end` the overflow goes
+               off the TOP, so the heading, the trip name and the close button
+               were all clipped and nothing could be scrolled back to.
+               `dvh` rather than `vh` because the mobile keyboard and the URL bar
+               both change the usable height, and `vh` ignores them.
+               `data-lenis-prevent` keeps smooth-scroll from swallowing the
+               gesture inside the panel. */
+            data-lenis-prevent
+            className="max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto overscroll-contain rounded-3xl border border-white/12 bg-[#181614] p-6 shadow-card-lg sm:p-8"
+          >
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-[0.6rem] font-bold uppercase tracking-[0.3em] text-gold">
