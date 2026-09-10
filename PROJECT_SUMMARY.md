@@ -644,23 +644,35 @@ Verified against production on 2026-09-05 unless marked otherwise.
    Star ratings are among the highest click-through rich results there are; this is the best
    effort-to-payoff item on the list and it is not a code change.
 
-### Payments — live, but still on sandbox
-- [ ] **Complete one real end-to-end sandbox payment through a browser.** The gateway is confirmed
-      working (a real PhonePe checkout session is created from tripwaley.com, `payEnabled: true`),
-      but nobody has yet approved a UPI collect and watched it land in Admin → Payments as `paid`.
-      That is the last untested link.
-- [ ] **Switch `env` to production** in Admin → Payments once PhonePe approves the live account.
-      One dropdown. Do it only after the sandbox run above passes.
+### Payments — live and taking real money
+- [x] **End-to-end payment confirmed on production, 2026-09-11.** Real credentials, real UPI
+      collect, landed in Admin → Payments as `paid`. The gateway chain is no longer theoretical.
 - [ ] **Change the webhook password.** It is currently `Naman1234`, which is weak and was shared in
       a screenshot — treat it as public. Change it on the PhonePe dashboard and in Admin → Payments
       together. It only guards the callback (the amount check catches a wrong figure anyway), but
       it should not stay as-is for production.
 
-### Two policy questions the owner has not answered — currently written as assumptions
-- [ ] **Is the 5% hold refundable?** Terms and the Refund Policy currently say YES — adjusted
-      against the 20% advance and refunded under the existing cancellation slab. If it should be
-      non-refundable instead, that is legal but needs explicit pre-payment disclosure and a tick-box
-      under the Consumer Protection (E-Commerce) Rules 2020, i.e. a different build.
+### Invoice PDF — cancellation policy now conflicts with the live site
+Design approved 2026-09-11: `docs/superpowers/specs/2026-09-11-booking-invoice-pdf-design.md`.
+
+- [ ] **The site's refund copy contradicts the invoice, and the owner has chosen to leave it for
+      now.** The owner's stated policy is: the hold is never refundable; cancellation is free until
+      the advance is cleared; once the advance is cleared ₹4,000 per person applies. The invoice PDF
+      will say exactly that. Meanwhile `settings.refundPolicy` and the FAQ
+      (`src/lib/types.ts:163`) still say *"Free cancellation until 7 days before departure"* — which
+      is a different rule, not a stricter version of the same one. Two documents stating different
+      cancellation terms is the weakest position to be in if a customer disputes a charge, and the
+      published page usually wins. Rewrite both to match when ready.
+      *Note this also answers the old open question "is the 5% hold refundable?" — it is not.*
+- [ ] **Deliver the invoice over WhatsApp and email.** The booking webhook will carry the invoice
+      link; n8n sends it. Not built — the app has no mail sending of its own.
+- [ ] **A second invoice once the advance is cleared.** Separate work, to be specified later.
+- [ ] **Confirm the bank account holder's name before it prints on every invoice.** The Vyapar
+      template says "Akshay Kumar"; the registered grievance officer is "Akshay Verma". One of them
+      is likely a typo, and a holder name that doesn't match the business is the kind of detail that
+      makes a customer paying a balance hesitate.
+
+### One policy question the owner has not answered — currently written as an assumption
 - [ ] **Are trip prices GST-exclusive?** Assumed YES, since GST is charged on top of the hold. If
       prices are meant to be GST-inclusive this line double-charges — set `gstPercent` to 0 and the
       GST wording disappears from the site automatically.
