@@ -10,10 +10,24 @@
  */
 
 import { renderToBuffer } from "@react-pdf/renderer";
+import fs from "node:fs";
+import path from "node:path";
 import { getPackage, getSettings, invoiceBank, text, weekday, shortDate } from "./catalog";
 import { nightsLabel } from "./types";
 import type { Order } from "./orders";
 import { InvoiceDocument } from "./invoiceDoc";
+
+/** The brand mark, if it has actually been added to the repo.
+ *  Checked rather than assumed: react-pdf throws on a missing image src, and an
+ *  absent logo must degrade to the text wordmark, not take down the one
+ *  document a paying customer is trying to download. */
+function logoPath(): string | undefined {
+  for (const name of ["tripwaley-logo.png", "tripwaley-logo.jpg"]) {
+    const p = path.join(process.cwd(), "public", "images", name);
+    if (fs.existsSync(p)) return p;
+  }
+  return undefined;
+}
 
 export async function renderInvoice(order: Order): Promise<Buffer> {
   const settings = getSettings();
@@ -41,6 +55,7 @@ export async function renderInvoice(order: Order): Promise<Buffer> {
         bankAccount: bank.account,
         bankIfsc: bank.ifsc,
         bankHolder: bank.holder,
+        logo: logoPath(),
       }}
       copy={{
         cancellation: text("invoice.cancellation"),

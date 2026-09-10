@@ -16,7 +16,7 @@
  * about money. Money is Bricolage. Prose is Instrument.
  */
 
-import { Document, Page, Text, View, StyleSheet, Font } from "@react-pdf/renderer";
+import { Document, Page, Text, View, Image, StyleSheet, Font } from "@react-pdf/renderer";
 import path from "node:path";
 import type { Order } from "./orders";
 import { invoiceLines, type InvoiceLine } from "./invoiceLines";
@@ -47,6 +47,9 @@ Font.registerHyphenationCallback((word) => [word]);
    that chain it comes out as a stray superscript, which is what happened. */
 const BODY = ["Instrument", "Bricolage"];
 
+/** watermark edge in points — roughly half the width of an A4 sheet */
+const WATERMARK = 300;
+
 const C = {
   ink: "#1a1614",
   brand: "#c91b20",
@@ -62,6 +65,21 @@ const s = StyleSheet.create({
 
   brandRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" },
   wordmark: { fontFamily: "Bricolage", fontWeight: 800, fontSize: 20, lineHeight: 1.2, color: C.brand, letterSpacing: -0.4, marginBottom: 2 },
+  logo: { width: 54, height: 54, marginBottom: 3 },
+
+  /* The watermark. Centred on A4 (595.28 × 841.89pt) by arithmetic rather than
+     by a centring layout, because it is positioned absolutely and out of flow.
+     Opacity 0.06: enough that a photocopy still shows it, light enough that
+     9pt terms printed over the dark ring stay legible. Anything past ~0.10 and
+     the ring competes with the table rules for attention. */
+  watermark: {
+    position: "absolute",
+    width: WATERMARK,
+    height: WATERMARK,
+    left: (595.28 - WATERMARK) / 2,
+    top: (841.89 - WATERMARK) / 2,
+    opacity: 0.06,
+  },
   orgLine: { fontSize: 8, color: C.muted, maxWidth: 270, marginTop: 2 },
   docLabel: { fontFamily: "Bricolage", fontWeight: 700, fontSize: 13, letterSpacing: 2, textAlign: "right" },
 
@@ -144,6 +162,24 @@ function Section({ title, body }: { title: string; body: string }) {
   );
 }
 
+/** The logo, or the text wordmark when no logo file has been supplied. Never a
+ *  broken image: react-pdf throws on a missing src, and it would take the whole
+ *  invoice down rather than degrade. */
+function Mark({ logo, brand }: { logo?: string; brand: string }) {
+  /* jsx-a11y sees `Image` and assumes an HTML <img>. This is react-pdf's own
+     primitive — a PDF has no alt attribute, and the brand name is printed in
+     the letterhead beside it either way. */
+  // eslint-disable-next-line jsx-a11y/alt-text
+  if (logo) return <Image src={logo} style={s.logo} />;
+  return <Text style={s.wordmark}>{brand}</Text>;
+}
+
+function Watermark({ logo }: { logo?: string }) {
+  if (!logo) return null;
+  // eslint-disable-next-line jsx-a11y/alt-text -- react-pdf primitive, purely decorative
+  return <Image src={logo} style={s.watermark} fixed />;
+}
+
 function Fact({ k, v }: { k: string; v: string }) {
   return (
     <View style={s.factRow}>
@@ -187,6 +223,8 @@ export interface InvoiceOrg {
   bankAccount?: string;
   bankIfsc?: string;
   bankHolder?: string;
+  /** absolute path to the logo file; omitted when it is not on disk */
+  logo?: string;
 }
 
 export interface InvoiceCopy {
@@ -255,9 +293,10 @@ export function InvoiceDocument({
     >
       {/* ============================================ page 1 — the invoice */}
       <Page size="A4" style={s.page}>
+        <Watermark logo={org.logo} />
         <View style={s.brandRow}>
           <View>
-            <Text style={s.wordmark}>{org.brand}</Text>
+            <Mark logo={org.logo} brand={org.brand} />
             {org.address ? <Text style={s.orgLine}>{org.address}</Text> : null}
             <Text style={s.orgLine}>
               {org.phone} · {org.email}
@@ -353,8 +392,9 @@ export function InvoiceDocument({
 
       {/* ======================================== page 2 — the booking terms */}
       <Page size="A4" style={s.page}>
+        <Watermark logo={org.logo} />
         <View style={s.brandRow}>
-          <Text style={s.wordmark}>{org.brand}</Text>
+          <Mark logo={org.logo} brand={org.brand} />
           <Text style={[s.orgLine, { textAlign: "right" }]}>Booking {order.id}</Text>
         </View>
         <View style={s.rule} />
@@ -401,8 +441,9 @@ export function InvoiceDocument({
 
       {/* ========================================= page 3 — the formalities */}
       <Page size="A4" style={s.page}>
+        <Watermark logo={org.logo} />
         <View style={s.brandRow}>
-          <Text style={s.wordmark}>{org.brand}</Text>
+          <Mark logo={org.logo} brand={org.brand} />
           <Text style={[s.orgLine, { textAlign: "right" }]}>Booking {order.id}</Text>
         </View>
         <View style={s.rule} />
