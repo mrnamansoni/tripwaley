@@ -36,7 +36,7 @@ export default function HoldSeatModal({ mode, initialTrip, trips, rates, default
   const [error, setError] = useState<string | null>(null);
   /* the form is unmounted once the hold succeeds, so the contact details are
      kept here — the payment step needs them and must not ask twice */
-  const [lead, setLead] = useState({ name: "", phone: "" });
+  const [lead, setLead] = useState({ name: "", email: "", phone: "" });
   const [trip, setTrip] = useState(
     (initialTrip && trips.some((t) => t.slug === initialTrip) ? initialTrip : trips[0]?.slug) ?? ""
   );
@@ -92,7 +92,15 @@ export default function HoldSeatModal({ mode, initialTrip, trips, rates, default
       return;
     }
     const name = String(data.get("name") ?? "").trim();
-    setLead({ name, phone });
+    const email = String(data.get("email") ?? "").trim();
+    /* Required here too. This modal's payment step posts to /api/pay/create,
+       which now rejects an order with no email — without this field the navbar
+       booking route would 422 at the moment of payment. */
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+      setError("Enter a valid email — that is where your booking confirmation goes.");
+      return;
+    }
+    setLead({ name, email, phone });
     setPhase("submitting");
     try {
       // the SAME durable pipeline the booking bar uses: persists the lead to the
@@ -103,6 +111,7 @@ export default function HoldSeatModal({ mode, initialTrip, trips, rates, default
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,
+          email,
           phone,
           package: selected.slug,
           date: selected.date,
@@ -128,6 +137,7 @@ export default function HoldSeatModal({ mode, initialTrip, trips, rates, default
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: lead.name,
+          email: lead.email,
           phone: lead.phone,
           packageSlug: selected.slug,
           citySlug: defaultCity,
@@ -198,6 +208,20 @@ export default function HoldSeatModal({ mode, initialTrip, trips, rates, default
               required
               autoComplete="name"
               placeholder="Priya Sharma"
+              className="mt-1.5 w-full rounded-xl border border-line bg-card px-4 py-3 text-base outline-none transition-shadow focus:border-brand focus:shadow-[0_0_0_3px_rgba(201,27,32,0.12)]"
+            />
+
+            <label className="mt-4 block text-sm font-semibold" htmlFor="hold-email">
+              Email
+            </label>
+            <input
+              id="hold-email"
+              name="email"
+              type="email"
+              required
+              inputMode="email"
+              autoComplete="email"
+              placeholder="you@example.com"
               className="mt-1.5 w-full rounded-xl border border-line bg-card px-4 py-3 text-base outline-none transition-shadow focus:border-brand focus:shadow-[0_0_0_3px_rgba(201,27,32,0.12)]"
             />
 

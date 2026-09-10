@@ -49,6 +49,7 @@ export async function POST(req: NextRequest) {
   // witness. resolveSource() decides between them.
   const src = resolveSource(body.source as LeadSource | undefined, req.headers.get("referer"));
 
+  const email = str(body.email, 120).trim();
   const packageSlug = str(body.package);
   const citySlug = str(body.city, 40);
   const paxRaw = Number(body.pax);
@@ -65,6 +66,7 @@ export async function POST(req: NextRequest) {
     source: src.surface,
     sourcePage: src.page,
     ...(src.creator ? { creator: src.creator } : {}),
+    ...(email ? { email } : {}),
     pax,
   });
 
@@ -95,6 +97,7 @@ export async function POST(req: NextRequest) {
       id: row.id,
       name: row.name,
       phone: row.phone,
+      email: email || null,
       packageSlug: pkg?.slug ?? packageSlug,
       packageName: pkg?.name ?? "",
       packageCode: pkg?.code ?? "",

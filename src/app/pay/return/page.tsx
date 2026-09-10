@@ -4,11 +4,12 @@ import Navbar from "@/components/sections/Navbar";
 import CityProvider from "@/components/site/CityProvider";
 import CurtainFooter from "@/components/site/CurtainFooter";
 import PendingPoll from "@/components/site/PendingPoll";
+import ReceiptPrinter from "@/components/site/ReceiptPrinter";
 import { getCities, getSettings } from "@/lib/catalog";
 import { getOrder } from "@/lib/orders";
 import { refreshFromPhonePe } from "@/lib/settle";
 import { formatPaise } from "@/lib/money";
-import { weekday, shortDate } from "@/lib/catalog";
+import { weekday, shortDate, inr } from "@/lib/catalog";
 
 export const metadata: Metadata = {
   title: "Payment | Tripwaley",
@@ -74,6 +75,9 @@ export default async function PayReturn({ searchParams }: { searchParams: Promis
   const tripLine = `${existing.packageName}${existing.date ? ` · ${existing.date.includes("-") ? `${weekday(existing.date)}, ${shortDate(existing.date)}` : existing.date}` : ""}`;
 
   if (status === "paid") {
+    const paidOn = existing.paidAt
+      ? new Date(existing.paidAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
+      : "";
     return (
       <Shell>
         <p className={`${mono} text-gold`}>payment · confirmed</p>
@@ -83,8 +87,44 @@ export default async function PayReturn({ searchParams }: { searchParams: Promis
         <p className="mt-5 text-base leading-relaxed text-white/60">
           We&apos;ve received <strong className="text-white">{formatPaise(q.holdTotalPaise)}</strong> for{" "}
           <strong className="text-white">{tripLine}</strong>. A trip captain will call you on{" "}
-          {existing.contact.phone} to confirm the details.
+          {existing.contact.phone} to confirm the details
+          {existing.contact.email ? <>. We have your email as {existing.contact.email}</> : null}.
         </p>
+
+        {/* The receipt. Decorative — every figure on it is repeated in the
+            plain-text breakdown below, so nothing depends on seeing it. */}
+        <div aria-hidden="true" className="mt-9">
+          <ReceiptPrinter
+            title={existing.packageName}
+            reference={existing.id}
+            paidLabel="paid now"
+            paidValue={formatPaise(q.holdTotalPaise)}
+            lines={[
+              { label: "From", value: existing.cityName || "—" },
+              ...(existing.date
+                ? [{ label: "Departs", value: existing.date.includes("-") ? `${weekday(existing.date)}, ${shortDate(existing.date)}` : existing.date }]
+                : []),
+              { label: "Travellers", value: `${existing.pax || 1} × ${existing.occupancy}` },
+              /* Subtotal BEFORE the coupon, then the coupon, then the total.
+                 quote.totalPaise is already discounted, so listing it as "trip
+                 total" above a "− ₹1,500" line invites the reader to subtract
+                 the discount a second time and expect a smaller number. A
+                 receipt has to survive being read top to bottom. */
+              ...(existing.coupon
+                ? [
+                    { label: "Trip price", value: formatPaise(q.totalPaise + Math.round(existing.coupon.discount * 100)) },
+                    { label: `Coupon ${existing.coupon.code}`, value: `− ${inr(existing.coupon.discount)}` },
+                  ]
+                : []),
+              { label: "Trip total", value: formatPaise(q.totalPaise), strong: true },
+              { label: `Hold ${q.holdPercent}%`, value: formatPaise(q.holdBasePaise) },
+              ...(q.holdGstPaise > 0 ? [{ label: `GST ${q.gstPercent}%`, value: formatPaise(q.holdGstPaise) }] : []),
+              { label: "Balance to pay", value: formatPaise(q.advanceBalancePaise + q.departureBalancePaise) },
+            ]}
+            footer="This amount counts toward your trip, not on top of it. Keep the reference for any query."
+            meta={[paidOn, settings.whatsapp ? `+${settings.whatsapp.replace(/\D/g, "")}` : "", "tripwaley.com"].filter(Boolean)}
+          />
+        </div>
 
         <div className="mt-8 rounded-2xl border border-white/12 bg-white/[0.04] p-5">
           <p className={`${mono} text-white/40`}>what happens next</p>

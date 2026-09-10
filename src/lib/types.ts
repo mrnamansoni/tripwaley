@@ -252,6 +252,8 @@ export interface Booking {
   creator?: string;
   /** how many travellers the lead is for */
   pax?: number;
+  /** the booking modal requires this now; older rows predate it */
+  email?: string;
 }
 /** one entry on the live-booking wire band (admin-curated, no real PII) */
 export interface WireEntry {

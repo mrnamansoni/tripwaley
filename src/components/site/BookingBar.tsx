@@ -76,6 +76,7 @@ export default function BookingBar({
   const [stub, setStub] = useState(false);
   const [modal, setModal] = useState(false);
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [err, setErr] = useState("");
   const [coupon, setCoupon] = useState<AppliedCoupon | null>(null);
@@ -128,6 +129,21 @@ export default function BookingBar({
   const changeCity = (next: string) => { setPickedCity(next); reprice(); };
 
   const validPhone = (p: string) => /^[6-9]\d{9}$/.test(p.replace(/[^\d]/g, "").slice(-10));
+  /* Deliberately permissive: one @, a dot in the domain, no spaces. Anything
+     stricter starts rejecting real addresses, and the confirmation email is
+     what proves it rather than a regex. */
+  const validEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e.trim());
+
+  /* Name, email and phone are all required now, on BOTH routes out of this
+     modal. The pay route already demanded a name server-side; the WhatsApp
+     route asked for a phone alone, so leads arrived with no way to send a
+     confirmation or an invoice. One rule, checked in one place. */
+  const missing = (): string | null => {
+    if (name.trim().length < 2) return "Please tell us your name.";
+    if (!validEmail(email)) return "Enter a valid email — that is where your booking confirmation goes.";
+    if (!validPhone(phone)) return "Enter a valid 10-digit mobile number.";
+    return null;
+  };
 
   /* the hold, shown so the traveller knows the number before they commit.
      One seat at a time in this bar, so the trip total is the seat price —
@@ -152,17 +168,10 @@ export default function BookingBar({
       setErr("No dates are open for this trip yet — message us and we'll book you onto the next batch.");
       return;
     }
-    /* The server requires a name on the pay path (422 otherwise). Catching it
-       here means the visitor is told before the button says "Opening secure
-       payment…", not after. */
-    if (name.trim().length < 2) {
-      setErr("Please add your name — the payment gateway needs it.");
-      return;
-    }
-    if (!validPhone(phone)) {
-      setErr("Enter a valid 10-digit mobile number.");
-      return;
-    }
+    /* Checked here so the visitor is told before the button says "Opening
+       secure payment…", not after a 422 comes back. */
+    const bad = missing();
+    if (bad) { setErr(bad); return; }
     setBusy(true);
     setErr("");
     trackInitiateCheckout({ slug: packageSlug, name: packageName, price: seat });
@@ -172,6 +181,7 @@ export default function BookingBar({
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         name,
+        email,
         phone,
         packageSlug,
         citySlug: bookCity,
@@ -222,16 +232,14 @@ export default function BookingBar({
   /* step 2: confirm → capture lead WITH phone, then printer + WhatsApp */
   const confirm = async () => {
     if (busy) return;
-    if (!validPhone(phone)) {
-      setErr("Enter a valid 10-digit mobile number.");
-      return;
-    }
+    const bad = missing();
+    if (bad) { setErr(bad); return; }
     setBusy(true);
     const res = await fetch("/api/lead", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        name, phone, package: packageSlug, city: bookCity, date: chosen, occupancy: occ,
+        name, email, phone, package: packageSlug, city: bookCity, date: chosen, occupancy: occ,
         price: tripTotal || null, pax,
         // the server re-prices this code itself; the lead event carries the
         // coupon only because this line sends it
@@ -282,24 +290,46 @@ export default function BookingBar({
               </div>
               <button type="button" onClick={() => setModal(false)} aria-label="Close" className="text-2xl leading-none text-white/40 hover:text-white">×</button>
             </div>
-            <p className="mt-1.5 text-sm text-white/50">
-              {packageName} · ex-{bookCityName} · {chosen ? `${weekday(chosen)}, ${shortDate(chosen)}` : "dates on request"} · {pax} × {occ}{seat != null ? ` · ${inr(seat)}/seat` : ""}
-            </p>
+            {/* The trip name was set in the same small grey run as the date,
+                city and occupancy — the one thing the visitor most needs to
+                confirm before paying was the hardest thing to read. It leads
+                now, at full contrast; the details stay secondary beneath it. */}
+            <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3">
+              <p className="font-display text-lg font-extrabold leading-tight text-white sm:text-xl">
+                {packageName}
+              </p>
+              <p className="mt-1 text-[0.82rem] text-white/60">
+                ex-{bookCityName} · {chosen ? `${weekday(chosen)}, ${shortDate(chosen)}` : "dates on request"} ·{" "}
+                {pax} × {occ}{seat != null ? ` · ${inr(seat)}/seat` : ""}
+              </p>
+            </div>
 
             {/* Enter follows the PRIMARY button, whichever that currently is */}
             <form onSubmit={(e) => { e.preventDefault(); if (canPay) payNow(); else confirm(); }} noValidate>
             <label className="mt-6 block text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white/45">
-              Your name{" "}
-              {canPay
-                ? <span className="text-brand-bright">*</span>
-                : <span className="text-white/25">(optional)</span>}
+              Your name <span className="text-brand-bright">*</span>
               <input
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => { setName(e.target.value); setErr(""); }}
                 placeholder="e.g. Naman"
                 autoComplete="name"
                 className="mt-1.5 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-base text-white outline-none transition-colors focus:border-gold"
               />
+            </label>
+            <label className="mt-4 block text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white/45">
+              Email <span className="text-brand-bright">*</span>
+              <input
+                value={email}
+                onChange={(e) => { setEmail(e.target.value); setErr(""); }}
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                placeholder="you@example.com"
+                className="mt-1.5 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-base text-white outline-none transition-colors focus:border-gold"
+              />
+              <span className="mt-1.5 block text-[0.66rem] font-normal normal-case tracking-normal text-white/35">
+                So we can send your booking confirmation and invoice.
+              </span>
             </label>
             <label className="mt-4 block text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white/45">
               Mobile number <span className="text-brand-bright">*</span>

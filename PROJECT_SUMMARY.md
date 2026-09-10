@@ -1,6 +1,6 @@
 # Project Summary: Tripwaley
 
-Last updated: 2026-09-10
+Last updated: 2026-09-11
 
 ## Project Overview
 Tripwaley is a production-grade travel booking website for a premium, group-departure travel brand in India. It is a Next.js 16 site with 3D/scroll-driven visuals (React Three Fiber, GSAP, Lenis), city-aware pricing, a lead-capture booking flow, and a full custom admin panel (CMS-style) so the owner can edit trips, prices, departures, cities, media, reviews, and bookings without touching code. There is no database — everything is stored in JSON files under `data/`.
@@ -38,6 +38,44 @@ Tripwaley is a production-grade travel booking website for a premium, group-depa
 - **New standing rule from the owner (2026-08-01, still in effect):** never push any change to GitHub directly. Always explain the plan in chat first and wait for a clear "yes" before making or pushing any change.
 
 ## Recent Changes
+
+### 2026-09-11 — First real payment taken; email capture, receipt printer, Ask-creator restored
+
+**PhonePe is live on production credentials and a real payment succeeded.** The integration is no
+longer theoretical.
+
+Four owner-requested changes:
+
+1. **Email captured, and name/email/phone all required.** Both booking surfaces now demand all three
+   — the booking bar's modal and the navbar hold-seat modal — and `/api/pay/create` enforces the
+   email server-side, because a browser-side rule is decorative. The address flows onto the order,
+   into the bookings log and out to the CRM as `contact.email`, which was previously always null.
+2. **The trip name leads the modal.** It used to sit in the same small grey run as the city, date
+   and occupancy: the one thing a visitor most needs to confirm before paying was the hardest thing
+   to read. It is now full-contrast display type in its own panel.
+3. **A receipt printer on the payment-success page.** Adapted from a component the owner supplied.
+   The reference needed motion/react and @phosphor-icons — neither installed — so it was rebuilt on
+   CSS keyframes and the brand palette rather than adding a second animation runtime beside GSAP for
+   one element on one page. The stepped feed is what sells it: a thermal printer advances a line at
+   a time, so `steps(1, end)` reads as printing where a smooth translate reads as sliding.
+4. **"Ask <creator>" is back in the hero** on both the creator hub and the creator trip page,
+   alongside the AskCreator section at the foot of the page rather than instead of it.
+
+**Two things caught before shipping, both of which would have been live faults:**
+
+- The navbar hold-seat modal also posts to `/api/pay/create`. Adding a required email there without
+  adding the FIELD would have made that entire booking route 422 at the moment of payment. It now
+  collects and sends one.
+- The receipt listed "Trip total ₹47,500" above "Coupon − ₹1,500", inviting the reader to subtract
+  the discount twice. `quote.totalPaise` is already discounted — the same shape as the webhook
+  `money.subtotal` bug from 7 September. It now reads price → coupon → total, which survives being
+  read top to bottom.
+
+**Worth knowing: there is no email-sending anywhere in the codebase.** The modal originally said
+"your confirmation and invoice go here" and the success page said "your receipt is on its way to
+…". Both were promises the system cannot keep, and both were reworded. The address is captured and
+reaches the CRM, so a human can send from there — but if automated confirmations are wanted, that is
+unbuilt work, not a setting.
 
 ### 2026-09-10 — Fixed: I flattened the creator cutouts pulling the Drive images
 

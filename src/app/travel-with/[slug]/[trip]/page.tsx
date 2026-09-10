@@ -204,6 +204,14 @@ export default async function CreatorTripPage({
                     Hold my seat →
                   </BookSeatButton>
                 )}
+                <a
+                  href={waLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-12 items-center rounded-full border border-white/25 px-6 py-3 text-sm font-bold text-white transition-colors hover:border-gold hover:text-gold"
+                >
+                  Ask {creator.firstName}
+                </a>
               </div>
             </div>
 

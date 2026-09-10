@@ -39,6 +39,7 @@ function notifyOps(order: Order) {
       id: order.id,
       name: order.contact.name,
       phone: order.contact.phone,
+      email: order.contact.email ?? null,
       packageSlug: order.packageSlug,
       packageName: order.packageName,
       packageCode: pkg?.code ?? "",

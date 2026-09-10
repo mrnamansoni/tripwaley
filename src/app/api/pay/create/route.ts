@@ -54,11 +54,17 @@ export async function POST(req: NextRequest) {
 
   const name = String(body.name ?? "").trim().slice(0, 80);
   const phone = String(body.phone ?? "").replace(/[^\d+]/g, "").slice(0, 20);
+  const email = String(body.email ?? "").trim().slice(0, 120);
   if (name.length < 2) {
     return NextResponse.json({ ok: false, error: "Please tell us your name." }, { status: 422 });
   }
   if (phone.replace(/\D/g, "").length < 10) {
     return NextResponse.json({ ok: false, error: "Please enter a valid mobile number." }, { status: 422 });
+  }
+  /* Required, and checked here as well as in the UI — a browser-side rule is
+     decorative, and this is the only address a receipt can be sent to. */
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+    return NextResponse.json({ ok: false, error: "Please enter a valid email address." }, { status: 422 });
   }
 
   const priced = quoteTrip({
@@ -131,7 +137,7 @@ export async function POST(req: NextRequest) {
     // creator or campaign that produced it months later
     source: resolveSource(body.source as LeadSource | undefined, req.headers.get("referer")),
     quote,
-    contact: { name, phone },
+    contact: { name, phone, email },
   });
 
   try {

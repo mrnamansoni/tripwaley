@@ -165,6 +165,14 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
                     ? `See ${trips.length} trip${trips.length > 1 ? "s" : ""} · ${dateCount} dates →`
                     : "Talk to us →"}
                 </Link>
+                <a
+                  href={waLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-12 items-center rounded-full border border-white/25 px-6 py-3 text-sm font-bold text-white transition-colors hover:border-gold hover:text-gold"
+                >
+                  Ask {creator.firstName}
+                </a>
               </div>
             </div>
 

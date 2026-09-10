@@ -60,7 +60,9 @@ export interface Order {
   /** frozen at creation, priced server-side — the ONLY authority on the amount */
   quote: HoldQuote;
 
-  contact: { name: string; phone: string };
+  /* email is optional on the TYPE for orders written before it was
+     collected; the booking modal now requires it. */
+  contact: { name: string; phone: string; email?: string };
 
   phonepe?: {
     orderId?: string;
