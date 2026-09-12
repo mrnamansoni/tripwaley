@@ -696,9 +696,9 @@ Verified against production on 2026-09-05 unless marked otherwise.
 
 2. **Three admin edits that code cannot make** (these rows live only on the production volume, and
    the seed merge never overwrites an existing row):
-   - Paste the new homepage H1 into Admin → Content → Homepage · Hero:
-     headline `Group trips across India.`, accent `Your city. Your crew.`
-     *(still showing the old "Your city. Your crew. Pick Your Shot.")*
+   - ~~Paste the new homepage H1~~ **DONE 2026-09-12** — verified live:
+     `Group trips across India.` / `Your city. Your crew.` Google's last crawl was
+     10 Sept 17:58, which predates this, so the change still needs a re-index request.
    - Rename the misspelled slug `rajasthan-bagpacking-from-ayodhaya` →
      `rajasthan-backpacking-from-ayodhya`, and fix the same two typos in the package NAME. The old
      URL will 301 automatically — see slugAliases in lib/slugCascade.ts.
