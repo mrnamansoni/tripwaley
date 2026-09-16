@@ -39,6 +39,49 @@ Tripwaley is a production-grade travel booking website for a premium, group-depa
 
 ## Recent Changes
 
+### 2026-09-16 — PageSpeed: Accessibility and Best Practices to 100, caching and third-party fixes
+
+PSI baseline was mobile 87/91/96/100, desktop 91/92/96/100. Verified on a local production build
+after this round: **Accessibility 100, Best Practices 100**, TBT 40ms (full marks), CLS 0.
+
+**Shipped**
+- **Analytics load on first interaction**, not on load. gtag (168KB/181ms) + fbevents (196KB/322ms)
+  were roughly half the page's blocking time before the visitor touched anything. Owner accepted the
+  trade: someone who leaves without scrolling or tapping is not counted.
+- **Cache headers fixed — my own earlier bug.** The `s-maxage=60` HTML rule also matched
+  `/_next/static`, replacing Next's `immutable, max-age=31536000` with a 2-hour cache
+  (~470KB of needless re-downloads). Excluding that path was the whole fix; Next sets the right
+  header itself, and adding our own made the build warn against it.
+- **Geolocation call removed** (`CityProvider`). Our own `Permissions-Policy: geolocation=()` had
+  been blocking it, so it never worked in production — it only logged the console error that was
+  the *sole* cause of the Best Practices score.
+- **Accessibility to 100**: prohibited `aria-label` on a `<p>` (also the whole "Agentic browsing
+  2/3"), three `aria-label`s that replaced visible link text, five low-contrast styles, and the
+  review drum's inactive panels — those were ghosted at 20% opacity, so white text measured ~#47464d
+  and failed contrast at ten nodes. Owner chose to hide them outright.
+- **Images**: added 1440/1600 widths (a 1350px viewport was jumping to 1920), `quality: 60` for
+  full-bleed decoration via a new `images.qualities` allowlist, which Next 16 requires.
+- **`experimental.inlineCss`** — removes both render-blocking stylesheets.
+- Non-composited animations: `text-shadow` → `drop-shadow`, and the navbar no longer transitions
+  `top`.
+
+**LCP was investigated and deliberately NOT changed.** Four A/B experiments against a local
+production build ruled out every candidate: blocking the GSAP chunk left LCP unchanged (though it
+cut TBT 154→14ms), blocking the hero image changed nothing, removing the SVG mask changed nothing,
+and blocking the fonts moved median LCP by 7ms across 5 interleaved runs per arm. Local LCP varies
+3.2–5.0s on identical builds while PSI measured 2.7s, so the local instrument cannot resolve it.
+On PSI the points lost were TBT 5, LCP 4, SI 3, FCP 1 — TBT is the bigger lever, and that is what
+the analytics change targets. Re-measure on PSI before doing more.
+
+**Wrong turns, recorded so they are not repeated:** I broke `DeckDestinations.tsx` with a JSX
+comment inside a `map` return (caught by typecheck); blamed my own PileUp `aria-label` for a
+pre-existing failure; claimed the `NFT list` build warning was mine when an in-place test showed it
+pre-exists; reported `q=60` missing because of a regex that could not match `&amp;`; and claimed
+three.js was in a homepage chunk when the match was the word "three" in site copy.
+
+**Still the owner's to do in Cloudflare:** Rocket Loader **off** (it rewrote 34 script tags and
+costs 114ms), and Browser Cache TTL → **Respect Existing Headers**.
+
 ### 2026-09-11 — Brand logo on the invoice, and the real favicon
 
 The real wordmark now sits in the letterhead of all three invoice pages and as a watermark behind

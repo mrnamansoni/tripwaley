@@ -174,7 +174,20 @@ export default function RootLayout({
       priceFrom: t.priceFrom,
     }));
   return (
-    <html lang="en" className={`${bricolage.variable} ${instrument.variable} ${caveat.variable}`}>
+    /* --ann-h is declared here, on the server, so the navbar is positioned
+       correctly in the very first paint. SiteChrome used to set it in an
+       effect, which shifted the header down once hydration ran. 2.5rem matches
+       the bar's h-10; SiteChrome sets it back to 0 if the visitor has already
+       dismissed this message. */
+    <html
+      lang="en"
+      className={`${bricolage.variable} ${instrument.variable} ${caveat.variable}`}
+      style={
+        settings.announcementBar?.enabled && settings.announcementBar.text
+          ? ({ "--ann-h": "2.5rem" } as React.CSSProperties)
+          : undefined
+      }
+    >
       <body>
         {/* first focusable element on every page — a keyboard user should not
             have to tab through the whole nav to reach content */}

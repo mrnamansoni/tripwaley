@@ -103,7 +103,7 @@ export default function DeckDestinations({ cards, eyebrow = "somewhere in here i
           <h2 className="mt-3 font-display text-3xl font-extrabold tracking-tight text-white">
             {activeCard?.name}
           </h2>
-          <p className="mt-1 text-[0.62rem] font-bold uppercase tracking-[0.3em] text-white/40">
+          <p className="mt-1 text-[0.62rem] font-bold uppercase tracking-[0.3em] text-white/70">
             {price != null ? `from ${inr(price)} ex-${city.name}` : activeCard?.destination || activeCard?.nightsLabel}
           </p>
         </div>
@@ -120,8 +120,14 @@ export default function DeckDestinations({ cards, eyebrow = "somewhere in here i
           cardClassName="h-[32vh] max-h-[17rem] w-[38vw] min-w-[8.5rem] max-w-[11rem]"
           onFrontChange={onFront}
         >
+          {/* No aria-label on these cards: each one already shows the trip
+              name and nights, and an aria-label REPLACES that visible text as
+              the accessible name rather than adding to it. Someone using voice
+              control who says the name they can see then matches nothing.
+              (This comment sits outside the map: inside the arrow's return it
+              would be a second sibling expression, which is not valid JSX.) */}
           {cards.map((c) => (
-            <Link key={c.slug} href={`/trips/${c.slug}`} aria-label={`${c.name} package`} className="relative block h-full w-full" draggable={false}>
+            <Link key={c.slug} href={`/trips/${c.slug}`} className="relative block h-full w-full" draggable={false}>
               <CardFace c={c} sizes="40vw" />
             </Link>
           ))}
@@ -149,11 +155,11 @@ export default function DeckDestinations({ cards, eyebrow = "somewhere in here i
             {activeCard?.name}
             {price && (
               <span className="ml-4 align-middle font-display text-lg font-bold text-gold sm:text-2xl">
-                from {inr(price)} <span className="text-white/45">ex-{city.name}</span>
+                from {inr(price)} <span className="text-white/70">ex-{city.name}</span>
               </span>
             )}
           </h2>
-          <p className="mt-1.5 text-xs font-bold uppercase tracking-[0.3em] text-white/40">
+          <p className="mt-1.5 text-xs font-bold uppercase tracking-[0.3em] text-white/65">
             {activeCard?.destination || activeCard?.nightsLabel}
           </p>
         </div>
@@ -165,7 +171,6 @@ export default function DeckDestinations({ cards, eyebrow = "somewhere in here i
                 key={c.slug}
                 href={`/trips/${c.slug}`}
                 data-deck-card
-                aria-label={`${c.name} package`}
                 className="absolute left-1/2 top-1/2 h-[38vh] w-[29vh] -translate-x-1/2 -translate-y-1/2 will-change-transform"
                 style={{ transformStyle: "preserve-3d" }}
                 tabIndex={i === active ? 0 : -1}

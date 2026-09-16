@@ -49,7 +49,11 @@ export default function Navbar({ overDarkHero = false }: { overDarkHero?: boolea
   return (
     <header
       style={{ top: "var(--ann-h, 0px)" }}
-      className={`fixed inset-x-0 z-50 transition-all duration-500 ${
+      /* Not `transition-all`: that animated `top` too, and `top` cannot be
+         composited — so every announcement-bar change repainted a fixed header
+         on the main thread. Only the colour/shadow properties actually need to
+         move. */
+      className={`fixed inset-x-0 z-50 transition-[background-color,border-color,box-shadow,backdrop-filter] duration-500 ${
         menuOpen
           ? // SOLID (no backdrop-blur) while the menu is open: backdrop-filter
             // creates a CSS containing block that would trap the fixed menu
@@ -62,7 +66,11 @@ export default function Navbar({ overDarkHero = false }: { overDarkHero?: boolea
       }`}
     >
       <nav className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between px-5 sm:px-8" aria-label="Main">
-        <Link href="/" aria-label="Tripwaley — home" className="rounded-lg">
+        {/* The lockup spells out "tripwaley" and its tagline as real text, so
+            the link names itself. The aria-label that used to sit here said
+            only "Tripwaley — home", which REPLACED that visible wording and
+            left the accessible name not matching what is on screen. */}
+        <Link href="/" className="rounded-lg">
           <LogoLockup inverted={overDark} />
         </Link>
 

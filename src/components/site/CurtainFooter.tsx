@@ -97,7 +97,15 @@ export default function CurtainFooter({
           </div>
 
           <div className="overflow-x-clip py-[0.12em]">
-            <p data-cf-mark aria-label="tripwaley" className="select-none whitespace-nowrap text-center font-display text-[18vw] font-extrabold leading-[1.06] tracking-tighter will-change-transform sm:text-[16.5vw]">
+            {/* `aria-label` is prohibited on a <p>: the attribute is only
+                honoured on elements with a role that supports naming, so a
+                screen reader was getting an element that announces a label it
+                is not allowed to have. This was the site's only ARIA failure
+                and also the whole of its "Agentic browsing 2/3". The letters
+                are decoration; the word itself is real text for assistive
+                tech, so it moves into a visually-hidden span. */}
+            <p data-cf-mark className="select-none whitespace-nowrap text-center font-display text-[18vw] font-extrabold leading-[1.06] tracking-tighter will-change-transform sm:text-[16.5vw]">
+              <span className="sr-only">tripwaley</span>
               {"tripwaley".split("").map((ch, i) => (
                 <span
                   key={i}
@@ -120,11 +128,11 @@ export default function CurtainFooter({
 
         {/* the curtain */}
         <div data-cf-curtain className="absolute inset-0 flex flex-col items-center justify-center bg-cream px-6 text-center will-change-transform">
-          <p className="text-[0.62rem] font-bold uppercase tracking-[0.5em] text-ink/45">{eyebrow}</p>
+          <p className="text-[0.62rem] font-bold uppercase tracking-[0.5em] text-ink/70">{eyebrow}</p>
           <h2 className="mt-4 font-display text-4xl font-extrabold tracking-tight sm:text-6xl">
             {headline}
           </h2>
-          <p className="mt-5 max-w-md text-sm leading-relaxed text-ink/55 sm:text-base">
+          <p className="mt-5 max-w-md text-sm leading-relaxed text-ink/75 sm:text-base">
             {sub}
           </p>
 
@@ -133,7 +141,9 @@ export default function CurtainFooter({
             {["Spiti", "Ladakh", "Kashmir", "Meghalaya", "Kerala", "Kedarkantha", "Andaman", "Rajasthan"].map((d, i) => (
               <span key={d} className="flex items-center gap-2.5">
                 {i > 0 && <span aria-hidden="true" className="h-1 w-1 rounded-full bg-brand/40" />}
-                <span className="text-[0.66rem] font-bold uppercase tracking-[0.25em] text-brand/70">{d}</span>
+                {/* brand red at 70% on cream measured 3.58:1 — under the 4.5
+                    needed at this size. Full-strength brand clears it. */}
+                <span className="text-[0.66rem] font-bold uppercase tracking-[0.25em] text-brand">{d}</span>
               </span>
             ))}
           </div>
@@ -147,7 +157,7 @@ export default function CurtainFooter({
             ].map(([n, label]) => (
               <div key={label}>
                 <p className="font-display text-2xl font-extrabold text-ink sm:text-3xl">{n}</p>
-                <p className="mt-1 text-[0.56rem] font-bold uppercase tracking-[0.2em] text-ink/45 sm:text-[0.62rem]">{label}</p>
+                <p className="mt-1 text-[0.56rem] font-bold uppercase tracking-[0.2em] text-ink/70 sm:text-[0.62rem]">{label}</p>
               </div>
             ))}
           </div>

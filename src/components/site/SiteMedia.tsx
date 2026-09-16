@@ -32,6 +32,10 @@ export interface SiteMediaProps {
   style?: React.CSSProperties;
   /** false on draggable-UI photos (atlas cards, the day/night slider handle) */
   draggable?: boolean;
+  /** 60 for full-bleed decoration behind an overlay; omit for anything looked
+   *  at directly. Must be listed in `images.qualities` in next.config.ts —
+   *  Next refuses a value that isn't. */
+  quality?: number;
 }
 
 const FILL_CLS = "absolute inset-0 h-full w-full";
@@ -50,6 +54,7 @@ export default function SiteMedia({
   poster,
   style,
   draggable,
+  quality,
 }: SiteMediaProps) {
   const url = normalizeMediaUrl(src ?? "");
   if (!url) return null;
@@ -89,7 +94,7 @@ export default function SiteMedia({
       ? Object.fromEntries(Object.entries(style).filter(([k]) => k !== "width" && k !== "height"))
       : undefined;
     return fill ? (
-      <Image src={url} alt={alt} fill sizes={sizes} priority={priority} className={className} style={fillStyle} draggable={draggable} />
+      <Image src={url} alt={alt} fill sizes={sizes} quality={quality} priority={priority} className={className} style={fillStyle} draggable={draggable} />
     ) : (
       <Image
         src={url}
@@ -97,6 +102,7 @@ export default function SiteMedia({
         width={width ?? 1600}
         height={height ?? 1067}
         sizes={sizes}
+        quality={quality}
         priority={priority}
         className={className}
         style={style}

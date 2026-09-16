@@ -287,8 +287,12 @@ body {
 @keyframes cfLetterWave {
   35% {
     transform: translateY(-0.11em);
-    filter: brightness(1.3);
-    text-shadow: 0 0.015em 0.16em rgba(255, 255, 255, 0.5);
+    /* `filter` and `transform` both run on the compositor. `text-shadow` does
+       NOT — it forces a paint on every frame of a 3s loop running on nine
+       letters at once, which is why Lighthouse counted these among its
+       non-composited animations. drop-shadow reproduces the glow as a
+       composited filter instead. */
+    filter: brightness(1.3) drop-shadow(0 0.015em 0.09em rgba(255, 255, 255, 0.45));
   }
 }
 .cf-letter {

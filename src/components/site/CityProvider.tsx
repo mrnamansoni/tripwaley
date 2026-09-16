@@ -36,35 +36,32 @@ export default function CityProvider({
     pool.find((c) => c.slug === defaultCity) ??
     pool[0] ?? { slug: "delhi", name: "Delhi", state: "Delhi", lat: 28.6, lng: 77.2, priced: true };
   const [slug, setSlug] = useState(fallback.slug);
-  const [detected, setDetected] = useState(false);
+  /* Always false now that the geolocation snap is gone (see the effect below).
+     Kept on the context because DepartureBoard reads it to choose between
+     "spotted you near" and "boarding point" — it simply always takes the
+     second branch, which is what production already did. */
+  const detected = false;
 
+  /* THE GEO SNAP IS GONE, and it was already gone in practice.
+   *
+   * This used to call navigator.geolocation.getCurrentPosition to guess the
+   * nearest priced city. Our own `Permissions-Policy: geolocation=()` header
+   * blocks that API site-wide, so on production the call never resolved — it
+   * only logged "Permissions policy violation: Geolocation access has been
+   * blocked" to the console on every single page load. That console error was
+   * the ONLY thing costing the site its Best Practices score.
+   *
+   * Removing the call changes no production behaviour: `detected` was already
+   * permanently false there. It stays on the context (DepartureBoard reads it
+   * for its "spotted you near" label) rather than rippling a removal through
+   * that component for a value that was always false anyway.
+   *
+   * Asking for coordinates on page load is also the wrong pattern regardless:
+   * it fires a permission prompt before the visitor has asked for anything.
+   */
   useEffect(() => {
     const saved = localStorage.getItem(KEY);
-    if (saved && pool.some((c) => c.slug === saved)) {
-      setTimeout(() => setSlug(saved), 0);
-      return;
-    }
-    // best-effort geo snap: browser coords → nearest priced city
-    if (!("geolocation" in navigator)) return;
-    const t = setTimeout(() => {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const { latitude, longitude } = pos.coords;
-          let best = fallback;
-          let bd = Infinity;
-          for (const c of pool) {
-            const d = (c.lat - latitude) ** 2 + (c.lng - longitude) ** 2;
-            if (d < bd) { bd = d; best = c; }
-          }
-          setSlug(best.slug);
-          setDetected(true);
-          localStorage.setItem(KEY, best.slug);
-        },
-        () => {},
-        { timeout: 4000, maximumAge: 3600_000 }
-      );
-    }, 1200); // don't interrupt the hero
-    return () => clearTimeout(t);
+    if (saved && pool.some((c) => c.slug === saved)) setTimeout(() => setSlug(saved), 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

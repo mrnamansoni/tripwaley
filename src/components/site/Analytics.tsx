@@ -14,8 +14,51 @@
 
 import Script from "next/script";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { trackPageView } from "@/lib/analytics";
+
+/* Wait for the visitor to actually do something before loading either tag.
+ *
+ * Measured on the live homepage: gtag costs 168KB and 181ms of main-thread
+ * time, and fbevents another 196KB and 322ms. Together they were roughly half
+ * the page's Total Blocking Time — the single heaviest term in the mobile
+ * Performance score — and they were doing that work before the visitor had
+ * touched anything.
+ *
+ * The trade is deliberate and was the owner's call: someone who opens the page
+ * and leaves without scrolling, tapping or pressing a key is never counted.
+ * Anyone who reads, scrolls or clicks is.
+ *
+ * `scroll` is included because on a page this tall it is the first thing
+ * almost everyone does. All listeners are passive and fire once.
+ */
+const WAKE_EVENTS = ["pointerdown", "keydown", "touchstart", "scroll", "wheel"] as const;
+
+function useFirstInteraction(): boolean {
+  const [awake, setAwake] = useState(false);
+
+  useEffect(() => {
+    if (awake) return;
+    const wake = () => setAwake(true);
+
+    /* A visitor who arrives already scrolled — a restored position, or an
+       anchor link — has effectively interacted and might never fire one of
+       the events below. The state change goes through a timer rather than
+       being called straight from the effect body: a synchronous setState
+       there triggers a cascading render, which is both a lint error and the
+       thing the React docs warn about. Same pattern as CityProvider. */
+    const t = window.scrollY > 0 ? setTimeout(() => setAwake(true), 0) : undefined;
+    if (t === undefined) {
+      for (const e of WAKE_EVENTS) window.addEventListener(e, wake, { once: true, passive: true });
+    }
+    return () => {
+      if (t !== undefined) clearTimeout(t);
+      for (const e of WAKE_EVENTS) window.removeEventListener(e, wake);
+    };
+  }, [awake]);
+
+  return awake;
+}
 
 function MetaRouteTracker() {
   const pathname = usePathname();
@@ -46,6 +89,15 @@ export default function Analytics({ gaId, metaPixelId }: { gaId?: string; metaPi
   const ga = gaId?.trim();
   const pixel = metaPixelId?.trim();
   if (!ga && !pixel) return null;
+
+  /* The tags themselves live in a child component because the guards above
+     return early, and a hook may not sit behind a conditional return. */
+  return <DeferredTags ga={ga} pixel={pixel} />;
+}
+
+function DeferredTags({ ga, pixel }: { ga?: string; pixel?: string }) {
+  const awake = useFirstInteraction();
+  if (!awake) return null;
 
   return (
     <>

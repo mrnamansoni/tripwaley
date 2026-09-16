@@ -13,7 +13,18 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
     // Source photos cap at ~2560px, so generating 2048/3840 variants just burns
     // CPU and ships bigger files. Cap the largest served width at 1920.
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    /* 1440 and 1600 exist because of a real gap: a 1350px desktop viewport
+       asking for 100vw jumped straight from 1200 to 1920, so every full-bleed
+       photo downloaded a 1920px file to paint ~1300px. PageSpeed measured
+       210KB of pure waste on one image that way. */
+    deviceSizes: [640, 750, 828, 1080, 1200, 1440, 1600, 1920],
+    /* Next validates the `quality` prop against this list and refuses anything
+       absent from it, so 60 has to be declared before a component can ask for
+       it. 60 is for full-bleed decorative photography — backgrounds behind
+       text, slats, film frames — where PageSpeed measured ~158KB of savings
+       per image and the difference is invisible under an overlay. 75 stays the
+       default for everything that is looked at directly. */
+    qualities: [60, 75],
     // Admin "Replace" overwrites a photo at its existing URL (so every page
     // using it updates at once, with no catalog rewrite) — the optimizer
     // caches by URL, so a long TTL here would keep serving the old bytes
@@ -38,7 +49,19 @@ const nextConfig: NextConfig = {
            /admin and /api are excluded below: caching an authenticated admin
            page in a shared cache would serve one session's HTML to another
            visitor. */
-        source: "/:path((?!admin|api).*)",
+        /* `_next/static` is excluded as well, and that exclusion is load-
+           bearing. Without it this rule also matched every hashed JS, CSS and
+           font file and replaced Next's own `immutable, max-age=31536000` with
+           `max-age=0`, which Cloudflare then served as a 2-hour browser cache.
+           PageSpeed reported it as ~470KB of first-party re-downloads under
+           "Use efficient cache lifetimes".
+
+           Excluding the path is the whole fix — Next already serves hashed
+           build output as `immutable, max-age=31536000` on its own. Adding our
+           own rule for it instead makes the build warn that "custom
+           Cache-Control headers ... can break Next.js development behavior",
+           which is the framework saying: don't, just stop overriding it. */
+        source: "/:path((?!admin|api|_next/static).*)",
         headers: [
           {
             key: "Cache-Control",
@@ -107,6 +130,13 @@ const nextConfig: NextConfig = {
     };
   },
   experimental: {
+    /* Tailwind's output is small and atomic, and the two stylesheets were
+       blocking first paint for ~150ms on mobile. Next's own guidance is to
+       inline for atomic CSS; the trade-off it names is that returning visitors
+       re-download the styles with each HTML response instead of reusing a
+       cached file. That is the right side of the trade here, because the HTML
+       itself is only cacheable for 60s anyway. */
+    inlineCss: true,
     // src/proxy.ts gates every /api/admin/* request, and Next 16 buffers a
     // proxied body to at most 10MB by default — silently: bytes past the
     // limit are dropped with no error to the client, so a large upload just

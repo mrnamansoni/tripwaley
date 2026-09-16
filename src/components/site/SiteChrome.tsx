@@ -30,13 +30,25 @@ export default function SiteChrome({ bar, popup }: { bar?: BarCfg; popup?: Popup
 function AnnouncementBar({ bar }: { bar: BarCfg }) {
   const [show, setShow] = useState(false);
 
+  /* --ann-h is now set on <html> by the root layout, on the SERVER, whenever
+     the bar is enabled. It used to be set here in an effect, which meant the
+     navbar rendered at top:0 and then jumped down 2.5rem once JS ran — the
+     entire 0.006 layout shift PageSpeed attributed to the header.
+     The effect's only remaining job is the reverse: collapsing the space again
+     for a visitor who has already dismissed this message. */
   useEffect(() => {
     const dismissed = sessionStorage.getItem("tw-ann-dismissed");
-    if (dismissed === bar.text) return; // re-show if the message changed
-    setShow(true);
-    document.documentElement.style.setProperty("--ann-h", "2.5rem");
+    if (dismissed === bar.text) {
+      document.documentElement.style.setProperty("--ann-h", "0px");
+      return;
+    }
+    // deferred by a tick rather than set straight from the effect body, which
+    // cascades a render; the header's space is already reserved server-side,
+    // so the bar appearing a tick later shifts nothing
+    const t = setTimeout(() => setShow(true), 0);
     return () => {
-      document.documentElement.style.removeProperty("--ann-h");
+      clearTimeout(t);
+      document.documentElement.style.setProperty("--ann-h", "0px");
     };
   }, [bar.text]);
 
@@ -59,7 +71,9 @@ function AnnouncementBar({ bar }: { bar: BarCfg }) {
         onClick={() => {
           setShow(false);
           sessionStorage.setItem("tw-ann-dismissed", bar.text);
-          document.documentElement.style.removeProperty("--ann-h");
+          // set to 0 rather than removed: the layout now declares 2.5rem
+          // inline on <html>, and removing this property would fall back to it
+          document.documentElement.style.setProperty("--ann-h", "0px");
         }}
         className="absolute right-2 flex h-7 w-7 items-center justify-center rounded-full text-ink/60 hover:bg-ink/10 hover:text-ink"
       >

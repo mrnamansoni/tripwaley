@@ -73,7 +73,16 @@ export default function PileUp({ cards }: { cards: PileCard[] }) {
                     <p className="text-[0.62rem] font-bold uppercase tracking-widest text-white/60">{c.nightsLabel} · ex-{city.name}</p>
                     <p className="font-display text-3xl font-extrabold text-gold">{price ? inr(price) : "on request"}</p>
                   </div>
-                  <Link href={`/trips/${c.slug}`} className="inline-flex min-h-12 items-center rounded-full bg-white px-7 py-3.5 font-bold text-ink transition-colors hover:bg-gold">
+                  {/* Four cards render this same "Claim →" text pointing at
+                      four different trips. To anyone listing the page's links
+                      — a screen-reader user, or a crawler — they were four
+                      identical links with four different destinations. The
+                      visible label stays; the accessible name names the trip. */}
+                  <Link
+                    href={`/trips/${c.slug}`}
+                    aria-label={`Claim your seat on ${c.name}`}
+                    className="inline-flex min-h-12 items-center rounded-full bg-white px-7 py-3.5 font-bold text-ink transition-colors hover:bg-gold"
+                  >
                     Claim →
                   </Link>
                 </div>

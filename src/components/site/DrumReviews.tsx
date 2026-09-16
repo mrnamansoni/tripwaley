@@ -81,14 +81,27 @@ export default function DrumReviews({
             {reviews.map((r, i) => (
               <div
                 key={r.name}
-                className={`absolute left-1/2 top-1/2 w-[72%] max-w-lg transition-opacity duration-300 sm:w-full ${i === active ? "opacity-100" : "opacity-20"}`}
+                /* Inactive faces are hidden outright rather than ghosted at
+                   20%. At that opacity the white review text composited down
+                   to roughly #47464d on the dark well — a contrast ratio near
+                   1.8 — and axe measures what is actually painted, so ten
+                   separate nodes failed the contrast audit even though the
+                   text is white in the source. `invisible` also takes them out
+                   of the accessibility tree, so a screen reader is no longer
+                   read five reviews when only one is on screen. */
+                aria-hidden={i !== active}
+                className={`absolute left-1/2 top-1/2 w-[72%] max-w-lg transition-opacity duration-300 sm:w-full ${i === active ? "opacity-100" : "invisible opacity-0"}`}
                 style={{ transform: `translate(-50%, -50%) rotateX(${-i * STEP}deg) translateZ(${RADIUS}px)` }}
               >
                 <blockquote className="rounded-3xl border border-white/12 bg-[#191821] p-4 shadow-card-lg sm:p-8">
                   <div className="flex items-center justify-between">
                     <div className="flex gap-0.5 text-gold" aria-label={`${r.rating} stars`}>
                       {"★★★★★".slice(0, r.rating)}
-                      <span className="text-white/20">{"★★★★★".slice(r.rating)}</span>
+                      {/* the unearned stars: decoration, and the rating is
+                          already announced on the parent's aria-label, so this
+                          is hidden rather than lifted to a contrast ratio that
+                          would make an empty star look filled */}
+                      <span aria-hidden="true" className="text-white/35">{"★★★★★".slice(r.rating)}</span>
                     </div>
                     <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[0.58rem] font-bold uppercase tracking-wider ${
                       r.source === "google" ? "bg-white/10 text-white/75" : "bg-[#833ab4]/25 text-[#e1a8f0]"
@@ -103,7 +116,7 @@ export default function DrumReviews({
                     </span>
                     <div>
                       <p className="text-sm font-bold text-white">{r.name}</p>
-                      <p className="text-xs text-white/45">{r.city} · {r.trip}</p>
+                      <p className="text-xs text-white/70">{r.city} · {r.trip}</p>
                     </div>
                     <span className="ml-auto rounded-full bg-success/15 px-3 py-1 text-[0.58rem] font-bold uppercase tracking-wider text-success">verified batch</span>
                   </footer>

@@ -127,6 +127,9 @@ export default function OpeningShot({
             fill
             priority
             sizes="100vw"
+            // sits behind the masked wordmark and a dark overlay, never viewed
+            // on its own — 60 saved ~158KB on this image alone
+            quality={60}
             className="animate-[maisonDrift_14s_ease-in-out_infinite_alternate] object-cover"
           />
           <div className="absolute inset-0 bg-ink/10" aria-hidden="true" />
@@ -190,7 +193,7 @@ export default function OpeningShot({
           <div className="relative aspect-video w-full max-w-6xl overflow-hidden bg-black">
             {film.map((f, i) => (
               <div key={`${f.src}-${i}`} data-os-frame className="absolute inset-0 opacity-0 will-change-transform">
-                <SiteMedia src={f.src} alt="" fill sizes="90vw" className="object-cover" />
+                <SiteMedia src={f.src} alt="" fill sizes="90vw" quality={60} className="object-cover" />
               </div>
             ))}
             <div className="noise absolute inset-0" aria-hidden="true" />
@@ -226,6 +229,8 @@ export default function OpeningShot({
                     alt=""
                     fill
                     sizes="100vw"
+                    // seven sliding slats of one photo, in motion behind them
+                    quality={60}
                     className="object-cover"
                     style={{ width: "700%", maxWidth: "none", left: `${-i * 100}%` }}
                   />
