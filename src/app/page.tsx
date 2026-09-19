@@ -9,7 +9,7 @@ import PileUp, { type PileCard } from "@/components/site/PileUp";
 import MomentumBreak from "@/components/site/MomentumBreak";
 import DrumReviews from "@/components/site/DrumReviews";
 import MagnetChant from "@/components/site/MagnetChant";
-import CurtainFooter from "@/components/site/CurtainFooter";
+import SiteFooter from "@/components/site/SiteFooter";
 import {
   getCities,
   getSettings,
@@ -160,7 +160,7 @@ export default function Home() {
         </section>
         <MagnetChant whatsappLink={settings.whatsappLink} />
       </main>
-      <CurtainFooter
+      <SiteFooter
         whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp}
         announcement={settings.announcement}
         eyebrow={text("footer.eyebrow")}

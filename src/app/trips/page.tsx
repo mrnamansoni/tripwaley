@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { canonical } from "@/lib/seo";
 import Navbar from "@/components/sections/Navbar";
 import CityProvider from "@/components/site/CityProvider";
-import CurtainFooter from "@/components/site/CurtainFooter";
+import SiteFooter from "@/components/site/SiteFooter";
 import TripsExplorer, { type ExplorerPackage, type ExplorerDeparture } from "@/components/site/TripsExplorer";
 import FinalBoarding from "@/components/site/FinalBoarding";
 import BookingWire from "@/components/site/BookingWire";
@@ -140,7 +140,7 @@ export default function TripsPage() {
           </section>
         )}
       </main>
-      <CurtainFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
+      <SiteFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
     </CityProvider>
   );
 }

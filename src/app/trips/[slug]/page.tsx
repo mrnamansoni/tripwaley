@@ -17,6 +17,8 @@ import SiteMedia from "@/components/site/SiteMedia";
 import RichText from "@/components/site/RichText";
 import DownloadItinerary from "@/components/site/DownloadItinerary";
 import TrackTripView from "@/components/site/TrackTripView";
+import { retiredTripTarget } from "@/lib/retiredUrls";
+import ExploreLinks from "@/components/site/ExploreLinks";
 import {
   getCities,
   getSettings,
@@ -97,6 +99,9 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
        "move the ranking". */
     const to = resolveSlugAlias(slug);
     if (to) permanentRedirect(`/trips/${to}`);
+    // trips retired before aliases existed, still indexed by Google
+    const retired = retiredTripTarget(slug, (s) => getPackage(s)?.status === "live");
+    if (retired) permanentRedirect(retired);
     notFound();
   }
 
@@ -415,6 +420,9 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
               price: fromPrice(p.slug),
             }))}
         />
+
+        {/* trip pages carry no footer, so the site index goes here */}
+        <ExploreLinks />
       </main>
 
       <BookingBar

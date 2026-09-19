@@ -233,6 +233,16 @@ export const readSeedCatalog = (): Catalog =>
   JSON.parse(fs.readFileSync(SEED_CATALOG, "utf8")) as Catalog;
 export const writeCatalog = (c: Catalog) => writeJson(FILES.catalog, c);
 
+/** When the catalog was last saved from the admin — the honest "last changed"
+ *  date for every page built from it. undefined if the file can't be read. */
+export function catalogUpdatedAt(): Date | undefined {
+  try {
+    return fs.statSync(FILES.catalog).mtime;
+  } catch {
+    return undefined;
+  }
+}
+
 export const readReviews = (): Review[] => readJson<Review[]>(FILES.reviews);
 export const writeReviews = (r: Review[]) => writeJson(FILES.reviews, r);
 

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Navbar from "@/components/sections/Navbar";
 import CityProvider from "@/components/site/CityProvider";
-import CurtainFooter from "@/components/site/CurtainFooter";
+import SiteFooter from "@/components/site/SiteFooter";
 import PendingPoll from "@/components/site/PendingPoll";
 import ReceiptPrinter from "@/components/site/ReceiptPrinter";
 import { getCities, getSettings } from "@/lib/catalog";
@@ -35,7 +35,7 @@ function Shell({ children }: { children: React.ReactNode }) {
           <div className="mx-auto w-full max-w-2xl">{children}</div>
         </section>
       </main>
-      <CurtainFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
+      <SiteFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
     </CityProvider>
   );
 }

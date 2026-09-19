@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import SiteMedia from "@/components/site/SiteMedia";
 import Navbar from "@/components/sections/Navbar";
 import CityProvider from "@/components/site/CityProvider";
-import CurtainFooter from "@/components/site/CurtainFooter";
+import SiteFooter from "@/components/site/SiteFooter";
 import { CaptainsBand, SafetyBand, CtaBand } from "@/components/site/PageExtras";
 import { getCities, getSettings, getLivePackages, getPricedCities, getFaqs, slotOne } from "@/lib/catalog";
 import { canonical } from "@/lib/seo";
@@ -113,7 +113,7 @@ export default function AboutPage() {
           title="Come see who we are on a Tuesday at 4,000m."
         />
       </main>
-      <CurtainFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
+      <SiteFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
     </CityProvider>
   );
 }

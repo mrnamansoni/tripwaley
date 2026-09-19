@@ -3,7 +3,7 @@ import SiteMedia from "@/components/site/SiteMedia";
 import Link from "next/link";
 import Navbar from "@/components/sections/Navbar";
 import CityProvider from "@/components/site/CityProvider";
-import CurtainFooter from "@/components/site/CurtainFooter";
+import SiteFooter from "@/components/site/SiteFooter";
 import { WeatherStrip, SeasonsBand, CtaBand } from "@/components/site/PageExtras";
 import VideoReel from "@/components/site/VideoReel";
 import ZodiacRing from "@/components/site/ZodiacRing";
@@ -184,7 +184,7 @@ export default function DestinationsPage() {
           </section>
         )}
       </main>
-      <CurtainFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
+      <SiteFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
     </CityProvider>
   );
 }

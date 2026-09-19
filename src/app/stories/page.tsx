@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import SiteMedia from "@/components/site/SiteMedia";
 import Link from "next/link";
 import Navbar from "@/components/sections/Navbar";
-import CurtainFooter from "@/components/site/CurtainFooter";
+import SiteFooter from "@/components/site/SiteFooter";
 import { getPosts, getSettings, shortDate } from "@/lib/catalog";
 import { canonical } from "@/lib/seo";
 
@@ -55,7 +55,7 @@ export default function StoriesPage() {
           )}
         </section>
       </main>
-      <CurtainFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
+      <SiteFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
     </>
   );
 }

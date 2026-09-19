@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/sections/Navbar";
 import CityProvider from "@/components/site/CityProvider";
-import CurtainFooter from "@/components/site/CurtainFooter";
+import SiteFooter from "@/components/site/SiteFooter";
 import SiteMedia from "@/components/site/SiteMedia";
 import ReadMore from "@/components/site/ReadMore";
 import { canonical } from "@/lib/seo";
@@ -362,7 +362,7 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
           </ul>
         </section>
       </main>
-      <CurtainFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
+      <SiteFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
     </CityProvider>
   );
 }

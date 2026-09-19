@@ -39,10 +39,33 @@ Tripwaley is a production-grade travel booking website for a premium, group-depa
 
 ## Recent Changes
 
+### 2026-09-19 — Search Console "not indexed" report: redirects for every URL that still earns ranking
+
+Analysed the GSC Coverage exports (54 indexed, 134 not indexed). Most of the "not indexed" list is harmless or already fixed:
+- **Page with redirect (3)** — http/www variants redirecting to https://tripwaley.com. Correct; this is how it should look.
+- **Duplicate without canonical (1)** — www copy of /refund-policy; www now 308s to apex.
+- **Blocked by robots.txt (2)** — old WordPress URLs judged by the old site's robots.txt; the current one doesn't block them. Clears on recrawl.
+- **Crawled, not indexed (5)** — two www trip URLs (apex versions are live), a font file (normal), two old WordPress pages.
+
+Real problems fixed:
+- **13 indexed trip URLs now 404** (drafted/deleted/recreated before slug aliases existed). `src/lib/retiredUrls.ts` maps each to its live replacement; `/trips/[slug]` 308s there, falling back to /trips if the replacement has gone too. `himachal-s-queen` (Shimla) has no equivalent → /trips. `rajasthan-bagpacking-from-dehradun` → udaipur-trip-from-dehradun (owner may prefer another).
+- **Creator trip pages** now redirect a missing trip to its renamed slug or the creator's page instead of 404 (`/travel-with/sam/udaipur-golden-circuit`).
+- **Legacy static/WordPress URLs** with a real equivalent (about-us, blog, index.html, honeymoon.html, festivals, corporate-tours, …) redirect in `next.config.ts`. WordPress demo posts are left to 404 — correct.
+- **Sitemap lastmod** was the request time on every URL, so it claimed all pages changed on every fetch. Now the catalog's last-save time.
+
+**"Discovered – currently not indexed" (90)** — owner exported it afterwards. All 90 are sitemap URLs, all return 200 with a correct canonical, none ever crawled (GSC shows 1970-01-01). 39 are the apex twins of pages already indexed on www (the www→apex move); 51 are new to Google (destinations, departure cities, creators, a few trips). It's crawl queue after the first-ever sitemap submission, not a defect.
+
+To speed it up, a **site index ("keep exploring")** now sits above the footer on every page and at the end of every trip page: every live destination, departure city, trip and creator page, one click from anywhere. Server-rendered plain links (`src/lib/exploreLinks.ts`, `ExploreLinks.tsx`), same liveness rules as the sitemap. Pages now use `SiteFooter` (index + CurtainFooter) instead of CurtainFooter directly.
+
 ### 2026-09-16 — PageSpeed: Accessibility and Best Practices to 100, caching and third-party fixes
 
-PSI baseline was mobile 87/91/96/100, desktop 91/92/96/100. Verified on a local production build
-after this round: **Accessibility 100, Best Practices 100**, TBT 40ms (full marks), CLS 0.
+PSI baseline was mobile 87/91/96/100, desktop 91/92/96/100. **Measured live on PSI after deploy:
+mobile 92/100/100/100, desktop 96/100/100/100.** The headline change is Total Blocking Time,
+270ms -> 20ms, which is the analytics deferral doing exactly what it was meant to. LCP 2.7 -> 2.6s,
+CLS 0.006 -> 0.001. FCP (1.7 -> 2.0s) and Speed Index (4.4 -> 4.8s) went slightly the WRONG way --
+possibly the inlineCss trade-off (styles now travel with every HTML response) or run variance, and
+Cloudflare Rocket Loader was still enabled during this measurement. Those two metrics are now the
+remaining levers on mobile, together with LCP.
 
 **Shipped**
 - **Analytics load on first interaction**, not on load. gtag (168KB/181ms) + fbevents (196KB/322ms)

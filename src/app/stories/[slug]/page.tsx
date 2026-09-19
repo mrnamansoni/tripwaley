@@ -3,7 +3,7 @@ import SiteMedia from "@/components/site/SiteMedia";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/sections/Navbar";
-import CurtainFooter from "@/components/site/CurtainFooter";
+import SiteFooter from "@/components/site/SiteFooter";
 import { getPost, getPosts, getSettings, shortDate, normalizeMediaUrl } from "@/lib/catalog";
 import { canonical } from "@/lib/seo";
 import { articleJsonLd, breadcrumbJsonLd, jsonLdScript } from "@/lib/schema";
@@ -109,7 +109,7 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
           </section>
         )}
       </main>
-      <CurtainFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
+      <SiteFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
     </>
   );
 }

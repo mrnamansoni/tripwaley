@@ -7,6 +7,7 @@ import {
   getPosts,
   getCreators,
 } from "@/lib/catalog";
+import { catalogUpdatedAt } from "@/lib/store";
 
 /* THE SITEMAP.
  *
@@ -28,7 +29,11 @@ import {
 export const dynamic = "force-dynamic";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const now = new Date();
+  /* lastmod is when the catalog was last saved, not "now". Stamping every URL
+     with the time of the request told Google all 90 pages changed on every
+     fetch — and Google stops trusting a site's lastmod once it proves
+     consistently wrong, which costs exactly the recrawl signal it exists for. */
+  const now = catalogUpdatedAt() ?? new Date();
   const url = (path: string) => `${SITE_ORIGIN}${path}`;
 
   const staticPages: [string, number, MetadataRoute.Sitemap[number]["changeFrequency"]][] = [

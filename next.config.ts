@@ -119,6 +119,27 @@ const nextConfig: NextConfig = {
         destination: "https://tripwaley.com/:path*",
         permanent: true,
       },
+      /* Addresses from the two sites that lived on this domain before this
+         one (a static HTML site, and a WordPress theme before that) which
+         Google still crawls. Each has a real equivalent here; the WordPress
+         demo posts (hello-world, tag archives, lorem blog posts) do not, and
+         are left to 404, which is the correct answer for them. */
+      ...(
+        [
+          ["/index.html", "/"],
+          ["/index.php/home", "/"],
+          ["/about-us", "/about"],
+          ["/career", "/about"],
+          ["/weekend-trips", "/trips"],
+          ["/festivals", "/trips"],
+          ["/festivals.html", "/trips"],
+          ["/corporate-tours", "/group-departures"],
+          ["/honeymoon.html", "/honeymoon"],
+          ["/india.html", "/destinations"],
+          ["/blog", "/stories"],
+          ["/tour-term-condition", "/terms"],
+        ] as const
+      ).map(([source, destination]) => ({ source, destination, permanent: true })),
     ];
   },
   async rewrites() {

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Navbar from "@/components/sections/Navbar";
 import Collections from "@/components/sections/Collections";
 import CityProvider from "@/components/site/CityProvider";
-import CurtainFooter from "@/components/site/CurtainFooter";
+import SiteFooter from "@/components/site/SiteFooter";
 import { MonthsBand, SeasonsBand, CtaBand } from "@/components/site/PageExtras";
 import { getCities, getSettings, getCollections } from "@/lib/catalog";
 import { canonical } from "@/lib/seo";
@@ -43,7 +43,7 @@ export default function CollectionsPage() {
           title="Tell us the mood. We'll name the mountain."
         />
       </main>
-      <CurtainFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
+      <SiteFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
     </CityProvider>
   );
 }

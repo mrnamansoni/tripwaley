@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Navbar from "@/components/sections/Navbar";
 import CityProvider from "@/components/site/CityProvider";
-import CurtainFooter from "@/components/site/CurtainFooter";
+import SiteFooter from "@/components/site/SiteFooter";
 import SiteMedia from "@/components/site/SiteMedia";
 import { CtaBand } from "@/components/site/PageExtras";
 import CreatorCalendar, { type CalendarDate } from "@/components/creator/CreatorCalendar";
@@ -190,7 +190,7 @@ export default function TravelWithCreatorPage() {
           script="go be in the video"
         />
       </main>
-      <CurtainFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
+      <SiteFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
     </CityProvider>
   );
 }

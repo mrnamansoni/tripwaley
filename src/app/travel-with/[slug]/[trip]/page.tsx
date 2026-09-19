@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { canonical } from "@/lib/seo";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import Navbar from "@/components/sections/Navbar";
 import CityProvider from "@/components/site/CityProvider";
-import CurtainFooter from "@/components/site/CurtainFooter";
+import SiteFooter from "@/components/site/SiteFooter";
 import BookingBar from "@/components/site/BookingBar";
 import BookSeatButton from "@/components/site/BookSeatButton";
 import AskCreator from "@/components/creator/AskCreator";
@@ -25,6 +25,7 @@ import {
   nightsLabel,
   normalizeMediaUrl,
   packageImages,
+  resolveSlugAlias,
 } from "@/lib/catalog";
 
 export function generateStaticParams() {
@@ -77,7 +78,16 @@ export default async function CreatorTripPage({
   const { slug, trip } = await params;
   const view = creatorTrip(slug, trip);
   const creator = getCreator(slug);
-  if (!view || !creator || !view.trip.published) notFound();
+  if (!creator) notFound();
+  if (!view || !view.trip.published) {
+    /* The creator is still here but this trip isn't: follow a slug rename if
+       there was one, otherwise send the visitor (and the ranking) to the
+       creator's page rather than 404ing an address Google has indexed —
+       /travel-with/sam/udaipur-golden-circuit was one. */
+    const to = resolveSlugAlias(trip);
+    const renamed = to ? creatorTrip(slug, to) : undefined;
+    permanentRedirect(renamed?.trip.published ? `/travel-with/${slug}/${to}` : `/travel-with/${slug}`);
+  }
 
   const settings = getSettings();
   const otherTrips = creatorTrips({ creatorSlug: slug }).filter((t) => t.package.slug !== trip);
@@ -403,7 +413,7 @@ export default async function CreatorTripPage({
           </div>
         </section>
       </main>
-      <CurtainFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
+      <SiteFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
       <BookingBar {...bar} />
     </CityProvider>
   );

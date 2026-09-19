@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Navbar from "@/components/sections/Navbar";
 import CityProvider from "@/components/site/CityProvider";
-import CurtainFooter from "@/components/site/CurtainFooter";
+import SiteFooter from "@/components/site/SiteFooter";
 import { CtaBand } from "@/components/site/PageExtras";
 import TripTypeGrid from "@/components/site/TripTypeGrid";
 import {
@@ -157,7 +157,7 @@ export default function CollegeTripsPage() {
           title="Send us your numbers. We'll send back three routes."
         />
       </main>
-      <CurtainFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
+      <SiteFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
     </CityProvider>
   );
 }

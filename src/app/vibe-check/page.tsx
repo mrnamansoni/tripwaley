@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Navbar from "@/components/sections/Navbar";
 import VibeCheck from "@/components/sections/VibeCheck";
 import CityProvider from "@/components/site/CityProvider";
-import CurtainFooter from "@/components/site/CurtainFooter";
+import SiteFooter from "@/components/site/SiteFooter";
 import { CaptainsBand, CtaBand } from "@/components/site/PageExtras";
 import { getCities, getSettings } from "@/lib/catalog";
 import { canonical } from "@/lib/seo";
@@ -71,7 +71,7 @@ export default function VibeCheckPage() {
           title="Found your vibe? Board with it."
         />
       </main>
-      <CurtainFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
+      <SiteFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
     </CityProvider>
   );
 }

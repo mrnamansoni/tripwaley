@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Navbar from "@/components/sections/Navbar";
 import CityProvider from "@/components/site/CityProvider";
-import CurtainFooter from "@/components/site/CurtainFooter";
+import SiteFooter from "@/components/site/SiteFooter";
 import { LEGAL_PAGES } from "@/components/site/LegalPage";
 import { getCities, getSettings } from "@/lib/catalog";
 import { canonical } from "@/lib/seo";
@@ -57,7 +57,7 @@ export default function PoliciesPage() {
           </ul>
         </div>
       </main>
-      <CurtainFooter whatsappLink={s.whatsappLink} whatsapp={s.whatsapp} announcement={s.announcement} />
+      <SiteFooter whatsappLink={s.whatsappLink} whatsapp={s.whatsapp} announcement={s.announcement} />
     </CityProvider>
   );
 }
