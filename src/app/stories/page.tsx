@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
-import SiteMedia from "@/components/site/SiteMedia";
 import Link from "next/link";
 import Navbar from "@/components/sections/Navbar";
 import SiteFooter from "@/components/site/SiteFooter";
-import { getPosts, getSettings, shortDate } from "@/lib/catalog";
+import StoryCard from "@/components/site/StoryCard";
+import { getAllPosts, getSettings } from "@/lib/catalog";
+import { isStoryLive, STORY_KINDS } from "@/lib/stories";
+import { DESTINATIONS } from "@/lib/destinations";
 import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -12,9 +14,18 @@ export const metadata: Metadata = {
   description: "Trip diaries, packing guides and route notes from Tripwaley's group departures across India.",
 };
 
-export default function StoriesPage() {
+export default async function StoriesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ place?: string }>;
+}) {
+  const { place } = await searchParams;
   const settings = getSettings();
-  const posts = getPosts().slice().sort((a, b) => b.date.localeCompare(a.date));
+  const all = getAllPosts().filter(isStoryLive).sort((a, b) => b.date.localeCompare(a.date));
+  const posts = place ? all.filter((p) => (p.destinations ?? []).includes(place)) : all;
+  /* only offer a place filter where something is actually written, so the row
+     never sends a reader to an empty page */
+  const places = DESTINATIONS.filter((d) => all.some((p) => (p.destinations ?? []).includes(d.slug)));
 
   return (
     <>
@@ -29,27 +40,35 @@ export default function StoriesPage() {
           </div>
         </section>
 
+        <nav aria-label="Filter stories" className="mx-auto w-full max-w-6xl px-5 pt-10 sm:px-8">
+          <div className="flex flex-wrap gap-2">
+            <Link href="/stories" className={`rounded-full border px-4 py-1.5 text-sm font-bold ${!place ? "border-brand bg-brand text-white" : "border-line bg-card text-ink/75 hover:border-brand hover:text-brand"}`}>
+              Everything
+            </Link>
+            {STORY_KINDS.map((k) => (
+              <Link key={k.kind} href={`/stories/topic/${k.kind}`} className="rounded-full border border-line bg-card px-4 py-1.5 text-sm font-bold text-ink/75 hover:border-brand hover:text-brand">
+                {k.label}
+              </Link>
+            ))}
+          </div>
+          {places.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {places.map((d) => (
+                <Link key={d.slug} href={`/stories?place=${d.slug}`} className={`rounded-full border px-3 py-1 text-xs font-bold ${place === d.slug ? "border-brand bg-brand text-white" : "border-line bg-card text-ink/70 hover:border-brand hover:text-brand"}`}>
+                  {d.name}
+                </Link>
+              ))}
+            </div>
+          )}
+        </nav>
+
         <section className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-8">
           {posts.length === 0 ? (
             <p className="text-ink/50">No stories published yet — check back soon.</p>
           ) : (
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {posts.map((p) => (
-                <Link key={p.slug} href={`/stories/${p.slug}`} className="group flex flex-col overflow-hidden rounded-3xl border border-line bg-card shadow-card transition-transform hover:-translate-y-1">
-                  <div className="relative aspect-[16/10] overflow-hidden">
-                    <SiteMedia src={p.cover} alt="" fill sizes="(max-width:640px) 92vw, 30vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
-                  </div>
-                  <div className="flex flex-1 flex-col p-5">
-                    <div className="mb-2 flex flex-wrap gap-2">
-                      {p.tags.slice(0, 2).map((t) => (
-                        <span key={t} className="rounded-full bg-blush px-2.5 py-0.5 text-[0.58rem] font-bold uppercase tracking-wider text-brand">{t}</span>
-                      ))}
-                    </div>
-                    <h2 className="font-display text-xl font-extrabold leading-tight tracking-tight text-ink transition-colors group-hover:text-brand">{p.title}</h2>
-                    <p className="mt-2 line-clamp-3 flex-1 text-sm text-ink/60">{p.excerpt}</p>
-                    <p className="mt-4 text-[0.62rem] font-bold uppercase tracking-widest text-ink/40">{p.author} · {shortDate(p.date)}</p>
-                  </div>
-                </Link>
+                <StoryCard key={p.slug} post={p} />
               ))}
             </div>
           )}
