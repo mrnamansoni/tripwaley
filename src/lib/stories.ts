@@ -5,7 +5,9 @@
  * drafted, deleted or renamed. A destination does not change, so writing
  * attached to one survives the product churn and keeps its ranking. */
 
-import type { BlogPost, StoryKind } from "./types.ts";
+import type { BlogPost, StoryKind } from "./types";
+// .ts extension required: scripts/test-stories.mjs runs this module directly
+// under Node, whose ESM resolver cannot add the extension for us.
 import { destinationsFor } from "./destinations.ts";
 
 export const STORY_KINDS: { kind: StoryKind; label: string; blurb: string }[] = [

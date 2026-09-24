@@ -12,6 +12,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
+    // Needed so scripts/test-*.mjs test runners can import src/lib modules directly
     "allowImportingTsExtensions": true,
     "incremental": true,
     "plugins": [
