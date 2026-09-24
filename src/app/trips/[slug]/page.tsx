@@ -19,6 +19,7 @@ import DownloadItinerary from "@/components/site/DownloadItinerary";
 import TrackTripView from "@/components/site/TrackTripView";
 import { retiredTripTarget } from "@/lib/retiredUrls";
 import ExploreLinks from "@/components/site/ExploreLinks";
+import BeforeYouGo from "@/components/site/BeforeYouGo";
 import {
   getCities,
   getSettings,
@@ -406,6 +407,8 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
             ← All departures
           </Link>
         </section>
+
+        <BeforeYouGo pkg={pkg} />
 
         {/* other live trips on a 3D ring (lab orbit-gallery pattern) */}
         <MoreTrips
