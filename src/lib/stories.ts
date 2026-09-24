@@ -23,9 +23,13 @@ export function storyKind(p: BlogPost): StoryKind {
   return p.kind && KINDS.has(p.kind) ? p.kind : "report";
 }
 
-/** `status` decides when present; otherwise fall back to the old boolean. */
+/** Both switches must agree: admin's `published` toggle can always take a
+ *  story down (published === false wins outright), and when `status` is
+ *  present it must also say "published". This keeps the admin's publish
+ *  toggle (StoriesEditor writes only `published`, never `status`) in
+ *  control even after a row gains a `status` field. */
 export function isStoryLive(p: BlogPost): boolean {
-  return p.status ? p.status === "published" : p.published === true;
+  return p.published !== false && (p.status ? p.status === "published" : true);
 }
 
 export const liveStories = (all: BlogPost[]): BlogPost[] => all.filter(isStoryLive);
@@ -49,6 +53,14 @@ export function groupByKind(posts: BlogPost[]): { kind: StoryKind; label: string
     label,
     posts: posts.filter((p) => storyKind(p) === kind),
   })).filter((g) => g.posts.length > 0);
+}
+
+/** Topics worth a page: only a kind that at least one LIVE story actually
+ *  uses. Three of the four topics have no live story behind them yet, so
+ *  offering all four hands Google (and the hub's filter row) empty pages. */
+export function kindsWithStories(all: BlogPost[]): { kind: StoryKind; label: string; blurb: string }[] {
+  const live = liveStories(all);
+  return STORY_KINDS.filter((k) => live.some((p) => storyKind(p) === k.kind));
 }
 
 /** 225 words a minute, never less than one minute */

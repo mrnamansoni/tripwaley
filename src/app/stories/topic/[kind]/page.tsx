@@ -5,11 +5,13 @@ import Navbar from "@/components/sections/Navbar";
 import SiteFooter from "@/components/site/SiteFooter";
 import StoryCard from "@/components/site/StoryCard";
 import { getAllPosts, getSettings } from "@/lib/catalog";
-import { isStoryLive, storyKind, STORY_KINDS } from "@/lib/stories";
+import { isStoryLive, storyKind, STORY_KINDS, kindsWithStories } from "@/lib/stories";
 import { canonical } from "@/lib/seo";
 
 export function generateStaticParams() {
-  return STORY_KINDS.map((k) => ({ kind: k.kind }));
+  /* only build a topic that actually has a live story behind it — a topic
+     with none 404s at request time via the same rule below */
+  return kindsWithStories(getAllPosts()).map((k) => ({ kind: k.kind }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ kind: string }> }): Promise<Metadata> {
@@ -30,6 +32,10 @@ export default async function TopicPage({ params }: { params: Promise<{ kind: st
     .filter(isStoryLive)
     .filter((p) => storyKind(p) === meta.kind)
     .sort((a, b) => b.date.localeCompare(a.date));
+
+  /* a topic nobody has written a live story for yet is not a page worth
+     Google indexing — same 404 an unknown kind already gets above */
+  if (posts.length === 0) notFound();
 
   return (
     <>

@@ -4,7 +4,7 @@ import Navbar from "@/components/sections/Navbar";
 import SiteFooter from "@/components/site/SiteFooter";
 import StoryCard from "@/components/site/StoryCard";
 import { getAllPosts, getSettings } from "@/lib/catalog";
-import { isStoryLive, STORY_KINDS } from "@/lib/stories";
+import { isStoryLive, kindsWithStories } from "@/lib/stories";
 import { DESTINATIONS } from "@/lib/destinations";
 import { canonical } from "@/lib/seo";
 
@@ -45,7 +45,9 @@ export default async function StoriesPage({
             <Link href="/stories" className={`rounded-full border px-4 py-1.5 text-sm font-bold ${!place ? "border-brand bg-brand text-white" : "border-line bg-card text-ink/75 hover:border-brand hover:text-brand"}`}>
               Everything
             </Link>
-            {STORY_KINDS.map((k) => (
+            {/* only a topic chip with at least one live story behind it —
+                same rule the topic page itself applies before it 404s */}
+            {kindsWithStories(all).map((k) => (
               <Link key={k.kind} href={`/stories/topic/${k.kind}`} className="rounded-full border border-line bg-card px-4 py-1.5 text-sm font-bold text-ink/75 hover:border-brand hover:text-brand">
                 {k.label}
               </Link>
@@ -64,7 +66,11 @@ export default async function StoriesPage({
 
         <section className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-8">
           {posts.length === 0 ? (
-            <p className="text-ink/50">No stories published yet — check back soon.</p>
+            place && all.length > 0 ? (
+              <p className="text-ink/50">No stories about this place yet — <Link href="/stories" className="font-bold text-brand">see all stories</Link>.</p>
+            ) : (
+              <p className="text-ink/50">No stories published yet — check back soon.</p>
+            )
           ) : (
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {posts.map((p) => (

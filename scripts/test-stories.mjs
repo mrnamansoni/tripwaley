@@ -13,6 +13,7 @@ import assert from "node:assert/strict";
 import {
   storyKind, isStoryLive, liveStories, storiesForDestination,
   storiesForPackage, groupByKind, readingMinutes, duplicateKeywords, STORY_KINDS,
+  kindsWithStories,
 } from "../src/lib/stories.ts";
 
 let n = 0;
@@ -39,8 +40,8 @@ console.log("\nlive vs draft");
   ok("an old row with published:true and no status is live");
   assert.equal(isStoryLive(post({ published: true, status: "draft" })), false);
   ok("status:draft beats published:true — a draft never reaches the site");
-  assert.equal(isStoryLive(post({ published: false, status: "published" })), true);
-  ok("status:published is enough on a new row");
+  assert.equal(isStoryLive(post({ published: false, status: "published" })), false);
+  ok("published:false always wins, even over status:published — the admin's publish toggle is the only kill switch the owner has, and status must not override it");
   assert.equal(isStoryLive(post({ published: true, status: "approved" })), false);
   ok("approved is not published: a human still has to publish it");
   assert.deepEqual(liveStories([post({ slug: "a" }), post({ slug: "b", status: "draft" })]).map((p) => p.slug), ["a"]);
@@ -81,6 +82,16 @@ console.log("\ngrouping and reading time");
   ok("400 words is 2 minutes at 225 wpm");
   assert.equal(readingMinutes(""), 1);
   ok("never 0 minutes");
+}
+
+console.log("\ntopics with live stories");
+{
+  const kinds = kindsWithStories([
+    post({ slug: "g", kind: "guide" }),
+    post({ slug: "draft-cost", kind: "cost", status: "draft" }),
+  ]).map((k) => k.kind);
+  assert.deepEqual(kinds, ["guide"]);
+  ok("a kind with only a draft story does not count — no live story, no topic page");
 }
 
 console.log("\nduplicate keywords");

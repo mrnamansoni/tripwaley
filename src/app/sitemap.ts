@@ -7,7 +7,7 @@ import {
   getAllPosts,
   getCreators,
 } from "@/lib/catalog";
-import { isStoryLive, STORY_KINDS } from "@/lib/stories";
+import { isStoryLive, kindsWithStories } from "@/lib/stories";
 import { catalogUpdatedAt } from "@/lib/store";
 
 /* THE SITEMAP.
@@ -84,7 +84,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.5,
     });
   }
-  for (const k of STORY_KINDS) {
+  /* only a topic with at least one live story behind it — otherwise the
+     sitemap hands Google a page that 404s (topic/[kind]/page.tsx applies the
+     same kindsWithStories rule) */
+  for (const k of kindsWithStories(getAllPosts())) {
     entries.push({ url: url(`/stories/topic/${k.kind}`), lastModified: now, changeFrequency: "weekly", priority: 0.5 });
   }
   /* Destination landing pages, but only where a live trip actually exists —

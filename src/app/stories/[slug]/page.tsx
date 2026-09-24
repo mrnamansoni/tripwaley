@@ -60,9 +60,19 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
     .slice(0, 4)
     .map((p) => ({ slug: p.slug, name: p.name, nights: nightsLabel(p), price: fromPrice(p.slug) }));
   /* related by place, not by date: someone reading about Kedarkantha wants the
-     other Kedarkantha pages, not last week's Goa story */
+     other Kedarkantha pages, not last week's Goa story. But the six stories
+     live in production today carry no `destinations` at all, so that list is
+     always empty for them — fall back to the most recent other live stories
+     so the internal-link block never disappears from an indexed page. */
   const related = destinationSlugs.flatMap((d) => storiesForDestination(d, getAllPosts()));
-  const more = [...new Map(related.filter((p) => p.slug !== post.slug).map((p) => [p.slug, p])).values()].slice(0, 3);
+  const byDestination = [...new Map(related.filter((p) => p.slug !== post.slug).map((p) => [p.slug, p])).values()].slice(0, 3);
+  const more = byDestination.length > 0
+    ? byDestination
+    : getAllPosts()
+        .filter(isStoryLive)
+        .filter((p) => p.slug !== post.slug)
+        .sort((a, b) => b.date.localeCompare(a.date))
+        .slice(0, 3);
   const faqSchema = faqJsonLd(faqs);
 
   return (
@@ -74,7 +84,7 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
           dangerouslySetInnerHTML={{ __html: jsonLdScript([
             articleJsonLd({
               title: post.title,
-              description: post.excerpt?.trim() || summarise(post.body),
+              description: post.summary?.trim() || post.excerpt?.trim() || summarise(post.body),
               slug: post.slug,
               image: post.cover,
               published: post.date,
@@ -121,8 +131,8 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
             <section className="mt-12 border-t border-line pt-8">
               <h2 className="font-display text-2xl font-extrabold tracking-tight text-ink">Questions people ask</h2>
               <dl className="mt-5 space-y-5">
-                {faqs.map((f) => (
-                  <div key={f.q}>
+                {faqs.map((f, i) => (
+                  <div key={i}>
                     <dt className="font-display text-base font-extrabold text-ink">{f.q}</dt>
                     <dd className="mt-1.5 text-[0.98rem] leading-relaxed text-ink/75">{f.a}</dd>
                   </div>
