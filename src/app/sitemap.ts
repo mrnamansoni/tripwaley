@@ -4,9 +4,10 @@ import { DESTINATIONS, destinationsFor } from "@/lib/destinations";
 import {
   getLivePackages,
   getPricedCities,
-  getPosts,
+  getAllPosts,
   getCreators,
 } from "@/lib/catalog";
+import { isStoryLive, STORY_KINDS } from "@/lib/stories";
 import { catalogUpdatedAt } from "@/lib/store";
 
 /* THE SITEMAP.
@@ -73,13 +74,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
   for (const c of getPricedCities()) {
     entries.push({ url: url(`/from/${c.slug}`), lastModified: now, changeFrequency: "weekly", priority: 0.7 });
   }
-  for (const post of getPosts()) {
+  /* drafts must never be handed to Google — isStoryLive is the same test the
+     story page itself uses to decide whether to 404 */
+  for (const post of getAllPosts().filter(isStoryLive)) {
     entries.push({
       url: url(`/stories/${post.slug}`),
       lastModified: post.date ? new Date(post.date) : now,
       changeFrequency: "monthly",
       priority: 0.5,
     });
+  }
+  for (const k of STORY_KINDS) {
+    entries.push({ url: url(`/stories/topic/${k.kind}`), lastModified: now, changeFrequency: "weekly", priority: 0.5 });
   }
   /* Destination landing pages, but only where a live trip actually exists —
      generateStaticParams applies the same rule, so the sitemap can never offer

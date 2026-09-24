@@ -21,7 +21,9 @@ import {
   inr,
   shortDate,
   weekday,
+  getAllPosts,
 } from "@/lib/catalog";
+import { storiesForDestination, readingMinutes } from "@/lib/stories";
 
 /* DESTINATION LANDING PAGES — /destinations/spiti, /destinations/kashmir, …
  *
@@ -81,6 +83,8 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
   // a destination with nothing running is a thin page and a dead end for a
   // visitor — it stays out of the index rather than being published empty
   if (!trips.length) notFound();
+
+  const guides = storiesForDestination(dest.slug, getAllPosts());
 
   const settings = getSettings();
   const cities = getCities();
@@ -361,6 +365,28 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
             ))}
           </ul>
         </section>
+
+        {guides.length > 0 && (
+          <section className="mx-auto w-full max-w-5xl px-5 pb-20 sm:px-8">
+            <p className="font-script text-2xl text-brand">read first</p>
+            <h2 className="mt-1 font-display text-3xl font-extrabold tracking-tight text-ink">
+              Everything we have written about {dest.name}
+            </h2>
+            <ul className="mt-6 divide-y divide-line">
+              {guides.map((p) => (
+                <li key={p.slug}>
+                  <Link href={`/stories/${p.slug}`} className="group flex items-baseline justify-between gap-4 py-3.5">
+                    <span>
+                      <span className="font-display text-lg font-extrabold leading-tight text-ink group-hover:text-brand">{p.title}</span>
+                      {p.summary && <span className="mt-0.5 block text-sm text-ink/60">{p.summary}</span>}
+                    </span>
+                    <span className="shrink-0 text-[0.68rem] font-bold uppercase tracking-wider text-ink/45">{readingMinutes(p.body)} min</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </main>
       <SiteFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
     </CityProvider>
