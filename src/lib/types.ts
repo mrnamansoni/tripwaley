@@ -204,6 +204,8 @@ export interface BlogPost {
   faqs?: StoryFaq[];
   /** draft -> approved -> published. Missing = read `published` */
   status?: "draft" | "approved" | "published";
+  /** addresses this story used to live at; each 308s to the current slug */
+  oldSlugs?: string[];
 }
 export interface Addon { name: string; price: number | null; priceMax: number | null }
 export interface Package {

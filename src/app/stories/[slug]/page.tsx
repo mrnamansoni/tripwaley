@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import SiteMedia from "@/components/site/SiteMedia";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import Navbar from "@/components/sections/Navbar";
 import SiteFooter from "@/components/site/SiteFooter";
 import { getAllPosts, getSettings, shortDate, normalizeMediaUrl, getLivePackages, nightsLabel, fromPrice, inr } from "@/lib/catalog";
-import { isStoryLive, storyKind, readingMinutes, STORY_KINDS, storiesForDestination } from "@/lib/stories";
+import { isStoryLive, storyKind, readingMinutes, STORY_KINDS, storiesForDestination, resolveStoryAlias } from "@/lib/stories";
 import { destinationsFor } from "@/lib/destinations";
 import StoryBody from "@/components/site/StoryBody";
 import { canonical } from "@/lib/seo";
@@ -42,7 +42,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function StoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const post = liveStory(slug);
-  if (!post) notFound();
+  if (!post) {
+    const to = resolveStoryAlias(slug, getAllPosts());
+    if (to) permanentRedirect(`/stories/${to}`);
+    notFound();
+  }
 
   const settings = getSettings();
   const kind = storyKind(post);

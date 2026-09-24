@@ -55,6 +55,12 @@ export function groupByKind(posts: BlogPost[]): { kind: StoryKind; label: string
 export const readingMinutes = (body: string): number =>
   Math.max(1, Math.round((body ?? "").trim().split(/\s+/).filter(Boolean).length / 225));
 
+/** The story that now owns an old address, if it is live. */
+export function resolveStoryAlias(slug: string, all: BlogPost[]): string | undefined {
+  const owner = all.find((p) => (p.oldSlugs ?? []).includes(slug));
+  return owner && isStoryLive(owner) && owner.slug !== slug ? owner.slug : undefined;
+}
+
 /** keyword (normalised) -> the slugs claiming it, only where more than one does */
 export function duplicateKeywords(all: BlogPost[]): Map<string, string[]> {
   const byKeyword = new Map<string, string[]>();
