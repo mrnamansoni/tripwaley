@@ -179,6 +179,8 @@ export const DEFAULT_FAQS: Faq[] = [
   { q: "How do I hold a seat?", a: "Tap 'Hold a seat', drop your number, and we block it free for 24 hours while you decide. No payment needed to hold." },
   { q: "What's the cancellation policy?", a: "Free cancellation until 7 days before departure. Closer to the date, partial refunds apply — the full policy is shared before you pay." },
 ];
+export type StoryKind = "guide" | "cost" | "seasonal" | "report";
+export interface StoryFaq { q: string; a: string }
 export interface BlogPost {
   slug: string;
   title: string;
@@ -189,6 +191,19 @@ export interface BlogPost {
   date: string; // ISO yyyy-mm-dd
   tags: string[];
   published: boolean;
+  /* ---- SEO stories. All optional: the stories written before this build
+     have none of them and must keep rendering exactly as they did. ---- */
+  /** which section of the site this belongs to; missing = "report" */
+  kind?: StoryKind;
+  /** destination slugs from DESTINATIONS — the durable link to trips */
+  destinations?: string[];
+  /** the one search this page is meant to own */
+  keyword?: string;
+  /** the answer, in 2-3 lines, shown above the body */
+  summary?: string;
+  faqs?: StoryFaq[];
+  /** draft -> approved -> published. Missing = read `published` */
+  status?: "draft" | "approved" | "published";
 }
 export interface Addon { name: string; price: number | null; priceMax: number | null }
 export interface Package {

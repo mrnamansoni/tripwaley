@@ -55,6 +55,8 @@ export const getFaqs = (): Faq[] => {
   return f && f.length ? f : DEFAULT_FAQS;
 };
 export const getPosts = (): BlogPost[] => (readCatalog().posts ?? []).filter((p) => p.published);
+/** every story row, drafts included — story pages decide liveness themselves
+ *  via isStoryLive(), because `published` alone can't express draft/approved */
 export const getAllPosts = (): BlogPost[] => readCatalog().posts ?? [];
 export const getPost = (slug: string): BlogPost | undefined => getPosts().find((p) => p.slug === slug);
 
