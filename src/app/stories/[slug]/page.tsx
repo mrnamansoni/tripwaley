@@ -4,9 +4,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/sections/Navbar";
 import SiteFooter from "@/components/site/SiteFooter";
-import { getPost, getPosts, getSettings, shortDate, normalizeMediaUrl } from "@/lib/catalog";
+import { getAllPosts, getSettings, shortDate, normalizeMediaUrl, getLivePackages, nightsLabel, fromPrice, inr } from "@/lib/catalog";
+import { isStoryLive, storyKind, readingMinutes, STORY_KINDS, storiesForDestination } from "@/lib/stories";
+import { destinationsFor } from "@/lib/destinations";
+import StoryBody from "@/components/site/StoryBody";
 import { canonical } from "@/lib/seo";
-import { articleJsonLd, breadcrumbJsonLd, jsonLdScript } from "@/lib/schema";
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd, jsonLdScript } from "@/lib/schema";
+
+/** a story is readable only when live — a draft 404s like any unknown slug */
+const liveStory = (slug: string) => getAllPosts().filter(isStoryLive).find((p) => p.slug === slug);
 
 /** first ~155 characters of real prose, cut on a word boundary */
 function summarise(body: string): string {
@@ -17,14 +23,14 @@ function summarise(body: string): string {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const post = getPost(slug);
+  const post = liveStory(slug);
   if (!post) return { title: "Story not found | Tripwaley" };
   /* Every published story shipped with an EMPTY meta description, because each
      one has a blank `excerpt` and this read it directly. Google then wrote its
      own snippet for the whole blog. Falling back to the opening of the body
      means a description can never be missing again, whatever the admin field
      holds. */
-  const description = post.excerpt?.trim() || summarise(post.body);
+  const description = post.summary?.trim() || post.excerpt?.trim() || summarise(post.body);
   return {
     ...canonical(`/stories/${post.slug}`),
     title: `${post.title} | Tripwaley Stories`,
@@ -35,12 +41,25 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function StoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const post = getPost(slug);
+  const post = liveStory(slug);
   if (!post) notFound();
 
   const settings = getSettings();
-  const paras = post.body.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
-  const more = getPosts().filter((p) => p.slug !== post.slug).slice(0, 3);
+  const kind = storyKind(post);
+  const summaryLine = post.summary?.trim() || post.excerpt?.trim() || "";
+  const faqs = post.faqs ?? [];
+  const destinationSlugs = post.destinations ?? [];
+  /* the live trips that go where this story is about — the whole point of an
+     informational page is that it hands the reader a real batch at the end */
+  const trips = getLivePackages()
+    .filter((p) => destinationsFor(p).some((d) => destinationSlugs.includes(d.slug)))
+    .slice(0, 4)
+    .map((p) => ({ slug: p.slug, name: p.name, nights: nightsLabel(p), price: fromPrice(p.slug) }));
+  /* related by place, not by date: someone reading about Kedarkantha wants the
+     other Kedarkantha pages, not last week's Goa story */
+  const related = destinationSlugs.flatMap((d) => storiesForDestination(d, getAllPosts()));
+  const more = [...new Map(related.filter((p) => p.slug !== post.slug).map((p) => [p.slug, p])).values()].slice(0, 3);
+  const faqSchema = faqJsonLd(faqs);
 
   return (
     <>
@@ -62,6 +81,7 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
               { name: "Stories", path: "/stories" },
               { name: post.title, path: `/stories/${post.slug}` },
             ]),
+            ...(faqSchema ? [faqSchema] : []),
           ]) }}
         />
         {/* cover */}
@@ -75,16 +95,56 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
               ))}
             </div>
             <h1 className="font-display text-4xl font-extrabold leading-[1.02] tracking-tight text-white sm:text-6xl">{post.title}</h1>
-            <p className="mt-3 text-sm font-bold uppercase tracking-widest text-white/70">{post.author} · {shortDate(post.date)}</p>
+            <p className="mt-3 text-sm font-bold uppercase tracking-widest text-white/70">
+              {STORY_KINDS.find((k) => k.kind === kind)?.label} · {post.author} · {shortDate(post.date)} · {readingMinutes(post.body)} min read
+            </p>
           </div>
         </section>
 
         {/* body */}
         <article className="mx-auto w-full max-w-3xl px-5 py-14 sm:px-8">
-          {post.excerpt && <p className="mb-8 border-l-2 border-brand pl-5 font-display text-xl font-bold leading-snug text-ink/80">{post.excerpt}</p>}
-          <div className="space-y-5 text-[1.05rem] leading-relaxed text-ink/80">
-            {paras.map((p, i) => <p key={i}>{p}</p>)}
-          </div>
+          {/* The answer first. Google lifts these into answer boxes and AI summaries,
+              and a reader who only wanted the number leaves satisfied either way. */}
+          {summaryLine && (
+            <p className="mb-8 border-l-2 border-brand pl-5 font-display text-xl font-bold leading-snug text-ink/80">
+              {summaryLine}
+            </p>
+          )}
+
+          <StoryBody body={post.body} />
+
+          {faqs.length > 0 && (
+            <section className="mt-12 border-t border-line pt-8">
+              <h2 className="font-display text-2xl font-extrabold tracking-tight text-ink">Questions people ask</h2>
+              <dl className="mt-5 space-y-5">
+                {faqs.map((f) => (
+                  <div key={f.q}>
+                    <dt className="font-display text-base font-extrabold text-ink">{f.q}</dt>
+                    <dd className="mt-1.5 text-[0.98rem] leading-relaxed text-ink/75">{f.a}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          )}
+
+          {trips.length > 0 && (
+            <section className="mt-12 rounded-3xl border border-line bg-card p-6 shadow-card">
+              <p className="font-script text-2xl text-brand">go and see it</p>
+              <ul className="mt-4 space-y-3">
+                {trips.map((t) => (
+                  <li key={t.slug}>
+                    <Link href={`/trips/${t.slug}`} className="group flex items-baseline justify-between gap-4 border-b border-line/70 pb-3">
+                      <span className="font-display text-lg font-extrabold leading-tight text-ink group-hover:text-brand">{t.name}</span>
+                      <span className="shrink-0 text-sm font-bold text-ink/70">
+                        {t.price != null ? `from ${inr(t.price)}` : t.nights}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
           <div className="mt-12 border-t border-line pt-8">
             <Link href="/stories" className="text-sm font-bold text-brand hover:text-brand-bright">← All stories</Link>
           </div>
