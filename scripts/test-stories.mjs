@@ -42,6 +42,8 @@ console.log("\nlive vs draft");
   ok("status:draft beats published:true — a draft never reaches the site");
   assert.equal(isStoryLive(post({ published: false, status: "published" })), false);
   ok("published:false always wins, even over status:published — the admin's publish toggle is the only kill switch the owner has, and status must not override it");
+  assert.equal(isStoryLive(post({ published: false })), false);
+  ok("the admin's own toggle, alone, takes a story offline — the plain case every one of the six live stories is in today");
   assert.equal(isStoryLive(post({ published: true, status: "approved" })), false);
   ok("approved is not published: a human still has to publish it");
   assert.deepEqual(liveStories([post({ slug: "a" }), post({ slug: "b", status: "draft" })]).map((p) => p.slug), ["a"]);
