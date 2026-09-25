@@ -13,6 +13,8 @@ import { listMedia, readBookings, readCatalog, readReviews, readSeedCatalog, wri
 import { isSeedSection, removalsForSection } from "@/lib/seedGuard";
 import { SLOT_DEFS, CONTENT_DEFS, resolveSlot, PAGE_SECTION_DEFS, isValidMediaRef, CATEGORY_DEFS, CREATOR_POSE_DEFS } from "@/lib/types";
 import { applySlugRenames, detectSlugRenames } from "@/lib/slugCascade";
+import { applyStoryRenames, detectStoryRenames } from "@/lib/storyCascade";
+import { DESTINATIONS } from "@/lib/destinations";
 import type { BlogPost, Captain, CollegeTrip, Coupon, Catalog, City, Creator, Departure, Faq, Package, PriceRule, Review, WireEntry } from "@/lib/types";
 
 export async function GET() {
@@ -219,10 +221,30 @@ function validate(section: string, data: unknown): string | null {
     }
     case "wire":
       return (data as WireEntry[]).every((w) => isStr(w.name) && isStr(w.city) && isStr(w.act) && isStr(w.trip)) ? null : "invalid wire row";
-    case "posts":
-      return (data as BlogPost[]).every(
-        (p) => isStr(p.slug) && p.slug && isStr(p.title) && typeof p.published === "boolean"
-      ) ? null : "invalid post row";
+    case "posts": {
+      /* Shape only. A story is never rejected for being short, thin, or
+         sharing a keyword with another — that was the owner's explicit call
+         on 2026-09-19. What is rejected is a value the site cannot render:
+         a topic outside the four, or a destination slug that does not exist. */
+      const kinds = new Set(["guide", "cost", "seasonal", "report"]);
+      const places = new Set(DESTINATIONS.map((d) => d.slug));
+      for (const p of data as BlogPost[]) {
+        if (!isStr(p.slug) || !p.slug || !isStr(p.title) || typeof p.published !== "boolean") return "invalid post row";
+        if (p.kind != null && !kinds.has(p.kind)) return `${p.slug}: unknown topic "${p.kind}"`;
+        if (p.status != null && !["draft", "approved", "published"].includes(p.status)) return `${p.slug}: unknown status "${p.status}"`;
+        if (p.destinations != null) {
+          if (!Array.isArray(p.destinations)) return `${p.slug}: destinations must be a list`;
+          const unknown = p.destinations.find((d) => !places.has(d));
+          if (unknown) return `${p.slug}: "${unknown}" is not one of our destinations`;
+        }
+        if (p.faqs != null) {
+          if (!Array.isArray(p.faqs)) return `${p.slug}: faqs must be a list`;
+          if (p.faqs.some((f) => !isStr(f?.q) || !isStr(f?.a))) return `${p.slug}: every FAQ needs a question and an answer`;
+        }
+        if (p.oldSlugs != null && (!Array.isArray(p.oldSlugs) || p.oldSlugs.some((s) => !isStr(s)))) return `${p.slug}: oldSlugs must be a list of slugs`;
+      }
+      return null;
+    }
     default:
       return "unknown section";
   }
@@ -264,6 +286,17 @@ export async function PUT(req: Request) {
             ` — repointed ${moved.prices} price rule(s), ${moved.departures} departure(s),` +
             ` ${moved.creatorTrips} creator trip(s)`
         );
+      }
+    }
+
+    /* Same bargain as a package rename: a story's slug is its address, and
+       the old one has to keep working. Done here rather than in the editor so
+       it holds whoever saves — the admin UI, a script, or the draft writer. */
+    if (section === "posts") {
+      const renames = detectStoryRenames(cat.posts ?? [], data as BlogPost[]);
+      if (renames.length) {
+        const moved = applyStoryRenames(data as BlogPost[], renames);
+        console.log(`[admin] story slug rename ${renames.map((r) => `${r.from} -> ${r.to}`).join(", ")} — kept ${moved} old url(s) alive`);
       }
     }
 
