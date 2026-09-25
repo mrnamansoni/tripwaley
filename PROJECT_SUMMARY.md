@@ -1,6 +1,6 @@
 # Project Summary: Tripwaley
 
-Last updated: 2026-09-11
+Last updated: 2026-09-25
 
 ## Project Overview
 Tripwaley is a production-grade travel booking website for a premium, group-departure travel brand in India. It is a Next.js 16 site with 3D/scroll-driven visuals (React Three Fiber, GSAP, Lenis), city-aware pricing, a lead-capture booking flow, and a full custom admin panel (CMS-style) so the owner can edit trips, prices, departures, cities, media, reviews, and bookings without touching code. There is no database — everything is stored in JSON files under `data/`.
@@ -38,6 +38,47 @@ Tripwaley is a production-grade travel booking website for a premium, group-depa
 - **New standing rule from the owner (2026-08-01, still in effect):** never push any change to GitHub directly. Always explain the plan in chat first and wait for a clear "yes" before making or pushing any change.
 
 ## Recent Changes
+
+### 2026-09-25 — SEO stories, build 1: every story is a page that can rank
+
+Design: `docs/superpowers/specs/2026-09-19-seo-content-strategy-design.md`.
+Plan: `docs/superpowers/plans/2026-09-25-seo-stories-build-1.md`. Owner's decisions: AI drafts from
+a keyword with a human approving every piece; each story gets its OWN url (trip pages link out, they
+do not embed); keywords come from free Google autocomplete; 5 drafts a week. Stories attach to
+DESTINATIONS, not trips — trips churn (13 trip urls had to be redirected six days earlier), a
+destination does not.
+
+Shipped (9 commits, `36f2829`..`54b606a`, plus `5167cbb`):
+- `BlogPost` gained optional `kind` / `destinations` / `keyword` / `summary` / `faqs` / `status` /
+  `oldSlugs`. `src/lib/stories.ts` holds every selection rule; `scripts/test-stories.mjs` (19),
+  `test-story-tokens.mjs` (7), `test-story-aliases.mjs` (3).
+- **Live values in article text**: `{{price <trip> <city>}}` and `{{next-departure <trip>}}` expand
+  at render (`src/lib/storyTokens.ts`, `StoryBody.tsx`). A price is never typed into a story, so it
+  cannot go stale; a retired trip renders a link, never a wrong number.
+- Story page: summary first, FAQ + FAQPage schema, a card offering the live trips for the story's
+  destinations, related-by-place with a recency fallback.
+- `BeforeYouGo.tsx` on every trip page — a `<details>`, no client JS (TBT stays 20ms), links present
+  in the server HTML while collapsed.
+- `/stories` filters by place and topic; `/stories/topic/[kind]`; destination pages list their guides.
+- Story slug aliases: renaming a story 308s from the old url (`resolveStoryAlias`).
+
+Two bugs the final review caught before deploy, both silent:
+1. `isStoryLive` let `status` override `published`, so the admin's publish toggle — the owner's only
+   control — would have stopped working: a story pulled offline would have kept rendering AND kept
+   being submitted in the sitemap. Now `published: false` always wins.
+2. All four topic pages were in the sitemap and linked from the hub, but only `report` has content,
+   so three thin pages would have been handed to Google days after cleaning 12 bad urls out of the
+   index. `kindsWithStories()` now gates the sitemap, the chips and the route (404 when empty).
+
+`scripts/tag-stories.mjs` (run once on the VPS volume, 2026-09-25) renamed the four `new-story-N`
+stories to real addresses, recorded each old slug, and tagged all six with kind + destinations.
+Verified live: old urls 308, trip pages show the panel, destination pages list guides, sitemap
+carries the new urls only.
+
+**Known gap until build 2: admin has NO fields for kind, destinations, keyword, summary or faqs**,
+and renaming a slug in admin does not record `oldSlugs`, so an admin rename still breaks the old
+url. The editor spreads unknown fields (`{...p, ...patch}`), so a save does NOT wipe what the script
+wrote — but a stale admin tab opened before the migration will, if saved. Reload before saving.
 
 ### 2026-09-19 — Search Console "not indexed" report: redirects for every URL that still earns ranking
 
@@ -752,6 +793,16 @@ Verified against production on 2026-09-05 unless marked otherwise.
 ### Do this first
 
 *Every item below was re-verified against production on 2026-09-10 and is genuinely still open.*
+
+0. **SEO content system, builds 2-4** (design: `docs/superpowers/specs/2026-09-19-seo-content-strategy-design.md`):
+   - **Build 2 — admin fields for stories.** kind, destinations, keyword (with a duplicate warning),
+     summary, FAQs, and a slug rename that records `oldSlugs`. Until this lands, those fields can
+     only be set by a script on the VPS, and an admin rename silently breaks the old url.
+   - Build 3 — token-protected draft + facts endpoints for the writer. Build 4 — the n8n keyword
+     finder and daily draft writer, 5 drafts a week, nothing auto-publishes.
+   - **Owner input needed:** the story "I Came for the Stars, But I Found Something More" (Shivam,
+     Mumbai) names no place anywhere in its text, so it has no `destinations` tag and appears on no
+     trip or destination page. Which batch was it?
 
 1. **Two DNS records did not survive the Cloudflare nameserver switch.** Add them in Cloudflare DNS,
    copying the values from Hostinger's email panel:
