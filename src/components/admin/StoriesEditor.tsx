@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useAdmin, Btn, Head, Field, Area, input, label } from "./ui";
 import MediaPicker from "./MediaPicker";
 import StoryMeta from "./StoryMeta";
+import StoryFaqs from "./StoryFaqs";
 import type { BlogPost } from "@/lib/types";
 
 const slugify = (s: string) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -91,6 +92,7 @@ export default function StoriesEditor() {
         </label>
         <Field l="tags (comma separated)" v={open.tags.join(", ")} on={(v) => upd({ tags: v.split(",").map((t) => t.trim()).filter(Boolean) })} />
         <StoryMeta post={open} all={posts} onChange={upd} />
+        <StoryFaqs faqs={open.faqs ?? []} onChange={(faqs) => upd({ faqs })} />
         <div className="sm:col-span-2"><Area l="excerpt (card + preview)" v={open.excerpt} on={(v) => upd({ excerpt: v })} rows={2} /></div>
         <div className="sm:col-span-2">
           <MediaPicker label="cover photo" value={open.cover} onChange={(p) => upd({ cover: p })} aspect="aspect-[16/9]" />
