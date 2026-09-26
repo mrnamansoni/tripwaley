@@ -1,6 +1,6 @@
 # Project Summary: Tripwaley
 
-Last updated: 2026-09-25
+Last updated: 2026-09-26
 
 ## Project Overview
 Tripwaley is a production-grade travel booking website for a premium, group-departure travel brand in India. It is a Next.js 16 site with 3D/scroll-driven visuals (React Three Fiber, GSAP, Lenis), city-aware pricing, a lead-capture booking flow, and a full custom admin panel (CMS-style) so the owner can edit trips, prices, departures, cities, media, reviews, and bookings without touching code. There is no database — everything is stored in JSON files under `data/`.
@@ -38,6 +38,44 @@ Tripwaley is a production-grade travel booking website for a premium, group-depa
 - **New standing rule from the owner (2026-08-01, still in effect):** never push any change to GitHub directly. Always explain the plan in chat first and wait for a clear "yes" before making or pushing any change.
 
 ## Recent Changes
+
+### 2026-09-26 — SEO stories, build 2: the admin can finally write those fields
+
+Plan: `docs/superpowers/plans/2026-09-25-seo-stories-build-2-admin.md`. Build 1 taught the site to
+READ six new story fields; nothing could write them but a script on the server, which is exactly
+what the owner hit when he opened Stories and saw the same nine boxes as before.
+
+Admin → Stories → edit now has: **topic** (Plan / Cost / By season / Trip report), **destinations**
+(tap-to-toggle chips, 18 places — this is what puts a story on a trip page), **keyword** with a
+warning naming any other story claiming it, **short answer**, and a **questions-and-answers**
+repeater that feeds the FAQ schema. A live counter shows body words, whether a short answer exists
+and how many questions. `StoryMeta.tsx` and `StoryFaqs.tsx` keep `StoriesEditor.tsx` readable.
+
+**Renaming a story in admin now keeps its old url.** `src/lib/storyCascade.ts` (a sibling of
+`slugCascade.ts`) detects the rename on the server and records the old slug; `/stories/[slug]` was
+already 308ing from `oldSlugs`. Done in the PUT handler, not the editor, so a script or the future
+draft writer gets the same protection.
+
+Four bugs the two review rounds caught, all silent, all worth knowing:
+1. **The editor's second save would have wiped what the server wrote.** Its `useState` seeded once
+   and never refreshed, so the save after a rename would have PUT the pre-rename rows and destroyed
+   the `oldSlugs` the cascade had just recorded — breaking the redirect it exists to create. It now
+   re-seeds from the server, but ONLY after its own successful save.
+2. **Too broad a re-seed would have eaten unsaved edits.** `MediaPicker` reloads the provider after
+   a cover upload; re-seeding on any reload meant uploading a photo mid-edit silently reverted the
+   title and body, and resurrected a locally deleted row. Hence "only after its own save".
+3. **A slug collision merged two stories.** The open story was identified BY SLUG while the slug box
+   rewrote it per keystroke, so backspacing through another story's slug made edits apply to both
+   rows. The editor now tracks the open story by position, and the server rejects duplicate slugs.
+4. **The publish badge read `published` while the site reads `isStoryLive`**, so a
+   `published: true, status: "draft"` row (what build 3's writer produces) would have shown "live"
+   in admin while the site hid it. Both the badge and the toggle now use `isStoryLive`.
+
+Validation stays shape-only, per the owner's 2026-09-19 call: an unknown topic or status is
+rejected, but an unknown destination slug is dropped with a log rather than blocking the save, blank
+FAQ rows are dropped silently, and nothing is ever refused for being short, thin or sharing a
+keyword. A rename batched with a delete cannot be tracked (the array length changed, so position no
+longer identifies a row) — the server logs a warning naming the slugs instead of guessing.
 
 ### 2026-09-25 — SEO stories, build 1: every story is a page that can rank
 
@@ -795,9 +833,7 @@ Verified against production on 2026-09-05 unless marked otherwise.
 *Every item below was re-verified against production on 2026-09-10 and is genuinely still open.*
 
 0. **SEO content system, builds 2-4** (design: `docs/superpowers/specs/2026-09-19-seo-content-strategy-design.md`):
-   - **Build 2 — admin fields for stories.** kind, destinations, keyword (with a duplicate warning),
-     summary, FAQs, and a slug rename that records `oldSlugs`. Until this lands, those fields can
-     only be set by a script on the VPS, and an admin rename silently breaks the old url.
+   - ~~Build 2 — admin fields for stories~~ **DONE 2026-09-26.**
    - Build 3 — token-protected draft + facts endpoints for the writer. Build 4 — the n8n keyword
      finder and daily draft writer, 5 drafts a week, nothing auto-publishes.
    - **Owner input needed:** the story "I Came for the Stars, But I Found Something More" (Shivam,
