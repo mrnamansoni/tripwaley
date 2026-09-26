@@ -12,7 +12,7 @@
  */
 
 import assert from "node:assert/strict";
-import { detectStoryRenames, applyStoryRenames } from "../src/lib/storyCascade.ts";
+import { detectStoryRenames, applyStoryRenames, dropAliasesOwnedByLiveStories } from "../src/lib/storyCascade.ts";
 
 let n = 0;
 const ok = (label) => { n++; console.log(`  ✓ ${label}`); };
@@ -67,6 +67,22 @@ console.log("\nrecording the old address");
   applyStoryRenames(posts, [{ from: "x", to: "b" }]);
   assert.deepEqual(posts[1].oldSlugs, [], "a slug reused by a live story must stop being an alias");
   ok("a slug that becomes a real story again stops redirecting elsewhere");
+}
+
+console.log("\ndropping aliases owned by live stories directly");
+{
+  // this is the standalone export the route now calls on every save, not
+  // only when applyStoryRenames already ran a rename
+  const posts = [post("b"), post("a", { oldSlugs: ["b", "z"] })];
+  dropAliasesOwnedByLiveStories(posts);
+  assert.deepEqual(posts[1].oldSlugs, ["z"], "an alias slug now owned by a real story is dropped, others survive");
+  ok("a newly created story at an aliased slug stops being redirected away");
+}
+{
+  const posts = [post("a", { oldSlugs: ["x", "y"] })];
+  dropAliasesOwnedByLiveStories(posts);
+  assert.deepEqual(posts[0].oldSlugs, ["x", "y"]);
+  ok("aliases that no story owns are left alone");
 }
 
 console.log(`\n${n} passed\n`);

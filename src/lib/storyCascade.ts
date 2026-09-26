@@ -45,12 +45,20 @@ export function applyStoryRenames(posts: BlogPost[], renames: StoryRename[]): nu
     owner.oldSlugs = [...old];
     moved++;
   }
-  /* A slug that is a real story again must stop redirecting: otherwise
-     /stories/b would 308 to /stories/a while b is itself a published page. */
+  dropAliasesOwnedByLiveStories(posts);
+  return moved;
+}
+
+/** A slug that is a real story again must stop redirecting: otherwise
+ *  /stories/b would 308 to /stories/a while b is itself a published page.
+ *  Runs after a rename (via applyStoryRenames) but also belongs on every
+ *  save — a brand-new story can be created at a slug that used to be
+ *  someone else's alias, and that alias has to give way immediately, not
+ *  only the next time something gets renamed. Mutates `posts`. */
+export function dropAliasesOwnedByLiveStories(posts: BlogPost[]): void {
   const live = new Set(posts.map((p) => p.slug));
   for (const p of posts) {
     if (!p.oldSlugs?.length) continue;
     p.oldSlugs = p.oldSlugs.filter((s) => !live.has(s));
   }
-  return moved;
 }

@@ -27,7 +27,7 @@ export default function StoryMeta({
   const clash = duplicateKeywords(all).get((post.keyword ?? "").trim().toLowerCase().replace(/\s+/g, " "));
   const others = (clash ?? []).filter((s) => s !== post.slug);
 
-  const words = post.body.trim().split(/\s+/).filter(Boolean).length;
+  const words = (post.body ?? "").trim().split(/\s+/).filter(Boolean).length;
 
   return (
     <>

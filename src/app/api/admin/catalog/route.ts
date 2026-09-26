@@ -13,7 +13,7 @@ import { listMedia, readBookings, readCatalog, readReviews, readSeedCatalog, wri
 import { isSeedSection, removalsForSection } from "@/lib/seedGuard";
 import { SLOT_DEFS, CONTENT_DEFS, resolveSlot, PAGE_SECTION_DEFS, isValidMediaRef, CATEGORY_DEFS, CREATOR_POSE_DEFS } from "@/lib/types";
 import { applySlugRenames, detectSlugRenames } from "@/lib/slugCascade";
-import { applyStoryRenames, detectStoryRenames } from "@/lib/storyCascade";
+import { applyStoryRenames, detectStoryRenames, dropAliasesOwnedByLiveStories } from "@/lib/storyCascade";
 import { DESTINATIONS } from "@/lib/destinations";
 import type { BlogPost, Captain, CollegeTrip, Coupon, Catalog, City, Creator, Departure, Faq, Package, PriceRule, Review, WireEntry } from "@/lib/types";
 
@@ -224,19 +224,20 @@ function validate(section: string, data: unknown): string | null {
     case "posts": {
       /* Shape only. A story is never rejected for being short, thin, or
          sharing a keyword with another — that was the owner's explicit call
-         on 2026-09-19. What is rejected is a value the site cannot render:
-         a topic outside the four, or a destination slug that does not exist. */
+         on 2026-09-19. What is rejected is a shape the site cannot render at
+         all: an unknown topic/status (impossible from the UI, would render
+         wrongly), or two stories at one address (one becomes unreachable).
+         An unknown destination slug degrades harmlessly instead — the posts
+         block below drops it rather than failing the whole save. */
       const kinds = new Set(["guide", "cost", "seasonal", "report"]);
-      const places = new Set(DESTINATIONS.map((d) => d.slug));
+      const seenSlugs = new Set<string>();
       for (const p of data as BlogPost[]) {
         if (!isStr(p.slug) || !p.slug || !isStr(p.title) || typeof p.published !== "boolean") return "invalid post row";
+        if (seenSlugs.has(p.slug)) return `two stories can't share the slug "${p.slug}" — one of them would become unreachable`;
+        seenSlugs.add(p.slug);
         if (p.kind != null && !kinds.has(p.kind)) return `${p.slug}: unknown topic "${p.kind}"`;
         if (p.status != null && !["draft", "approved", "published"].includes(p.status)) return `${p.slug}: unknown status "${p.status}"`;
-        if (p.destinations != null) {
-          if (!Array.isArray(p.destinations)) return `${p.slug}: destinations must be a list`;
-          const unknown = p.destinations.find((d) => !places.has(d));
-          if (unknown) return `${p.slug}: "${unknown}" is not one of our destinations`;
-        }
+        if (p.destinations != null && !Array.isArray(p.destinations)) return `${p.slug}: destinations must be a list`;
         if (p.faqs != null) {
           if (!Array.isArray(p.faqs)) return `${p.slug}: faqs must be a list`;
           if (p.faqs.some((f) => !isStr(f?.q) || !isStr(f?.a))) return `${p.slug}: every FAQ needs a question and an answer`;
@@ -292,12 +293,58 @@ export async function PUT(req: Request) {
     /* Same bargain as a package rename: a story's slug is its address, and
        the old one has to keep working. Done here rather than in the editor so
        it holds whoever saves — the admin UI, a script, or the draft writer. */
+    let postsToSave: BlogPost[] | undefined;
     if (section === "posts") {
-      const renames = detectStoryRenames(cat.posts ?? [], data as BlogPost[]);
+      const before = cat.posts ?? [];
+      // shallow-copy each row: applyStoryRenames/dropAliasesOwnedByLiveStories
+      // mutate rows in place, and the destination/FAQ cleanup below does too
+      const after = (data as BlogPost[]).map((p) => ({ ...p }));
+
+      const renames = detectStoryRenames(before, after);
       if (renames.length) {
-        const moved = applyStoryRenames(data as BlogPost[], renames);
+        const moved = applyStoryRenames(after, renames);
         console.log(`[admin] story slug rename ${renames.map((r) => `${r.from} -> ${r.to}`).join(", ")} — kept ${moved} old url(s) alive`);
+      } else if (before.length !== after.length) {
+        // rows were added/removed in the same save as a possible rename —
+        // detectStoryRenames correctly refuses to guess, so warn instead of
+        // silently losing the redirect. Never reject: this never blocks a save.
+        const beforeSlugs = new Set(before.map((p) => p.slug));
+        const afterSlugs = new Set(after.map((p) => p.slug));
+        const missing = [...beforeSlugs].filter((s) => !afterSlugs.has(s));
+        const added = [...afterSlugs].filter((s) => !beforeSlugs.has(s));
+        if (missing.length && added.length) {
+          console.warn(
+            `[admin] posts saved with rows added/removed — slug change(s) ${missing.map((s) => `${s} -> ?`).join(", ")}` +
+              ` could not be tracked, old url(s) may 404`
+          );
+        }
       }
+
+      // a slug that is a real story again must stop being an alias — on
+      // every save, not only right after a rename (a new story can land on
+      // a slug that used to redirect elsewhere)
+      dropAliasesOwnedByLiveStories(after);
+
+      // an unknown destination slug degrades harmlessly (the story just
+      // shows on no trip page), so drop it rather than fail the whole save
+      const knownDestinations = new Set(DESTINATIONS.map((d) => d.slug));
+      for (const p of after) {
+        if (!p.destinations?.length) continue;
+        const dropped = p.destinations.filter((d) => !knownDestinations.has(d));
+        if (dropped.length) {
+          p.destinations = p.destinations.filter((d) => knownDestinations.has(d));
+          console.warn(`[admin] ${p.slug}: dropped unknown destination slug(s) ${dropped.join(", ")}`);
+        }
+      }
+
+      // an unfilled "+ Add a question" row would publish a blank FAQ entry —
+      // drop it silently rather than blocking the save
+      for (const p of after) {
+        if (!p.faqs?.length) continue;
+        p.faqs = p.faqs.filter((f) => f.q.trim() && f.a.trim());
+      }
+
+      postsToSave = after;
     }
 
     if (section === "settings") cat.settings = { ...cat.settings, ...(data as Catalog["settings"]) };
@@ -308,7 +355,7 @@ export async function PUT(req: Request) {
     if (section === "media") cat.media = { ...cat.media, ...(data as Record<string, string[]>) };
     if (section === "content") cat.content = { ...cat.content, ...(data as Record<string, string>) };
     if (section === "faqs") cat.faqs = data as Faq[];
-    if (section === "posts") cat.posts = data as BlogPost[];
+    if (section === "posts") cat.posts = postsToSave;
     if (section === "pageSections") cat.pageSections = data as Record<string, Record<string, boolean>>;
     if (section === "wire") cat.wire = data as WireEntry[];
     if (section === "creators") cat.creators = data as Creator[];
