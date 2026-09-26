@@ -25,9 +25,10 @@ export function storyKind(p: BlogPost): StoryKind {
 
 /** Both switches must agree: admin's `published` toggle can always take a
  *  story down (published === false wins outright), and when `status` is
- *  present it must also say "published". This keeps the admin's publish
- *  toggle (StoriesEditor writes only `published`, never `status`) in
- *  control even after a row gains a `status` field. */
+ *  present it must also say "published". StoriesEditor writes both together,
+ *  but a row can still arrive with only one of them — from the tag-stories
+ *  migration, or from the draft writer — and the owner's publish toggle has
+ *  to stay in control of whatever arrives. */
 export function isStoryLive(p: BlogPost): boolean {
   return p.published !== false && (p.status ? p.status === "published" : true);
 }
