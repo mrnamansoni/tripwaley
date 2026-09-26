@@ -19,17 +19,26 @@ export default function StoriesEditor() {
   const [posts, setPosts] = useState<BlogPost[]>(data.catalog.posts ?? []);
   /* The server writes fields this editor has no control for — oldSlugs from
      the rename cascade, and later the draft writer's own. save() reloads the
-     provider, so re-seed from it whenever its posts array gets a new identity
-     (i.e. after every successful save): without this, the NEXT save would PUT
-     the pre-save rows and wipe them. Adjusting state during render (rather
-     than in a useEffect) is React's own documented pattern for "reset state
-     when a prop changes" — it avoids the extra commit a useEffect would need,
-     and this repo's lint (react-hooks/set-state-in-effect) rejects the effect
-     form outright. */
+     provider, so once OUR OWN save resolves, re-seed from the provider's next
+     posts identity: without this, the NEXT save would PUT the pre-save rows
+     and wipe the server's writes. Adjusting state during render (rather than
+     in a useEffect) is React's own documented pattern for "reset state when a
+     prop changes" — it avoids the extra commit a useEffect would need, and
+     this repo's lint (react-hooks/set-state-in-effect) rejects the effect
+     form outright.
+
+     The re-seed is gated on `expectServer` — set only by this editor's own
+     successful save — rather than firing on every identity change, because
+     ANY provider reload changes that identity, and MediaPicker calls
+     reload() after a plain cover-photo upload. Re-seeding on every reload
+     would silently discard in-progress edits (title/body typed since the
+     last save) and resurrect locally deleted rows. */
   const [seededFrom, setSeededFrom] = useState(data.catalog.posts);
-  if (seededFrom !== data.catalog.posts) {
+  const [expectServer, setExpectServer] = useState(false);
+  if (expectServer && seededFrom !== data.catalog.posts) {
     setSeededFrom(data.catalog.posts);
     setPosts(data.catalog.posts ?? []);
+    setExpectServer(false);
   }
 
   // Identified by position, not slug: the slug field rewrites live on every
@@ -42,7 +51,13 @@ export default function StoriesEditor() {
     setPosts((all) => all.map((p, i) => (i === openIdx ? { ...p, ...patch } : p)));
 
   const addNew = () => {
-    const slug = `new-story-${posts.length + 1}`;
+    // A deleted-then-recreated slot can make posts.length collide with an
+    // existing slug (e.g. delete #2 of 3, then add — length+1 repeats #3's
+    // slug). The server rejects duplicate slugs, so find the first
+    // new-story-N that's actually free.
+    let n = 1;
+    while (posts.some((p) => p.slug === `new-story-${n}`)) n++;
+    const slug = `new-story-${n}`;
     setPosts((all) => [
       { slug, title: "New story", excerpt: "", cover: "/images/group-mountains.jpg", body: "", author: "Tripwaley", date: new Date().toISOString().slice(0, 10), tags: [], published: false },
       ...all,
@@ -55,7 +70,7 @@ export default function StoriesEditor() {
       <>
         <Head title="Stories" sub="Blog posts for /stories. Draft = hidden from the site.">
           <Btn tone="ghost" onClick={addNew}>+ New story</Btn>
-          <Btn onClick={() => save("posts", posts)}>Save all</Btn>
+          <Btn onClick={async () => { if (await save("posts", posts)) setExpectServer(true); }}>Save all</Btn>
         </Head>
         <div className="divide-y divide-white/8 rounded-2xl border border-white/10">
           {posts.map((p, i) => (
@@ -67,7 +82,15 @@ export default function StoriesEditor() {
               <span className="hidden text-xs text-white/40 sm:block">{p.date}</span>
               <button
                 type="button"
-                onClick={() => setPosts((all) => all.map((x) => (x.slug === p.slug ? { ...x, published: !x.published, status: !x.published ? "published" : "draft" } : x)))}
+                onClick={() => {
+                  // The badge shows isStoryLive(p), not raw p.published, so the
+                  // toggle must flip the same computed value — otherwise a
+                  // {published: true, status: "draft"} row (the draft writer's
+                  // shape) shows "draft" but a click writes published: false,
+                  // a no-visible-effect click that takes two tries to publish.
+                  const live = !isStoryLive(p);
+                  setPosts((all) => all.map((x) => (x.slug === p.slug ? { ...x, published: live, status: live ? "published" : "draft" } : x)));
+                }}
                 className={`rounded-full px-3 py-1 text-[0.6rem] font-bold uppercase tracking-wider ${isStoryLive(p) ? "bg-success/20 text-success" : "bg-white/10 text-white/45"}`}
               >
                 {isStoryLive(p) ? "published" : "draft"}
@@ -86,7 +109,7 @@ export default function StoriesEditor() {
       <Head title={open.title} sub={`/stories/${open.slug}`}>
         <Btn tone="ghost" onClick={() => setOpenIdx(null)}>← Back</Btn>
         <Btn tone="danger" onClick={() => { setPosts((all) => all.filter((_, i) => i !== openIdx)); setOpenIdx(null); }}>Delete</Btn>
-        <Btn onClick={async () => { if (await save("posts", posts)) setOpenIdx(null); }}>Save all stories</Btn>
+        <Btn onClick={async () => { if (await save("posts", posts)) { setExpectServer(true); setOpenIdx(null); } }}>Save all stories</Btn>
       </Head>
       <div className="grid max-w-4xl gap-4 sm:grid-cols-2">
         <Field l="title" v={open.title} on={(v) => upd({ title: v })} />
@@ -117,7 +140,7 @@ export default function StoriesEditor() {
           <MediaPicker label="cover photo" value={open.cover} onChange={(p) => upd({ cover: p })} aspect="aspect-[16/9]" />
         </div>
         <div className="sm:col-span-2">
-          <Area l="body (blank line = new paragraph)" v={open.body} on={(v) => upd({ body: v })} rows={14} />
+          <Area l="body (blank line = new paragraph)" v={open.body ?? ""} on={(v) => upd({ body: v })} rows={14} />
         </div>
       </div>
     </>
