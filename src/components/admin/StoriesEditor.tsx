@@ -7,6 +7,7 @@
 import { useState } from "react";
 import { useAdmin, Btn, Head, Field, Area, input, label } from "./ui";
 import MediaPicker from "./MediaPicker";
+import StoryMeta from "./StoryMeta";
 import type { BlogPost } from "@/lib/types";
 
 const slugify = (s: string) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -46,7 +47,7 @@ export default function StoriesEditor() {
               <span className="hidden text-xs text-white/40 sm:block">{p.date}</span>
               <button
                 type="button"
-                onClick={() => setPosts((all) => all.map((x) => (x.slug === p.slug ? { ...x, published: !x.published } : x)))}
+                onClick={() => setPosts((all) => all.map((x) => (x.slug === p.slug ? { ...x, published: !x.published, status: !x.published ? "published" : "draft" } : x)))}
                 className={`rounded-full px-3 py-1 text-[0.6rem] font-bold uppercase tracking-wider ${p.published ? "bg-success/20 text-success" : "bg-white/10 text-white/45"}`}
               >
                 {p.published ? "published" : "draft"}
@@ -73,12 +74,23 @@ export default function StoriesEditor() {
         <Field l="author" v={open.author} on={(v) => upd({ author: v })} />
         <Field l="date" v={open.date} type="date" on={(v) => upd({ date: v })} />
         <label className={label}>status
-          <select value={open.published ? "1" : "0"} onChange={(e) => upd({ published: e.target.value === "1" })} className={input}>
+          <select
+            value={open.published ? "1" : "0"}
+            /* `published` is what the site actually obeys (isStoryLive), and
+               `status` is what the draft writer will set in build 3. Write
+               both together so they can never disagree. */
+            onChange={(e) => {
+              const live = e.target.value === "1";
+              upd({ published: live, status: live ? "published" : "draft" });
+            }}
+            className={input}
+          >
             <option value="1">published — live</option>
             <option value="0">draft — hidden</option>
           </select>
         </label>
         <Field l="tags (comma separated)" v={open.tags.join(", ")} on={(v) => upd({ tags: v.split(",").map((t) => t.trim()).filter(Boolean) })} />
+        <StoryMeta post={open} all={posts} onChange={upd} />
         <div className="sm:col-span-2"><Area l="excerpt (card + preview)" v={open.excerpt} on={(v) => upd({ excerpt: v })} rows={2} /></div>
         <div className="sm:col-span-2">
           <MediaPicker label="cover photo" value={open.cover} onChange={(p) => upd({ cover: p })} aspect="aspect-[16/9]" />
