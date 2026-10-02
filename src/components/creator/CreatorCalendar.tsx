@@ -102,7 +102,7 @@ export default function CreatorCalendar({ dates }: { dates: CalendarDate[] }) {
     <div className="mx-auto w-full max-w-7xl px-5 sm:px-8">
       {/* ---------- filters ---------- */}
       <div className="flex flex-wrap items-center gap-2.5">
-        <span className="mr-1 font-mono text-[0.56rem] uppercase tracking-[0.3em] text-white/35">filter</span>
+        <span className="mr-1 font-mono text-[0.56rem] uppercase tracking-[0.3em] text-white/55">filter</span>
         <Pill active={creator === "all"} onClick={() => { setCreator("all"); setDay(null); }}>
           All creators
         </Pill>
@@ -145,7 +145,7 @@ export default function CreatorCalendar({ dates }: { dates: CalendarDate[] }) {
         <div>
           <div className="grid grid-cols-7 gap-1.5">
             {WEEKDAYS.map((w) => (
-              <span key={w} className="pb-1 text-center font-mono text-[0.5rem] uppercase tracking-widest text-white/30">
+              <span key={w} className="pb-1 text-center font-mono text-[0.5rem] uppercase tracking-widest text-white/55">
                 {w[0]}
               </span>
             ))}
@@ -169,7 +169,7 @@ export default function CreatorCalendar({ dates }: { dates: CalendarDate[] }) {
                       ? "bg-gold text-ink"
                       : has
                         ? "border border-gold/45 bg-gold/10 text-white hover:border-gold hover:bg-gold/20"
-                        : "text-white/20"
+                        : "text-white/55"
                   }`}
                 >
                   {i + 1}
@@ -191,7 +191,7 @@ export default function CreatorCalendar({ dates }: { dates: CalendarDate[] }) {
             </button>
           )}
 
-          <p className="mt-5 border-t border-white/10 pt-4 text-xs leading-relaxed text-white/40">
+          <p className="mt-5 border-t border-white/10 pt-4 text-xs leading-relaxed text-white/55">
             Gold days have a creator on board. Tap one to see who&apos;s going and what&apos;s left.
           </p>
         </div>
@@ -259,7 +259,7 @@ function DateRow({ d }: { d: CalendarDate }) {
         {/* date block */}
         <div className="flex w-14 shrink-0 flex-col items-center rounded-xl bg-ink px-2 py-2 text-center ring-1 ring-white/10">
           <span className="font-display text-2xl font-extrabold leading-none text-gold">{dt.getDate()}</span>
-          <span className="mt-0.5 font-mono text-[0.5rem] uppercase tracking-widest text-white/45">
+          <span className="mt-0.5 font-mono text-[0.5rem] uppercase tracking-widest text-white/55">
             {dt.toLocaleDateString("en-IN", { month: "short" })}
           </span>
         </div>
@@ -275,7 +275,7 @@ function DateRow({ d }: { d: CalendarDate }) {
         <div className="min-w-0 flex-1">
           <Link href={d.href} className="font-display text-base font-extrabold text-white hover:text-gold">
             {d.creatorName}
-            <span className="ml-2 font-mono text-[0.6rem] font-normal tracking-wide text-white/35">{d.creatorHandle}</span>
+            <span className="ml-2 font-mono text-[0.6rem] font-normal tracking-wide text-white/55">{d.creatorHandle}</span>
           </Link>
           <p className="mt-0.5 truncate text-sm text-white/60">{d.packageName}</p>
           {d.hook && <p className="mt-1 hidden truncate font-script text-base text-gold/80 sm:block">&ldquo;{d.hook}&rdquo;</p>}
@@ -288,7 +288,7 @@ function DateRow({ d }: { d: CalendarDate }) {
           )}
           <div className="sm:w-32">
             <div className="flex items-center justify-between gap-2">
-              <span className={`font-mono text-[0.56rem] uppercase tracking-widest ${soldOut ? "text-white/35" : scarce ? "text-brand-bright" : "text-white/50"}`}>
+              <span className={`font-mono text-[0.56rem] uppercase tracking-widest ${soldOut ? "text-white/55" : scarce ? "text-brand-bright" : "text-white/50"}`}>
                 {soldOut ? "sold out" : `${d.seatsLeft} left`}
               </span>
             </div>
@@ -305,7 +305,7 @@ function DateRow({ d }: { d: CalendarDate }) {
           href={d.href}
           className={`w-full shrink-0 rounded-full px-5 py-2.5 text-center text-xs font-extrabold transition-colors sm:w-auto ${
             soldOut
-              ? "border border-white/20 text-white/45 hover:border-white/40"
+              ? "border border-white/20 text-white/55 hover:border-white/40"
               : "bg-gold text-ink hover:brightness-110"
           }`}
         >

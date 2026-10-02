@@ -13,8 +13,8 @@ import { useState } from "react";
 import { trackLead } from "@/lib/analytics";
 
 const input =
-  "mt-1.5 w-full rounded-xl border border-line bg-card px-4 py-3 text-[0.95rem] text-ink outline-none transition-colors placeholder:text-ink/30 focus:border-brand";
-const label = "block text-[0.62rem] font-bold uppercase tracking-[0.2em] text-ink/45";
+  "mt-1.5 w-full rounded-xl border border-line bg-card px-4 py-3 text-[0.95rem] text-ink outline-none transition-colors placeholder:text-ink/65 focus:border-brand";
+const label = "block text-[0.62rem] font-bold uppercase tracking-[0.2em] text-ink/65";
 
 export default function CollegeQuoteForm({
   title,
@@ -118,7 +118,7 @@ export default function CollegeQuoteForm({
                 href={waHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-8 inline-flex min-h-12 items-center gap-2.5 rounded-full bg-success px-6 py-3 text-sm font-bold text-white transition-transform hover:scale-[1.03]"
+                className="mt-8 inline-flex min-h-12 items-center gap-2.5 rounded-full bg-success-ink px-6 py-3 text-sm font-bold text-white transition-transform hover:scale-[1.03]"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M12 2a10 10 0 0 0-8.66 15L2 22l5.16-1.3A10 10 0 1 0 12 2Z" />
@@ -190,21 +190,21 @@ export default function CollegeQuoteForm({
                       <label className={label} htmlFor="cq-name">
                         your name
                       </label>
-                      <input id="cq-name" className={input} value={f.name} onChange={set("name")} placeholder="coordinator" />
+                      <input id="cq-name" className={input} value={f.name} onChange={set("name")} autoComplete="name" placeholder="coordinator" />
                     </div>
 
                     <div>
                       <label className={label} htmlFor="cq-phone">
                         mobile *
                       </label>
-                      <input id="cq-phone" className={input} value={f.phone} onChange={set("phone")} inputMode="tel" placeholder="10-digit mobile" required />
+                      <input id="cq-phone" className={input} value={f.phone} onChange={set("phone")} type="tel" inputMode="tel" autoComplete="tel-national" placeholder="10-digit mobile" required />
                     </div>
 
                     <div className="sm:col-span-2">
                       <label className={label} htmlFor="cq-email">
                         email
                       </label>
-                      <input id="cq-email" className={input} value={f.email} onChange={set("email")} inputMode="email" placeholder="for the quote PDF" />
+                      <input id="cq-email" className={input} value={f.email} onChange={set("email")} type="email" inputMode="email" autoComplete="email" placeholder="for the quote PDF" />
                     </div>
 
                     <div className="sm:col-span-2">
@@ -228,7 +228,7 @@ export default function CollegeQuoteForm({
                   >
                     {phase === "sending" ? "Sending…" : "Get our quote →"}
                   </button>
-                  <p className="mt-3 text-[0.72rem] leading-relaxed text-ink/45">
+                  <p className="mt-3 text-[0.72rem] leading-relaxed text-ink/65">
                     We use your number only to send this quote. No spam, ever.
                   </p>
                 </form>

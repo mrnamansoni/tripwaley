@@ -6,6 +6,7 @@
 
 import { useEffect, useRef } from "react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
+import { prefersReducedMotion } from "@/lib/motion";
 
 const ROWS = [
   { words: ["LEAVE", "·", "THE", "·", "GROUP CHAT", "·", "LEAVE", "·", "THE", "·", "GROUP CHAT"], dir: 1 },
@@ -16,6 +17,8 @@ export default function MomentumBreak() {
   const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
+    // reduced motion: content is already in its finished, visible state
+    if (prefersReducedMotion()) return;
     const ctx = gsap.context(() => {
       const rows = gsap.utils.toArray<HTMLElement>("[data-mb-row]");
       rows.forEach((row, i) => {

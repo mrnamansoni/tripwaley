@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "@/lib/gsap";
+import { prefersReducedMotion } from "@/lib/motion";
 import RouteDraw from "@/components/svg/RouteDraw";
 import { testimonials, vibes } from "@/lib/data";
 import { useBooking } from "@/components/booking/BookingContext";
@@ -37,6 +38,10 @@ export default function VibeCheck() {
   useEffect(() => {
     if (!revealed || !resultRef.current) return;
     const target = scoreFor(picked);
+    if (prefersReducedMotion()) {
+      if (scoreRef.current) scoreRef.current.textContent = String(target);
+      return;
+    }
     const counter = { v: 0 };
     const ctx = gsap.context(() => {
       gsap.fromTo(
@@ -60,7 +65,7 @@ export default function VibeCheck() {
       gsap.fromTo(
         "[data-vibe-avatar]",
         { scale: 0 },
-        { scale: 1, duration: 0.5, ease: "back.out(2)", stagger: 0.07, delay: 0.15 }
+        { scale: 1, duration: 0.5, ease: "power3.out", stagger: 0.07, delay: 0.15 }
       );
     }, resultRef);
     return () => ctx.revert();
@@ -116,7 +121,7 @@ export default function VibeCheck() {
           {!revealed ? (
             <>
               <h3 className="font-display text-2xl font-extrabold">Co-traveller vibe check</h3>
-              <p className="mt-1.5 text-sm text-ink/60">
+              <p className="mt-1.5 text-sm text-ink/65">
                 Pick up to {MAX_PICKS} — we&apos;ll match you with a batch. ({picked.length}/{MAX_PICKS})
               </p>
               <div className="mt-5 flex flex-wrap gap-2.5" role="group" aria-label="Pick your travel vibes">
@@ -173,7 +178,7 @@ export default function VibeCheck() {
                   +12
                 </span>
               </div>
-              <p className="mt-2 text-sm text-ink/60">
+              <p className="mt-2 text-sm text-ink/65">
                 Your August batch so far — 18 travellers, avg age 26.
               </p>
 
@@ -213,7 +218,7 @@ export default function VibeCheck() {
                   setRevealed(false);
                   setPicked([]);
                 }}
-                className="mt-3 w-full text-center text-sm font-semibold text-ink/50 underline decoration-2 underline-offset-4 transition-colors hover:text-brand"
+                className="mt-3 w-full text-center text-sm font-semibold text-ink/65 underline decoration-2 underline-offset-4 transition-colors hover:text-brand"
               >
                 Retake the check
               </button>

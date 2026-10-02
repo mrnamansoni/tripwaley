@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { REFUND_SLAB } from "@/lib/refunds";
 import Link from "next/link";
 import LegalPage, { Clause, PolicyPreamble } from "@/components/site/LegalPage";
 import { getSettings, holdRates } from "@/lib/catalog";
@@ -13,14 +14,8 @@ export const metadata: Metadata = {
 
 const UPDATED = "2026-09-05";
 
-/* The refund slab. Kept as data, not prose, because a payment gateway
-   reviewer and a traveller both scan for the table — and because the owner
-   will want to tune the windows without rewriting a legal paragraph. */
-const SLAB: { window: string; refund: string; tone: "good" | "mid" | "bad" }[] = [
-  { window: "7 days or more before departure", refund: "100% refund", tone: "good" },
-  { window: "3 to 6 days before departure", refund: "50% refund", tone: "mid" },
-  { window: "Less than 3 days before departure, or no-show", refund: "No refund", tone: "bad" },
-];
+/* the slab lives in lib/refunds.ts — trip-page FAQs read the same rows */
+const SLAB = REFUND_SLAB;
 
 const TONE = {
   good: "bg-success/12 text-success",
@@ -86,10 +81,10 @@ export default function RefundPolicyPage() {
           <table className="w-full min-w-[26rem] border-separate border-spacing-0 text-left">
             <thead>
               <tr>
-                <th className="rounded-l-xl border-y border-l border-line bg-cream px-4 py-3 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-ink/45">
+                <th className="rounded-l-xl border-y border-l border-line bg-cream px-4 py-3 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-ink/65">
                   when you cancel
                 </th>
-                <th className="rounded-r-xl border-y border-r border-line bg-cream px-4 py-3 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-ink/45">
+                <th className="rounded-r-xl border-y border-r border-line bg-cream px-4 py-3 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-ink/65">
                   you get back
                 </th>
               </tr>

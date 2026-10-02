@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import SiteMedia from "@/components/site/SiteMedia";
 import { gsap } from "@/lib/gsap";
+import { prefersReducedMotion } from "@/lib/motion";
 import { moments as defaultMoments, type Moment } from "@/lib/data";
 
 /**
@@ -50,6 +51,8 @@ export default function TripMoments({ moments = defaultMoments }: { moments?: Mo
   const [active, setActive] = useState(0);
 
   useEffect(() => {
+    // reduced motion: content is already in its finished, visible state
+    if (prefersReducedMotion()) return;
     const ctx = gsap.context(() => {
       gsap.fromTo(
         "[data-moment-head]",
@@ -171,7 +174,7 @@ export default function TripMoments({ moments = defaultMoments }: { moments?: Mo
           })}
         </div>
 
-        <p className="mt-6 text-center text-xs font-semibold uppercase tracking-[0.2em] text-white/35">
+        <p className="mt-6 text-center text-xs font-semibold uppercase tracking-[0.2em] text-white/55">
           every departure · every batch · already in the price
         </p>
       </div>

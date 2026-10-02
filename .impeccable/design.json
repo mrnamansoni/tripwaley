@@ -1,0 +1,467 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-28T19:14:47.536Z",
+  "title": "Design System: Tripwaley",
+  "extensions": {
+    "colorMeta": {
+      "brand": {
+        "role": "primary",
+        "displayName": "Chilli Red",
+        "canonical": "#c91b20",
+        "tonalRamp": [
+          "#43090b",
+          "#700f12",
+          "#9d1519",
+          "#ca1b20",
+          "#e64247",
+          "#ed787b",
+          "#f5b7b9",
+          "#fce9e9"
+        ]
+      },
+      "brand-bright": {
+        "role": "primary",
+        "displayName": "Bright Chilli",
+        "canonical": "#e82028",
+        "tonalRamp": [
+          "#45070a",
+          "#740c10",
+          "#a21116",
+          "#d0151d",
+          "#eb3d44",
+          "#f17479",
+          "#f7b5b8",
+          "#fde8e9"
+        ]
+      },
+      "brand-soft": {
+        "role": "primary",
+        "displayName": "Soft Chilli",
+        "canonical": "#ff7a7f",
+        "tonalRamp": [
+          "#4d0003",
+          "#800005",
+          "#b30007",
+          "#e60009",
+          "#ff2931",
+          "#ff666c",
+          "#ffadb0",
+          "#ffe5e6"
+        ]
+      },
+      "gold": {
+        "role": "secondary",
+        "displayName": "Sunrise Gold",
+        "canonical": "#f5a31a",
+        "tonalRamp": [
+          "#492f03",
+          "#7a4e05",
+          "#ab6e07",
+          "#dc8d0a",
+          "#f6ad32",
+          "#f9c46c",
+          "#fce0b1",
+          "#fef5e7"
+        ]
+      },
+      "gold-ink": {
+        "role": "secondary",
+        "displayName": "Burnt Gold",
+        "canonical": "#8a5605",
+        "tonalRamp": [
+          "#4a2e03",
+          "#7b4d04",
+          "#ac6b06",
+          "#dd8a08",
+          "#f8aa30",
+          "#fac26b",
+          "#fcdeb0",
+          "#fef5e6"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#1a1614",
+        "tonalRamp": [
+          "#2b2521",
+          "#483d37",
+          "#65554e",
+          "#826e64",
+          "#a28f86",
+          "#bcafa9",
+          "#dcd4d1",
+          "#f4f2f1"
+        ]
+      },
+      "reel-black": {
+        "role": "neutral",
+        "displayName": "Reel Black",
+        "canonical": "#0d0b09",
+        "tonalRamp": [
+          "#2d261f",
+          "#4b4034",
+          "#695949",
+          "#88735e",
+          "#a79480",
+          "#c0b3a5",
+          "#ded6cf",
+          "#f5f2f0"
+        ]
+      },
+      "coal": {
+        "role": "neutral",
+        "displayName": "Coal",
+        "canonical": "#111111",
+        "tonalRamp": [
+          "#262626",
+          "#404040",
+          "#595959",
+          "#737373",
+          "#949494",
+          "#b3b3b3",
+          "#d6d6d6",
+          "#f2f2f2"
+        ]
+      },
+      "cream": {
+        "role": "neutral",
+        "displayName": "Cream",
+        "canonical": "#fffcf8",
+        "tonalRamp": [
+          "#4d2c00",
+          "#804900",
+          "#b36600",
+          "#e68300",
+          "#ffa329",
+          "#ffbd66",
+          "#ffdcad",
+          "#fff4e5"
+        ]
+      },
+      "blush": {
+        "role": "neutral",
+        "displayName": "Blush",
+        "canonical": "#fef5f0",
+        "tonalRamp": [
+          "#481d05",
+          "#783008",
+          "#a7430b",
+          "#d7560e",
+          "#f27936",
+          "#f59f70",
+          "#faccb2",
+          "#fdefe7"
+        ]
+      },
+      "ticket-paper": {
+        "role": "neutral",
+        "displayName": "Ticket Paper",
+        "canonical": "#f4efe4",
+        "tonalRamp": [
+          "#362c16",
+          "#5b4a25",
+          "#7f6734",
+          "#a38542",
+          "#c1a567",
+          "#d3bf92",
+          "#e7ddc5",
+          "#f8f4ed"
+        ]
+      },
+      "card": {
+        "role": "neutral",
+        "displayName": "Card White",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#262626",
+          "#404040",
+          "#595959",
+          "#737373",
+          "#949494",
+          "#b3b3b3",
+          "#d6d6d6",
+          "#f2f2f2"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Warm Line",
+        "canonical": "#eae4dd",
+        "tonalRamp": [
+          "#2f271d",
+          "#4f4131",
+          "#6e5b44",
+          "#8e7558",
+          "#ad967b",
+          "#c5b4a0",
+          "#e0d7cd",
+          "#f5f2ef"
+        ]
+      },
+      "success": {
+        "role": "semantic",
+        "displayName": "Go Green",
+        "canonical": "#1ab76a",
+        "tonalRamp": [
+          "#0a4327",
+          "#107041",
+          "#169c5b",
+          "#1dc974",
+          "#43e495",
+          "#79ecb4",
+          "#b8f5d7",
+          "#e9fcf2"
+        ]
+      },
+      "success-ink": {
+        "role": "semantic",
+        "displayName": "Deep Green",
+        "canonical": "#0f7a4a",
+        "tonalRamp": [
+          "#084429",
+          "#0e7245",
+          "#149f60",
+          "#19cc7c",
+          "#40e89c",
+          "#77eeb9",
+          "#b6f6d9",
+          "#e8fcf3"
+        ]
+      },
+      "trust": {
+        "role": "semantic",
+        "displayName": "Trust Blue",
+        "canonical": "#2f6fed",
+        "tonalRamp": [
+          "#061c46",
+          "#0a2e75",
+          "#0e41a4",
+          "#1253d3",
+          "#3a77ee",
+          "#729ef3",
+          "#b4cbf9",
+          "#e8effd"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Page-opening headlines; one word in brand or gold."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section headings."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Card titles, step names, FAQ questions."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Descriptive copy at 60-65% opacity, about 36rem wide."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Uppercase slate marks: eyebrows, stat captions, chips."
+      },
+      "data": {
+        "displayName": "Data",
+        "purpose": "Mono film-strip frame numbers, departure-board rows, ticket codes."
+      },
+      "script": {
+        "displayName": "Script",
+        "purpose": "One Caveat caption per section, lowercase and conversational."
+      }
+    },
+    "shadows": [
+      {
+        "name": "card",
+        "value": "0 1px 2px rgba(26,22,20,0.05), 0 8px 24px -8px rgba(26,22,20,0.12)",
+        "purpose": "Cards at rest on cream."
+      },
+      {
+        "name": "card-lg",
+        "value": "0 2px 4px rgba(26,22,20,0.06), 0 24px 48px -16px rgba(26,22,20,0.22)",
+        "purpose": "Hovered cards, modals, featured cards."
+      },
+      {
+        "name": "red",
+        "value": "0 8px 28px -8px rgba(201,27,32,0.45)",
+        "purpose": "Under the primary red button only."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-soft",
+        "value": "cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "House easing for entrances and state changes."
+      },
+      {
+        "name": "marquee",
+        "value": "42s linear infinite",
+        "purpose": "Duplicated-track marquees; pause on hover and under reduced motion."
+      },
+      {
+        "name": "live-pulse",
+        "value": "1.6s ease-in-out infinite",
+        "purpose": "Urgency dot on chips."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "xl",
+        "value": "1280px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one red call to action per viewport: Hold your seat.",
+      "html": "<button class=\"ds-btn-primary\">Hold your seat</button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;min-height:48px;border-radius:9999px;background:#c91b20;color:#fff;padding:12px 28px;font:800 14px/1 \"Instrument Sans\",system-ui,sans-serif;border:0;box-shadow:0 8px 28px -8px rgba(201,27,32,.45);transition:background .2s,transform .2s;cursor:pointer}.ds-btn-primary:hover{background:#e82028}.ds-btn-primary:active{transform:scale(.97)}.ds-btn-primary:focus-visible{outline:2px solid #c91b20;outline-offset:3px}"
+    },
+    {
+      "name": "Ghost Button (dark)",
+      "kind": "button",
+      "refersTo": "button-ghost-dark",
+      "description": "Secondary action on cinematic dark grounds.",
+      "html": "<div class=\"ds-dark\"><button class=\"ds-btn-ghost-dark\">See all departures</button></div>",
+      "css": ".ds-dark{background:#1a1614;padding:24px}.ds-btn-ghost-dark{display:inline-flex;align-items:center;min-height:48px;border-radius:9999px;background:transparent;color:#fff;border:1px solid rgba(255,255,255,.25);padding:12px 24px;font:700 14px/1 \"Instrument Sans\",system-ui,sans-serif;transition:color .2s,border-color .2s;cursor:pointer}.ds-btn-ghost-dark:hover{color:#f5a31a;border-color:#f5a31a}.ds-btn-ghost-dark:focus-visible{outline:2px solid #c91b20;outline-offset:3px}"
+    },
+    {
+      "name": "Ghost Button (light)",
+      "kind": "button",
+      "refersTo": "button-ghost-light",
+      "description": "Secondary action on cream; the WhatsApp variant turns green.",
+      "html": "<button class=\"ds-btn-ghost-light\">WhatsApp us</button>",
+      "css": ".ds-btn-ghost-light{display:inline-flex;align-items:center;min-height:44px;border-radius:9999px;background:#fff;color:#1a1614;border:1px solid #eae4dd;padding:8px 16px;font:700 14px/1 \"Instrument Sans\",system-ui,sans-serif;transition:color .2s,border-color .2s;cursor:pointer}.ds-btn-ghost-light:hover{color:#0f7a4a;border-color:#1ab76a}.ds-btn-ghost-light:focus-visible{outline:2px solid #c91b20;outline-offset:3px}"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Booking and lead fields on light grounds.",
+      "html": "<label class=\"ds-field\">Mobile number<input class=\"ds-input\" placeholder=\"10-digit mobile\"></label>",
+      "css": ".ds-field{display:block;font:700 12px/1.4 \"Instrument Sans\",system-ui,sans-serif;color:#1a1614}.ds-input{display:block;margin-top:6px;width:100%;box-sizing:border-box;border-radius:12px;border:1px solid #eae4dd;background:#fff;color:#1a1614;padding:12px 16px;font:400 16px/1.4 \"Instrument Sans\",system-ui,sans-serif;outline:none;transition:box-shadow .2s,border-color .2s}.ds-input:focus{border-color:#c91b20;box-shadow:0 0 0 3px rgba(201,27,32,.12)}"
+    },
+    {
+      "name": "Status Chip",
+      "kind": "chip",
+      "refersTo": "chip-status",
+      "description": "Urgency and availability chips.",
+      "html": "<span class=\"ds-chip ds-chip-red\">Filling fast</span> <span class=\"ds-chip ds-chip-green\">Seats open</span>",
+      "css": ".ds-chip{display:inline-flex;align-items:center;border-radius:9999px;padding:4px 10px;font:700 10px/1 \"Instrument Sans\",system-ui,sans-serif;text-transform:uppercase;letter-spacing:.05em}.ds-chip-red{background:#c91b20;color:#fff}.ds-chip-green{background:rgba(26,183,106,.15);color:#0f7a4a}"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Content card on cream; lifts on hover.",
+      "html": "<div class=\"ds-card\"><p class=\"ds-card-t\">Pick &amp; hold</p><p class=\"ds-card-b\">Choose a trip and date, and hold your seat with a small advance.</p></div>",
+      "css": ".ds-card{max-width:320px;border-radius:24px;border:1px solid #eae4dd;background:#fff;padding:28px;box-shadow:0 1px 2px rgba(26,22,20,.05),0 8px 24px -8px rgba(26,22,20,.12);transition:transform .5s cubic-bezier(.22,1,.36,1),box-shadow .5s}.ds-card:hover{transform:translateY(-4px);box-shadow:0 2px 4px rgba(26,22,20,.06),0 24px 48px -16px rgba(26,22,20,.22)}.ds-card-t{margin:0;font:800 24px/1.2 \"Bricolage Grotesque\",system-ui,sans-serif;color:#c91b20}.ds-card-b{margin:12px 0 0;font:400 14px/1.6 \"Instrument Sans\",system-ui,sans-serif;color:rgba(26,22,20,.65)}"
+    },
+    {
+      "name": "Ticket-stub Trip Card",
+      "kind": "custom",
+      "refersTo": "ticket-card",
+      "description": "Signature trip card with a punched tear line.",
+      "html": "<div class=\"ds-ticket\"><div class=\"ds-ticket-main\"><p class=\"ds-ticket-k\">Dehradun to Kedarkantha</p><p class=\"ds-ticket-t\">Kedarkantha Winter Trek</p></div><div class=\"ds-ticket-stub\"><span class=\"ds-ticket-k\">from</span>Rs 8,999</div></div>",
+      "css": ".ds-ticket{display:flex;width:304px;border-radius:16px;overflow:hidden;background:#f4efe4;box-shadow:0 2px 4px rgba(26,22,20,.06),0 24px 48px -16px rgba(26,22,20,.22);transition:transform .3s}.ds-ticket:hover{transform:translateY(-4px)}.ds-ticket-main{flex:1;padding:16px;border-right:2px dashed rgba(13,11,9,.25)}.ds-ticket-stub{padding:16px;display:flex;flex-direction:column;justify-content:center;font:800 18px/1.1 \"Bricolage Grotesque\",system-ui,sans-serif;color:#c91b20}.ds-ticket-k{margin:0;font:400 10px/1.3 ui-monospace,Menlo,monospace;letter-spacing:.1em;text-transform:uppercase;color:rgba(26,22,20,.55)}.ds-ticket-t{margin:6px 0 0;font:800 18px/1.15 \"Bricolage Grotesque\",system-ui,sans-serif;color:#1a1614}"
+    },
+    {
+      "name": "Navigation",
+      "kind": "nav",
+      "refersTo": "",
+      "description": "Desktop bar with a WhatsApp ghost button and the red primary.",
+      "html": "<nav class=\"ds-nav\"><span class=\"ds-nav-logo\">tripwaley</span><span class=\"ds-nav-links\"><a>Trips</a><a>Destinations</a><a>Stories</a></span><a class=\"ds-nav-cta\">Hold your seat</a></nav>",
+      "css": ".ds-nav{display:flex;align-items:center;justify-content:space-between;gap:16px;height:72px;padding:0 24px;background:#fffcf8;font:700 14px/1 \"Instrument Sans\",system-ui,sans-serif;color:#1a1614}.ds-nav-logo{font:800 20px/1 \"Bricolage Grotesque\",system-ui,sans-serif;color:#c91b20}.ds-nav-links{display:flex;gap:20px}.ds-nav-links a{cursor:pointer;transition:color .2s}.ds-nav-links a:hover{color:#c91b20}.ds-nav-cta{display:inline-flex;align-items:center;min-height:44px;border-radius:9999px;background:#c91b20;color:#fff;padding:10px 20px;box-shadow:0 8px 28px -8px rgba(201,27,32,.45);cursor:pointer}.ds-nav-cta:hover{background:#e82028}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Trip Reel",
+    "overview": "Tripwaley plays like the film of your batch. The homepage opens on a title card (\"SCENE ON HAI\", \"scroll · roll · camera\"), photographs cut in like footage, script captions sit over images like home-video subtitles, and the site ends on a curtain footer. Travel paperwork is the reel's props: departure boards, ticket stubs with punched holes, a receipt printer, a final boarding call. Everything is here to make a stranger picture themselves on the next batch.\n\nThe rhythm alternates: dark cinematic scenes on reel-black carry the emotion (heroes, the about story, reviews), and warm cream daylight sections carry the facts (prices, itineraries, FAQs). Type does the shouting in heavy, tight Bricolage Grotesque; body copy stays quiet in Instrument Sans. Red is the call to action and gold is the light in the dark: sun, highlights and the emphasised word of a headline.\n\nIt is dense and energetic without being a dashboard: large display type, full-bleed photography, and many small uppercase labels acting as the reel's credits and slate marks. The owner confirmed on 2026-09-28 that the current look is right; this document records it rather than redirecting it.",
+    "keyCharacteristics": [
+      "Film and travel-document metaphors carried by real components, not decoration",
+      "Dark cinematic scenes alternate with cream daylight sections",
+      "Heavy, tight display type with one word per headline picked out in brand red or gold",
+      "Handwritten Caveat captions as the voice of the crew",
+      "Pill-shaped actions, generous rounded cards, warm (never pure-black) shadows",
+      "Motion is scroll-driven (GSAP + Lenis); CSS loops have reduced-motion paths, most GSAP timelines do not yet (audit 2026-09-28)"
+    ],
+    "rules": [
+      {
+        "name": "The Locked Palette Rule",
+        "body": "Brand hues come from the logo: red, gold, ink. Do not introduce a new hue; express variety with tints of these and with photography.",
+        "section": "colors"
+      },
+      {
+        "name": "The Ink-Safe Gold Rule",
+        "body": "Gold and green are for fills, borders and text on dark grounds. On cream or white, text uses gold-ink or success-ink, never the originals.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Red Rule",
+        "body": "One red call to action per viewport. When two compete, one becomes a ghost button.",
+        "section": "colors"
+      },
+      {
+        "name": "The Readable Faint Rule",
+        "body": "Muted text never drops below `ink/65` on light grounds (5.3:1 on every light ground in use, ticket paper included) or `white/55` on dark ones (6:1). Fainter tints are for borders, dividers and decoration only. White text never sits on the bright `success` green; use `success-ink` as the fill (5.4:1).",
+        "section": "colors"
+      },
+      {
+        "name": "The One Script Line Rule",
+        "body": "Caveat appears at most once per section, as a caption or kicker. It never carries a heading, a price or instructions.",
+        "section": "typography"
+      },
+      {
+        "name": "The Coloured Word Rule",
+        "body": "A headline highlights one word or phrase, never more, in brand on light grounds and gold on dark ones.",
+        "section": "typography"
+      },
+      {
+        "name": "The Warm Shadow Rule",
+        "body": "Shadows are tinted with ink (26,22,20), never neutral black, and the red glow belongs to the primary button alone.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Film Grain Rule",
+        "body": "Dark cinematic grounds may carry the `.noise` grain overlay at about 4.5% opacity; daylight sections never do.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do alternate dark cinematic scenes with cream daylight sections so emotion and facts take turns.",
+      "Do keep one red primary action per viewport, and put it where the thumb is on phones.",
+      "Do use gold-ink (#8a5605) and success-ink (#0f7a4a) for gold or green text on light grounds.",
+      "Do give every looping or scroll-driven animation a `prefers-reduced-motion` path: CSS loops in `globals.css` have one; GSAP timelines need `gsap.matchMedia()` too.",
+      "Do use real photographs of real batches for imagery."
+    ],
+    "donts": [
+      "Don't add a hue outside red, gold and ink; the palette is locked to the logo.",
+      "Don't use Caveat for headings, prices or instructions.",
+      "Don't use pure-black shadows or put the red glow on anything but the primary button.",
+      "Don't use bounce or elastic easing; the house curve is `cubic-bezier(0.22, 1, 0.36, 1)`.",
+      "Don't set gold (#f5a31a) or green (#1ab76a) as text on cream or white.",
+      "Don't set text fainter than ink/65 on light grounds or white/55 on dark grounds.",
+      "Don't hide content with GSAP `autoAlpha` (visibility:hidden) when it holds headings, links or buttons; animate `opacity` so it stays reachable, and give every GSAP timeline a reduced-motion branch."
+    ]
+  }
+}

@@ -137,7 +137,7 @@ export default function AskCreator({
           >
             Message {firstName} on WhatsApp →
           </a>
-          {handle && <p className="font-mono text-[0.6rem] uppercase tracking-[0.3em] text-white/35">{handle}</p>}
+          {handle && <p className="font-mono text-[0.6rem] uppercase tracking-[0.3em] text-white/55">{handle}</p>}
         </div>
       </div>
     </section>

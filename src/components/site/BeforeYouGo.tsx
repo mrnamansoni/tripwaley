@@ -28,25 +28,25 @@ export default function BeforeYouGo({ pkg }: { pkg: Package }) {
               {count} {count === 1 ? "piece" : "pieces"} on planning, cost and what it&apos;s actually like
             </span>
           </span>
-          <span aria-hidden="true" className="shrink-0 text-2xl text-ink/40 transition-transform group-open:rotate-45">+</span>
+          <span aria-hidden="true" className="shrink-0 text-2xl text-ink/65 transition-transform group-open:rotate-45">+</span>
         </summary>
 
         <div className="space-y-8 border-t border-line px-6 pb-7 pt-6">
           {groups.map((g) => (
             <div key={g.kind}>
               <p className="text-[0.62rem] font-bold uppercase tracking-[0.3em] text-ink/70">{g.label}</p>
-              <p className="mt-1 text-xs text-ink/55">{STORY_KINDS.find((k) => k.kind === g.kind)?.blurb}</p>
+              <p className="mt-1 text-xs text-ink/65">{STORY_KINDS.find((k) => k.kind === g.kind)?.blurb}</p>
               <ul className="mt-3 space-y-2.5">
                 {g.posts.map((p) => (
                   <li key={p.slug}>
                     <Link href={`/stories/${p.slug}`} className="group/row block rounded-xl px-3 py-2 transition-colors hover:bg-cream">
                       <span className="flex items-baseline justify-between gap-3">
                         <span className="font-semibold text-ink group-hover/row:text-brand">{p.title}</span>
-                        <span className="shrink-0 text-[0.68rem] font-bold uppercase tracking-wider text-ink/45">
+                        <span className="shrink-0 text-[0.68rem] font-bold uppercase tracking-wider text-ink/65">
                           {readingMinutes(p.body)} min
                         </span>
                       </span>
-                      {p.summary && <span className="mt-0.5 block text-sm leading-snug text-ink/60">{p.summary}</span>}
+                      {p.summary && <span className="mt-0.5 block text-sm leading-snug text-ink/65">{p.summary}</span>}
                     </Link>
                   </li>
                 ))}

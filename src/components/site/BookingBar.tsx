@@ -16,6 +16,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { gsap } from "@/lib/gsap";
+import { prefersReducedMotion } from "@/lib/motion";
 import { useCity } from "./CityProvider";
 import CouponField, { type AppliedCoupon } from "./CouponField";
 import { useModal } from "@/hooks/useModal";
@@ -257,20 +258,129 @@ export default function BookingBar({
     // conversion until payments exist
     trackLead({ slug: packageSlug, name: packageName, price: seat });
     // the printer moment: a stub prints out of the bar, then WhatsApp opens
-    gsap.fromTo("[data-bb-cta]", { scale: 0.94 }, { scale: 1, duration: 0.45, ease: "elastic.out(1.2,0.5)" });
+    if (!prefersReducedMotion()) gsap.fromTo("[data-bb-cta]", { scale: 0.94 }, { scale: 1, duration: 0.45, ease: "power3.out" });
     setStub(true);
-    requestAnimationFrame(() => {
+    if (!prefersReducedMotion()) requestAnimationFrame(() => {
       gsap.fromTo("[data-bb-stub]", { yPercent: 96 }, { yPercent: 0, duration: 0.9, ease: "power3.out" });
       gsap.fromTo("[data-bb-stamp]", { autoAlpha: 0, scale: 2.4, rotate: 12 }, { autoAlpha: 1, scale: 1, rotate: -7, duration: 0.35, ease: "power4.in", delay: 0.75 });
     });
     const msg = encodeURIComponent(
-      `Hi Tripwaley! Hold a seat for me:\n• ${packageName}\n• From ${bookCityName}\n• ${chosen ? `${weekday(chosen)}, ${shortDate(chosen)}` : "dates not published yet"}\n• ${pax} traveller${pax > 1 ? "s" : ""}, ${occ} sharing${seat != null ? ` — ${inr(seat)}/seat` : ""}${coupon ? `\n• Coupon: ${coupon.code} (${coupon.label}) — ${inr(coupon.total)}` : ""}${name ? `\n• Name: ${name}` : ""}\n• Mobile: ${phone.replace(/[^\d]/g, "").slice(-10)}`
+      `Hi Tripwaley! Reserve a seat for me:\n• ${packageName}\n• From ${bookCityName}\n• ${chosen ? `${weekday(chosen)}, ${shortDate(chosen)}` : "dates not published yet"}\n• ${pax} traveller${pax > 1 ? "s" : ""}, ${occ} sharing${seat != null ? ` — ${inr(seat)}/seat` : ""}${coupon ? `\n• Coupon: ${coupon.code} (${coupon.label}) — ${inr(coupon.total)}` : ""}${name ? `\n• Name: ${name}` : ""}\n• Mobile: ${phone.replace(/[^\d]/g, "").slice(-10)}`
     );
     setTimeout(() => {
       window.open(`https://wa.me/${whatsapp}?text=${msg}`, "_blank", "noopener");
       setBusy(false);
       setTimeout(() => setStub(false), 6000);
     }, 1400);
+  };
+
+  /* Sharing, travellers, boarding city and date. One definition, two homes:
+     inline in the bar from sm: up (compact pills), and inside the booking
+     sheet on phones (44px rows with labels). On a phone, four wrapped pill
+     rows made the sticky bar ~200px tall — a quarter of the screen — with
+     36px targets. `sheet` picks the phone layout. */
+  const pill = "rounded-full border border-white/15";
+  const tripControls = (sheet: boolean) => {
+    const row = sheet ? "flex items-center justify-between gap-3" : "contents";
+    const label = sheet ? "text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white/55" : "sr-only";
+    const select = sheet
+      ? "min-h-11 min-w-0 flex-1 rounded-xl border border-white/15 bg-black/30 px-3 text-sm font-bold text-white outline-none focus:border-gold [&>option]:text-ink"
+      : `${pill} min-h-10 bg-transparent px-4 py-2 text-xs font-bold text-white outline-none [&>option]:text-ink`;
+    const seg = sheet ? "min-h-11 px-4 text-xs" : "min-h-10 px-4 py-2 text-xs";
+    return (
+      <>
+        {/* occupancy toggle */}
+        <div className={row}>
+          {sheet && <span className={label}>Sharing</span>}
+          <div className={`flex overflow-hidden ${pill} ${sheet ? "" : "order-2"}`} role="group" aria-label="Sharing type">
+            {(["triple", "double"] as const).map((o) => (
+              <button
+                key={o}
+                type="button"
+                onClick={() => changeOcc(o)}
+                disabled={!rule?.[o]}
+                aria-pressed={occ === o}
+                className={`${seg} font-bold uppercase tracking-wider transition-colors disabled:opacity-30 ${
+                  occ === o ? "bg-gold text-ink" : "text-white/75 hover:text-gold"
+                }`}
+              >
+                {o}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* travellers — pax multiplies the trip total and therefore the hold */}
+        <div className={row}>
+          {sheet && <span className={label}>Travellers</span>}
+          <div className={`flex items-center overflow-hidden ${pill} ${sheet ? "" : "order-3"}`} role="group" aria-label="Travellers">
+            <button
+              type="button"
+              onClick={() => changePax(Math.max(1, pax - 1))}
+              disabled={pax <= 1}
+              aria-label="One fewer traveller"
+              className={`${sheet ? "min-h-11 min-w-11" : "min-h-10 px-3"} text-sm font-bold text-white/70 transition-colors hover:text-gold disabled:opacity-25`}
+            >
+              −
+            </button>
+            <span className="min-w-[3.6rem] text-center text-xs font-bold uppercase tracking-wider text-white" aria-live="polite">
+              {pax} pax
+            </span>
+            <button
+              type="button"
+              onClick={() => changePax(Math.min(20, pax + 1))}
+              disabled={pax >= 20}
+              aria-label="One more traveller"
+              className={`${sheet ? "min-h-11 min-w-11" : "min-h-10 px-3"} text-sm font-bold text-white/70 transition-colors hover:text-gold disabled:opacity-25`}
+            >
+              +
+            </button>
+          </div>
+        </div>
+
+        {/* departure city — ONLY cities this package is priced from */}
+        {bookableCities.length > 1 && (
+          <label className={row}>
+            <span className={label}>Departure city</span>
+            <select
+              value={bookCity}
+              onChange={(e) => changeCity(e.target.value)}
+              className={`${select} ${sheet ? "max-w-[12rem]" : "order-3"}`}
+            >
+              {bookableCities.map((c) => (
+                <option key={c} value={c}>
+                  from {cityNames[c] ?? c}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+
+        {/* batch picker.
+            `chosen` can be a date a DATE CARD selected that this list doesn't
+            contain — the cards come from the creator's own dates, these options
+            from the shared departures collection. A <select> whose value has no
+            option renders the first one instead, so the bar showed one date
+            while the modal booked another. Union, so what is displayed is
+            always what will be sent. */}
+        {barDates.length > 0 && (
+          <label className={row}>
+            <span className={label}>Departure date</span>
+            <select
+              value={chosen}
+              onChange={(e) => setDate(e.target.value)}
+              className={`${select} ${sheet ? "max-w-[12rem]" : "order-3"}`}
+            >
+              {barDates.map((d) => (
+                <option key={d} value={d}>
+                  {weekday(d)} · {shortDate(d)}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+      </>
+    );
   };
 
   return (
@@ -301,11 +411,11 @@ export default function BookingBar({
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-[0.6rem] font-bold uppercase tracking-[0.3em] text-gold">
-                  {canPay ? `seat hold · ${quote.holdPercent}% now` : "seat hold · 24h free"}
+                  {canPay ? `seat hold · ${quote.holdPercent}% now` : "free reserve · 24 hours"}
                 </p>
                 <h3 className="mt-1.5 font-display text-2xl font-extrabold text-white">Where do we reach you?</h3>
               </div>
-              <button type="button" onClick={() => setModal(false)} aria-label="Close" className="text-2xl leading-none text-white/40 hover:text-white">×</button>
+              <button type="button" onClick={() => setModal(false)} aria-label="Close" className="-mr-2 -mt-1 flex h-11 w-11 shrink-0 items-center justify-center text-2xl leading-none text-white/55 hover:text-white">×</button>
             </div>
             {/* The trip name was set in the same small grey run as the date,
                 city and occupancy — the one thing the visitor most needs to
@@ -315,41 +425,48 @@ export default function BookingBar({
               <p className="font-display text-lg font-extrabold leading-tight text-white sm:text-xl">
                 {packageName}
               </p>
-              <p className="mt-1 text-[0.82rem] text-white/60">
+              <p className="mt-1 hidden text-[0.82rem] text-white/60 xl:block">
                 ex-{bookCityName} · {chosen ? `${weekday(chosen)}, ${shortDate(chosen)}` : "dates on request"} ·{" "}
                 {pax} × {occ}{seat != null ? ` · ${inr(seat)}/seat` : ""}
               </p>
+              <p className="mt-1 text-[0.82rem] text-white/60 xl:hidden">
+                {seat != null ? `${inr(seat)}/seat` : "priced on request"}
+              </p>
+              {/* below xl: the trip is chosen here — the slim bar has no room for it */}
+              <div className="mt-3 space-y-2.5 border-t border-white/10 pt-3 xl:hidden">{tripControls(true)}</div>
             </div>
 
             {/* Enter follows the PRIMARY button, whichever that currently is */}
             <form onSubmit={(e) => { e.preventDefault(); if (canPay) payNow(); else confirm(); }} noValidate>
-            <label className="mt-6 block text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white/45">
-              Your name <span className="text-brand-bright">*</span>
+            <label className="mt-6 block text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white/55">
+              Your name <span className="text-brand-soft" aria-hidden="true">*</span>
               <input
                 value={name}
                 onChange={(e) => { setName(e.target.value); setErr(""); }}
                 placeholder="e.g. Naman"
                 autoComplete="name"
+                aria-required="true"
                 className="mt-1.5 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-base text-white outline-none transition-colors focus:border-gold"
               />
             </label>
-            <label className="mt-4 block text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white/45">
-              Email <span className="text-brand-bright">*</span>
+            <label className="mt-4 block text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white/55">
+              Email <span className="text-brand-soft" aria-hidden="true">*</span>
               <input
                 value={email}
                 onChange={(e) => { setEmail(e.target.value); setErr(""); }}
                 type="email"
                 inputMode="email"
                 autoComplete="email"
+                aria-required="true"
                 placeholder="you@example.com"
                 className="mt-1.5 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-base text-white outline-none transition-colors focus:border-gold"
               />
-              <span className="mt-1.5 block text-[0.66rem] font-normal normal-case tracking-normal text-white/35">
+              <span className="mt-1.5 block text-[0.66rem] font-normal normal-case tracking-normal text-white/55">
                 So we can send your booking confirmation and invoice.
               </span>
             </label>
-            <label className="mt-4 block text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white/45">
-              Mobile number <span className="text-brand-bright">*</span>
+            <label className="mt-4 block text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white/55">
+              Mobile number <span className="text-brand-soft" aria-hidden="true">*</span>
               <div className="mt-1.5 flex items-center rounded-xl border border-white/15 bg-black/30 px-4 focus-within:border-gold">
                 <span className="text-base text-white/50">+91</span>
                 <input
@@ -357,6 +474,7 @@ export default function BookingBar({
                   onChange={(e) => { setPhone(e.target.value); setErr(""); }}
                   inputMode="numeric"
                   autoComplete="tel"
+                  aria-required="true"
                   placeholder="98765 43210"
                   className="w-full bg-transparent px-2 py-3 text-base text-white outline-none"
                 />
@@ -378,12 +496,12 @@ export default function BookingBar({
                 )}
                 {coupon && (
                   <div className="mt-3 flex items-baseline justify-between border-t border-white/10 pt-3">
-                    <span className="text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white/45">
+                    <span className="text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white/55">
                       your price
                     </span>
                     <span className="font-display text-xl font-extrabold text-white">
                       {inr(coupon.total)}
-                      <span className="ml-2 text-sm font-bold text-white/35 line-through">{inr(seat)}</span>
+                      <span className="ml-2 text-sm font-bold text-white/55 line-through">{inr(seat)}</span>
                     </span>
                   </div>
                 )}
@@ -397,7 +515,7 @@ export default function BookingBar({
                 <p className="text-sm font-bold text-gold">No online rate from {bookCityName} yet.</p>
                 <p className="mt-1 text-[0.72rem] leading-relaxed text-white/55">
                   We price this trip individually from here. Send your number and we&apos;ll come back
-                  with a quote — or switch your boarding city in the bar below to book instantly.
+                  with a quote — or switch your boarding city above to book instantly.
                 </p>
               </div>
             )}
@@ -415,10 +533,10 @@ export default function BookingBar({
             {canPay && (
               <div className="mt-5 rounded-xl border border-white/12 bg-black/25 p-4">
                 <div className="flex items-baseline justify-between">
-                  <span className="text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white/45">pay now to hold</span>
+                  <span className="text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white/55">pay now to hold</span>
                   <span className="font-display text-2xl font-extrabold text-gold">{formatPaise(quote.holdTotalPaise)}</span>
                 </div>
-                <p className="mt-1.5 text-[0.68rem] leading-relaxed text-white/40">
+                <p className="mt-1.5 text-[0.68rem] leading-relaxed text-white/55">
                   {quote.holdPercent}% of {inr(tripTotal)}
                   {quote.holdGstPaise > 0 && <> + {quote.gstPercent}% GST</>} — counts toward your trip,
                   not on top of it. Our team collects {formatPaise(quote.advanceBalancePaise)} closer to
@@ -427,7 +545,7 @@ export default function BookingBar({
               </div>
             )}
 
-            {err && <p className="mt-2.5 text-sm font-semibold text-brand-bright">{err}</p>}
+            {err && <p role="alert" className="mt-2.5 text-sm font-semibold text-brand-soft">{err}</p>}
 
             <button
               type="submit"
@@ -435,7 +553,7 @@ export default function BookingBar({
               className="mt-6 w-full rounded-full bg-brand py-3.5 font-extrabold text-white shadow-red transition-colors hover:bg-brand-bright disabled:opacity-60"
             >
               {busy
-                ? canPay ? "Opening secure payment…" : "Holding your seat…"
+                ? canPay ? "Opening secure payment…" : "Reserving your seat…"
                 : canPay ? `Pay ${formatPaise(quote.holdTotalPaise)} & hold my seat →` : "Confirm & continue on WhatsApp →"}
             </button>
 
@@ -450,10 +568,10 @@ export default function BookingBar({
               </button>
             )}
             </form>
-            <p className="mt-3 text-center text-[0.62rem] text-white/35">
+            <p className="mt-3 text-center text-[0.62rem] text-white/55">
               {canPay
                 ? "Secure payment by PhonePe · UPI, card or netbanking"
-                : "No payment now · we hold your seat 24h · reply STOP anytime"}
+                : "No payment now · we reserve your seat for 24 hours · reply STOP anytime"}
             </p>
           </div>
         </div>
@@ -466,17 +584,17 @@ export default function BookingBar({
           <div data-bb-stub className="relative rounded-t-xl bg-[#f7f2e4] px-5 pb-3 pt-4 shadow-card-lg will-change-transform">
             <div className="flex items-start justify-between border-b border-dashed border-ink/20 pb-2.5">
               <p className="font-script text-lg text-brand">tripwaley</p>
-              <p className="text-right font-mono text-[0.5rem] uppercase tracking-[0.2em] text-ink/50">seat hold<br />24 hrs</p>
+              <p className="text-right font-mono text-[0.56rem] uppercase tracking-[0.2em] text-ink/70">{canPay ? <>seat hold<br />{quote.holdPercent}% now</> : <>reserved<br />24 hrs</>}</p>
             </div>
             <div className="flex items-end justify-between pt-2.5">
               <div>
-                <p className="font-mono text-[0.5rem] uppercase tracking-widest text-ink/45">ex-{bookCityName}</p>
+                <p className="font-mono text-[0.56rem] uppercase tracking-widest text-ink/70">ex-{bookCityName}</p>
                 <p className="font-display text-sm font-extrabold leading-tight text-ink">{packageName.slice(0, 22)}</p>
-                <p className="font-mono text-[0.55rem] text-ink/55">{chosen ? `${weekday(chosen)} · ${shortDate(chosen)}` : "dates on request"} · {occ}</p>
+                <p className="font-mono text-[0.56rem] text-ink/70">{chosen ? `${weekday(chosen)} · ${shortDate(chosen)}` : "dates on request"} · {occ}</p>
               </div>
-              <div data-bb-stamp className="opacity-0">
+              <div data-bb-stamp className="opacity-0 motion-reduce:opacity-100">
                 <span className="inline-block rounded border-2 border-success px-1.5 py-0.5 font-display text-[0.55rem] font-extrabold uppercase tracking-widest text-success">
-                  Holding
+                  {canPay ? "Holding" : "Reserved"}
                 </span>
               </div>
             </div>
@@ -488,16 +606,18 @@ export default function BookingBar({
           </div>
         </div>
       )}
-      {/* two compact rows on phones, one row from sm: up */}
-      <div className="mx-auto grid w-full max-w-6xl grid-cols-[1fr_auto] items-center gap-x-3 gap-y-2 px-4 py-2.5 sm:flex sm:flex-wrap sm:gap-x-5 sm:gap-y-2.5 sm:px-8 sm:py-3">
+      {/* one slim row (price + button) below xl:, the full bar from xl: up */}
+      <div className="mx-auto grid w-full max-w-6xl grid-cols-[1fr_auto] items-center gap-x-3 px-4 pt-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] sm:px-8 xl:flex xl:flex-wrap xl:gap-x-5 xl:gap-y-2.5 xl:py-3">
         {/* quote */}
         <div className="min-w-0">
-          <p className="truncate text-[0.55rem] font-bold uppercase tracking-widest text-white/45 sm:text-[0.6rem]">
-            {packageName} · ex-{bookCityName}
+          <p className="truncate text-[0.6rem] font-bold uppercase tracking-widest text-white/65">
+            <span className="hidden sm:inline">{packageName} · </span>ex-{bookCityName}
+            {/* the date pill is in the sheet on phones, so the chosen date rides here */}
+            <span className="xl:hidden">{chosen ? ` · ${weekday(chosen)} ${shortDate(chosen)}` : ""}</span>
           </p>
           <p className="font-display text-lg font-extrabold leading-tight text-white sm:text-2xl">
             {seat != null ? inr(seat) : "on request"}
-            <span className="ml-1.5 text-[0.58rem] font-bold uppercase tracking-wider text-white/40 sm:text-[0.62rem]">/seat</span>
+            <span className="ml-1.5 text-[0.62rem] font-bold uppercase tracking-wider text-white/65">/seat</span>
           </p>
         </div>
 
@@ -506,90 +626,15 @@ export default function BookingBar({
           type="button"
           onClick={openModal}
           disabled={busy}
-          className="order-2 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-extrabold text-white shadow-red transition-colors hover:bg-brand-bright disabled:opacity-60 sm:order-4 sm:px-8 sm:py-3"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-extrabold text-white shadow-red transition-colors hover:bg-brand-bright disabled:opacity-60 sm:px-8 sm:py-3 xl:order-4"
         >
-          {busy ? "Holding…" : "Hold my seat →"}
+          {busy ? (canPay ? "Holding…" : "Reserving…") : canPay ? "Hold my seat →" : "Reserve my seat →"}
         </button>
 
-        {/* occupancy toggle */}
-        <div className="order-3 flex overflow-hidden rounded-full border border-white/15 sm:order-2" role="group" aria-label="Sharing type">
-          {(["triple", "double"] as const).map((o) => (
-            <button
-              key={o}
-              type="button"
-              onClick={() => changeOcc(o)}
-              disabled={!rule?.[o]}
-              className={`min-h-9 px-3.5 py-1.5 text-[0.66rem] font-bold uppercase tracking-wider transition-colors disabled:opacity-30 sm:min-h-10 sm:px-4 sm:py-2 sm:text-xs ${
-                occ === o ? "bg-gold text-ink" : "text-white/70 hover:text-gold"
-              }`}
-            >
-              {o}
-            </button>
-          ))}
-        </div>
-
-        {/* travellers — pax multiplies the trip total and therefore the hold */}
-        <div className="order-5 flex items-center overflow-hidden rounded-full border border-white/15 sm:order-3" role="group" aria-label="Travellers">
-          <button
-            type="button"
-            onClick={() => changePax(Math.max(1, pax - 1))}
-            disabled={pax <= 1}
-            aria-label="One fewer traveller"
-            className="min-h-9 px-3 text-sm font-bold text-white/70 transition-colors hover:text-gold disabled:opacity-25 sm:min-h-10"
-          >
-            −
-          </button>
-          <span className="min-w-[3.6rem] text-center text-[0.66rem] font-bold uppercase tracking-wider text-white sm:text-xs" aria-live="polite">
-            {pax} {pax === 1 ? "pax" : "pax"}
-          </span>
-          <button
-            type="button"
-            onClick={() => changePax(Math.min(20, pax + 1))}
-            disabled={pax >= 20}
-            aria-label="One more traveller"
-            className="min-h-9 px-3 text-sm font-bold text-white/70 transition-colors hover:text-gold disabled:opacity-25 sm:min-h-10"
-          >
-            +
-          </button>
-        </div>
-
-        {/* departure city — ONLY cities this package is priced from */}
-        {bookableCities.length > 1 && (
-          <select
-            value={bookCity}
-            onChange={(e) => changeCity(e.target.value)}
-            aria-label="Departure city"
-            className="order-6 min-h-9 max-w-[9.5rem] rounded-full border border-white/15 bg-transparent px-3.5 py-1.5 text-[0.66rem] font-bold text-white outline-none sm:order-3 sm:min-h-10 sm:max-w-none sm:px-4 sm:py-2 sm:text-xs [&>option]:text-ink"
-          >
-            {bookableCities.map((c) => (
-              <option key={c} value={c}>
-                from {cityNames[c] ?? c}
-              </option>
-            ))}
-          </select>
-        )}
-
-        {/* batch picker.
-            `chosen` can be a date a DATE CARD selected that this list doesn't
-            contain — the cards come from the creator's own dates, these options
-            from the shared departures collection. A <select> whose value has no
-            option renders the first one instead, so the bar showed one date
-            while the modal booked another. Union, so what is displayed is
-            always what will be sent. */}
-        {barDates.length > 0 && (
-          <select
-            value={chosen}
-            onChange={(e) => setDate(e.target.value)}
-            aria-label="Departure date"
-            className="order-4 min-h-9 max-w-[9.5rem] rounded-full border border-white/15 bg-transparent px-3.5 py-1.5 text-[0.66rem] font-bold text-white outline-none sm:order-3 sm:min-h-10 sm:max-w-none sm:px-4 sm:py-2 sm:text-xs [&>option]:text-ink"
-          >
-            {barDates.map((d) => (
-              <option key={d} value={d}>
-                {weekday(d)} · {shortDate(d)}
-              </option>
-            ))}
-          </select>
-        )}
+        {/* the trip controls sit inline from xl: up; below that they live in the
+            booking sheet instead, so the bar stays one slim row (at sm–lg the
+            inline set wrapped the bar onto two rows, 123px tall) */}
+        <div className="hidden xl:contents">{tripControls(false)}</div>
       </div>
       </div>
     </>

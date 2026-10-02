@@ -81,7 +81,7 @@ export default function ReceiptPrinter({
               className={`h-1.5 w-1.5 rounded-full ${stage === "done" ? "bg-success" : "bg-gold animate-pulse motion-reduce:animate-none"}`}
               aria-hidden="true"
             />
-            <span className="font-mono text-[0.52rem] uppercase tracking-[0.24em] text-white/45">
+            <span className="font-mono text-[0.52rem] uppercase tracking-[0.24em] text-white/55">
               {stage === "done" ? "printed" : "printing"}
             </span>
           </span>
@@ -93,7 +93,7 @@ export default function ReceiptPrinter({
             <p className="min-w-0 truncate font-display text-sm font-extrabold text-white/85">{title}</p>
             <p className="shrink-0 font-display text-base font-extrabold text-gold">{paidValue}</p>
           </div>
-          <p className="mt-0.5 font-mono text-[0.55rem] uppercase tracking-[0.2em] text-white/35">
+          <p className="mt-0.5 font-mono text-[0.55rem] uppercase tracking-[0.2em] text-white/55">
             ref {reference}
           </p>
         </div>
@@ -113,7 +113,7 @@ export default function ReceiptPrinter({
           className="relative bg-[#f7f2e4] px-4 pb-8 pt-7 text-ink shadow-card-lg sm:px-6"
         >
           <h2 className="text-center font-display text-xl font-extrabold leading-tight">{title}</h2>
-          <p className="mt-1 text-center font-mono text-[0.55rem] uppercase tracking-[0.28em] text-ink/45">
+          <p className="mt-1 text-center font-mono text-[0.55rem] uppercase tracking-[0.28em] text-ink/65">
             seat confirmation
           </p>
 
@@ -122,7 +122,7 @@ export default function ReceiptPrinter({
           <dl className="space-y-2">
             {lines.map((l) => (
               <div key={l.label} className="flex items-baseline justify-between gap-4">
-                <dt className="min-w-0 font-mono text-[0.62rem] uppercase leading-snug tracking-[0.1em] text-ink/55 sm:text-[0.66rem] sm:tracking-[0.12em]">{l.label}</dt>
+                <dt className="min-w-0 font-mono text-[0.62rem] uppercase leading-snug tracking-[0.1em] text-ink/65 sm:text-[0.66rem] sm:tracking-[0.12em]">{l.label}</dt>
                 <dd className={`shrink-0 text-right text-[0.82rem] ${l.strong ? "font-display text-base font-extrabold text-ink" : "font-semibold text-ink/80"}`}>
                   {l.value}
                 </dd>
@@ -133,11 +133,11 @@ export default function ReceiptPrinter({
           <div className="my-4 border-t border-dashed border-ink/25" aria-hidden="true" />
 
           <div className="flex items-baseline justify-between gap-4">
-            <span className="font-mono text-[0.62rem] uppercase tracking-[0.18em] text-ink/60">{paidLabel}</span>
+            <span className="font-mono text-[0.62rem] uppercase tracking-[0.18em] text-ink/65">{paidLabel}</span>
             <span className="font-display text-2xl font-extrabold text-brand">{paidValue}</span>
           </div>
 
-          <p className="mt-5 text-center text-[0.74rem] leading-relaxed text-ink/60">{footer}</p>
+          <p className="mt-5 text-center text-[0.74rem] leading-relaxed text-ink/65">{footer}</p>
 
           {/* a barcode, drawn rather than encoded — it is ornament, and a real
               one would imply it scans to something */}
@@ -149,7 +149,7 @@ export default function ReceiptPrinter({
           <p className="mt-2 text-center font-mono text-[0.58rem] tracking-[0.2em] text-ink/70">{reference}</p>
 
           {meta.length > 0 && (
-            <p className="mt-4 text-center font-mono text-[0.55rem] uppercase tracking-[0.14em] text-ink/40">
+            <p className="mt-4 text-center font-mono text-[0.55rem] uppercase tracking-[0.14em] text-ink/65">
               {meta.join(" · ")}
             </p>
           )}

@@ -161,7 +161,7 @@ export default function ItineraryRibbon({
       });
       gsap.utils.toArray<HTMLElement>("[data-ir-node]").forEach((node) => {
         gsap.fromTo(node, { scale: 0 },
-          { scale: 1, duration: 0.45, ease: "back.out(2.4)",
+          { scale: 1, duration: 0.45, ease: "power3.out",
             scrollTrigger: { trigger: node, start: "top 76%" } });
       });
     }, rootRef);
@@ -244,7 +244,7 @@ export default function ItineraryRibbon({
                     className="object-cover transition-transform duration-700 group-hover:scale-[1.07]"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-ink/60 to-transparent" aria-hidden="true" />
-                  <span aria-hidden="true" className="absolute -right-2 -top-5 font-display text-[5.2rem] font-extrabold leading-none text-white/25 transition-colors duration-500 group-hover:text-gold/50">
+                  <span aria-hidden="true" className="absolute -right-2 -top-5 font-display text-[5.2rem] font-extrabold leading-none text-white/55 transition-colors duration-500 group-hover:text-gold/50">
                     {String(day.day).padStart(2, "0")}
                   </span>
                   <span className="absolute bottom-3 left-4 rounded-full bg-gold px-3 py-1 text-[0.58rem] font-extrabold uppercase tracking-widest text-ink">

@@ -165,7 +165,7 @@ export default async function FromCityPage({ params }: { params: Promise<{ city:
                   >
                     <span>
                       <span className="block font-display text-xl font-extrabold text-brand">{shortDate(d.date)}</span>
-                      <span className="text-[0.6rem] font-bold uppercase tracking-widest text-ink/45">{weekday(d.date)}</span>
+                      <span className="text-[0.6rem] font-bold uppercase tracking-widest text-ink/65">{weekday(d.date)}</span>
                     </span>
                     <span className="min-w-0 truncate font-display text-lg font-extrabold text-ink group-hover:text-brand">{d.package.name}</span>
                     <span className="font-display text-lg font-extrabold text-ink">{price ? inr(price) : "→"}</span>
@@ -194,13 +194,13 @@ export default async function FromCityPage({ params }: { params: Promise<{ city:
                   <span className="font-display text-lg font-extrabold text-ink group-hover:text-brand">
                     {city.name} to {dest.name}
                   </span>
-                  <span className="mt-1 font-mono text-[0.55rem] uppercase tracking-[0.2em] text-ink/40">
+                  <span className="mt-1 font-mono text-[0.55rem] uppercase tracking-[0.2em] text-ink/65">
                     {dest.state} · {trips} {trips === 1 ? "trip" : "trips"}
                   </span>
-                  <span className="mt-2.5 flex-1 text-[0.84rem] leading-relaxed text-ink/55">{dest.tagline}</span>
+                  <span className="mt-2.5 flex-1 text-[0.84rem] leading-relaxed text-ink/65">{dest.tagline}</span>
                   <span className="mt-3 font-display text-lg font-extrabold text-brand">
                     from {inr(from)}
-                    <span className="ml-1 text-[0.66rem] font-bold uppercase tracking-wider text-ink/40">/seat</span>
+                    <span className="ml-1 text-[0.66rem] font-bold uppercase tracking-wider text-ink/65">/seat</span>
                   </span>
                 </Link>
               ))}
@@ -256,7 +256,7 @@ export default async function FromCityPage({ params }: { params: Promise<{ city:
                   <SiteMedia src={packageImages(pkg)[0]} alt={pkg.name} fill sizes="30vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.06]" />
                 </div>
                 <div className="p-5">
-                  <p className="text-[0.6rem] font-bold uppercase tracking-[0.25em] text-ink/45">{nightsLabel(pkg)}</p>
+                  <p className="text-[0.6rem] font-bold uppercase tracking-[0.25em] text-ink/65">{nightsLabel(pkg)}</p>
                   <h3 className="mt-1 font-display text-lg font-extrabold text-ink group-hover:text-brand">{pkg.name}</h3>
                   <p className="mt-2 font-display text-lg font-extrabold text-brand">{inr(price)}</p>
                 </div>
@@ -281,7 +281,7 @@ export default async function FromCityPage({ params }: { params: Promise<{ city:
 
         {/* other boarding cities — these pages had no inbound links at all */}
         <section className="mx-auto w-full max-w-6xl px-5 pb-20 sm:px-8">
-          <h2 className="font-mono text-[0.6rem] uppercase tracking-[0.3em] text-ink/45">other boarding cities</h2>
+          <h2 className="font-mono text-[0.6rem] uppercase tracking-[0.3em] text-ink/65">other boarding cities</h2>
           <ul className="mt-5 flex flex-wrap gap-2.5">
             {cities.filter((c) => c.priced && c.slug !== city.slug).map((c) => (
               <li key={c.slug}>

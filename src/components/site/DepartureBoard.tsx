@@ -9,8 +9,10 @@ import Link from "next/link";
 import SiteMedia from "./SiteMedia";
 import { useEffect, useRef } from "react";
 import { gsap } from "@/lib/gsap";
+import { prefersReducedMotion } from "@/lib/motion";
 import { useCity, CitySwitcher } from "./CityProvider";
 import { inr, shortDate, weekday } from "@/lib/types";
+import { fareFor } from "@/lib/fares";
 
 export interface BoardRow {
   date: string;
@@ -35,9 +37,11 @@ export default function DepartureBoard({
   footnote?: string;
 }) {
   const ref = useRef<HTMLElement>(null);
-  const { city, detected } = useCity();
+  const { city, cities, detected } = useCity();
 
   useEffect(() => {
+    // reduced motion: content is already in its finished, visible state
+    if (prefersReducedMotion()) return;
     const ctx = gsap.context(() => {
       gsap.fromTo("[data-db-in]", { autoAlpha: 0, y: 26 }, {
         autoAlpha: 1, y: 0, duration: 0.9, ease: "power3.out", stagger: 0.06,
@@ -77,7 +81,7 @@ export default function DepartureBoard({
             <h2 data-db-in className="mt-1 font-display text-4xl font-extrabold tracking-tight sm:text-6xl">
               The rack, ex-<span className="text-brand">{city.name}.</span>
             </h2>
-            <p data-db-in className="mt-2 text-sm text-ink/55">
+            <p data-db-in className="mt-2 text-sm text-ink/65">
               {hook}
             </p>
           </div>
@@ -91,13 +95,15 @@ export default function DepartureBoard({
       <div data-db-rail data-lenis-prevent className="relative z-10 mt-9 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-9 pt-2 [scrollbar-width:none] sm:px-8 [&::-webkit-scrollbar]:hidden">
         {stubs.map((r) => {
           const mine = r.citySlugs.includes(city.slug);
-          const price = r.fromPrices[city.slug] ?? Object.values(r.fromPrices)[0];
+          // fare and "ex-" label name the same city — never another city's fare under yours
+          const fareCity = mine ? city : cities.find((c) => r.citySlugs.includes(c.slug));
+          const price = fareCity ? fareFor(r.fromPrices, fareCity.slug) : undefined;
           return (
             <Link
               key={r.packageSlug}
               href={`/trips/${r.packageSlug}`}
               data-db-stub
-              className="group flex min-h-[13rem] w-[20.5rem] shrink-0 snap-center overflow-hidden rounded-2xl bg-[#f7f2e4] opacity-0 shadow-card-lg transition-transform duration-500 hover:-translate-y-1.5 sm:min-h-[14.5rem] sm:w-[25rem] sm:snap-start"
+              className="group flex min-h-[13rem] w-[20.5rem] shrink-0 snap-center overflow-hidden rounded-2xl bg-[#f7f2e4] opacity-0 motion-reduce:opacity-100 shadow-card-lg transition-transform duration-500 hover:-translate-y-1.5 sm:min-h-[14.5rem] sm:w-[25rem] sm:snap-start"
             >
               {/* photo edge */}
               <span className="relative w-[34%] shrink-0">
@@ -118,7 +124,7 @@ export default function DepartureBoard({
                 <span className="flex items-start justify-between gap-2">
                   <span className="min-w-0">
                     <span className="block font-display text-2xl font-extrabold leading-none text-brand">{shortDate(r.date)}</span>
-                    <span className="text-[0.56rem] font-bold uppercase tracking-widest text-ink/45">{weekday(r.date)} · guaranteed</span>
+                    <span className="text-[0.56rem] font-bold uppercase tracking-widest text-ink/65">{weekday(r.date)} · guaranteed</span>
                   </span>
                   {r.scarcity ? (
                     <span className="shrink-0 rounded-full bg-brand px-2.5 py-1 text-[0.52rem] font-bold uppercase tracking-wider text-white">{r.scarcity.slice(0, 18)}</span>
@@ -129,16 +135,16 @@ export default function DepartureBoard({
                 <span className="mt-2 block truncate font-display text-base font-extrabold leading-tight text-ink transition-colors group-hover:text-brand sm:text-lg">
                   {r.packageName}
                 </span>
-                <span className="mt-1 block truncate text-[0.6rem] font-semibold uppercase tracking-wider text-ink/40">
-                  {mine ? `boards in ${city.name}` : `nearest: ${r.citySlugs.slice(0, 2).join(" · ")}`}
+                <span className="mt-1 block truncate text-[0.6rem] font-semibold uppercase tracking-wider text-ink/65">
+                  {mine ? `boards in ${city.name}` : `boards in ${cities.filter((c) => r.citySlugs.includes(c.slug)).slice(0, 2).map((c) => c.name).join(" · ") || "other cities"}`}
                 </span>
                 <span className="mt-2.5 flex items-end justify-between border-t border-dashed border-ink/15 pt-2.5">
                   <span>
-                    <span className="block text-[0.52rem] font-bold uppercase tracking-widest text-ink/60">ex-{city.name} · from</span>
-                    <span className="font-display text-xl font-extrabold text-ink">{price != null ? inr(price) : "—"}</span>
+                    <span className="block text-[0.52rem] font-bold uppercase tracking-widest text-ink/65">{fareCity ? `ex-${fareCity.name} · from` : "fare"}</span>
+                    <span className="font-display text-xl font-extrabold text-ink">{price != null ? inr(price) : "on request"}</span>
                   </span>
                   <span className="inline-flex h-9 items-center rounded-full bg-ink px-4 text-xs font-bold text-cream transition-colors group-hover:bg-brand">
-                    Hold →
+                    See trip →
                   </span>
                 </span>
               </span>
@@ -152,15 +158,15 @@ export default function DepartureBoard({
           target="_blank"
           rel="noreferrer"
           data-db-stub
-          className="flex w-[17rem] shrink-0 snap-center flex-col items-center justify-center rounded-2xl border-2 border-dashed border-brand/35 px-6 text-center opacity-0 sm:snap-start"
+          className="flex w-[17rem] shrink-0 snap-center flex-col items-center justify-center rounded-2xl border-2 border-dashed border-brand/35 px-6 text-center opacity-0 motion-reduce:opacity-100 sm:snap-start"
         >
           <p className="font-script text-2xl text-brand">your city missing?</p>
           <p className="mt-2 font-display text-lg font-extrabold text-ink">We add boarding points on demand.</p>
-          <span className="mt-4 inline-flex min-h-11 items-center rounded-full bg-success px-6 py-2.5 text-sm font-bold text-white">WhatsApp us →</span>
+          <span className="mt-4 inline-flex min-h-11 items-center rounded-full bg-success-ink px-6 py-2.5 text-sm font-bold text-white">WhatsApp us →</span>
         </a>
       </div>
 
-      <p className="px-5 text-center text-[0.6rem] font-bold uppercase tracking-[0.35em] text-ink/60 sm:px-8">
+      <p className="px-5 text-center text-[0.6rem] font-bold uppercase tracking-[0.35em] text-ink/65 sm:px-8">
         {footnote}
       </p>
     </section>

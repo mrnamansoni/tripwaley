@@ -57,6 +57,14 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
       if (!target) return;
       e.preventDefault();
       lenis.scrollTo(target as HTMLElement, { offset: -80 });
+      /* preventDefault also cancelled the browser's focus move, so the skip
+         link and every #anchor scrolled the page but left keyboard focus
+         behind — the next Tab went straight back into the navbar. Move focus
+         to the target (made focusable if it isn't) and keep the URL honest. */
+      const el = target as HTMLElement;
+      if (!el.hasAttribute("tabindex") && !el.matches("a[href],button,input,select,textarea,summary")) el.setAttribute("tabindex", "-1");
+      el.focus({ preventScroll: true });
+      if (link.hash) history.replaceState(null, "", link.hash);
     };
     document.addEventListener("click", onAnchorClick);
 

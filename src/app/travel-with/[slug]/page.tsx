@@ -101,14 +101,14 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
             <div className="pb-10 lg:pb-20">
               <Link
                 href="/travel-with-creator"
-                className="inline-flex items-center gap-2 font-mono text-[0.56rem] uppercase tracking-[0.3em] text-white/45 transition-colors hover:text-gold"
+                className="inline-flex items-center gap-2 font-mono text-[0.56rem] uppercase tracking-[0.3em] text-white/55 transition-colors hover:text-gold"
               >
                 ← all creators
               </Link>
 
               <p className={`mt-7 font-script text-2xl sm:text-3xl ${accentText}`}>travel with</p>
               {creator.epithet && (
-                <p className="font-mono text-[0.58rem] uppercase tracking-[0.4em] text-white/45">{creator.epithet}</p>
+                <p className="font-mono text-[0.58rem] uppercase tracking-[0.4em] text-white/55">{creator.epithet}</p>
               )}
               <h1 className="font-display text-[3.4rem] font-extrabold leading-[0.85] tracking-tight text-white sm:text-[7rem] lg:text-[8.5rem]">
                 {creator.firstName}
@@ -129,10 +129,10 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
               {startingFrom != null && (
                 <div className="mt-7 flex flex-wrap items-end gap-x-6 gap-y-2">
                   <div>
-                    <p className="font-mono text-[0.55rem] uppercase tracking-[0.3em] text-white/45">trips from</p>
+                    <p className="font-mono text-[0.55rem] uppercase tracking-[0.3em] text-white/55">trips from</p>
                     <p className="mt-1 font-display text-4xl font-extrabold text-white sm:text-5xl">
                       {inr(startingFrom)}
-                      <span className="ml-2 align-middle font-mono text-[0.6rem] font-bold uppercase tracking-widest text-white/45">
+                      <span className="ml-2 align-middle font-mono text-[0.6rem] font-bold uppercase tracking-widest text-white/55">
                         per seat
                       </span>
                     </p>
@@ -149,7 +149,7 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
                     <span className="block font-display text-2xl font-extrabold tabular-nums text-white transition-colors group-hover:text-gold sm:text-3xl">
                       {s.followers}
                     </span>
-                    <span className="mt-0.5 block font-mono text-[0.55rem] uppercase tracking-[0.25em] text-white/45">
+                    <span className="mt-0.5 block font-mono text-[0.55rem] uppercase tracking-[0.25em] text-white/55">
                       {s.platform}
                     </span>
                   </a>
@@ -219,7 +219,7 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
               <h2 className="mt-1 font-display text-3xl font-extrabold leading-tight tracking-tight text-ink sm:text-4xl">
                 Who you&apos;re actually<br />sharing a bus with.
               </h2>
-              <p className="mt-5 font-mono text-[0.56rem] uppercase tracking-[0.3em] text-ink/40">
+              <p className="mt-5 font-mono text-[0.56rem] uppercase tracking-[0.3em] text-ink/65">
                 {creator.niche} · based in {creator.city}
               </p>
             </div>

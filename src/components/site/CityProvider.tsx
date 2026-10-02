@@ -4,7 +4,7 @@
    Priority: saved choice → geolocation snap (best-effort) → Delhi.
    Every price and hook on the site reads from this context. */
 
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useId, useRef, useState } from "react";
 import type { City } from "@/lib/types";
 
 const KEY = "tw-city";
@@ -65,26 +65,62 @@ export default function CityProvider({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /* Switching city silently re-prices the whole page. Sighted visitors see
+     every number change; a screen reader heard nothing. This line tells them. */
+  const [announce, setAnnounce] = useState("");
   const setCity = useCallback((s: string) => {
     setSlug(s);
     localStorage.setItem(KEY, s);
+    const name = pool.find((c) => c.slug === s)?.name;
+    if (name) setAnnounce(`Prices and dates now shown for departures from ${name}.`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const city = pool.find((c) => c.slug === slug) ?? fallback;
-  return <Ctx.Provider value={{ city, cities: pool, setCity, detected }}>{children}</Ctx.Provider>;
+  return (
+    <Ctx.Provider value={{ city, cities: pool, setCity, detected }}>
+      {children}
+      <p className="sr-only" role="status" aria-live="polite">{announce}</p>
+    </Ctx.Provider>
+  );
 }
 
 /* The navbar / band chip that names the visitor's city and opens the switcher */
 export function CitySwitcher({ tone = "dark" }: { tone?: "dark" | "light" }) {
   const { city, cities, setCity } = useCity();
   const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const listId = useId();
+
+  /* Escape closes and hands focus back; a click anywhere else closes. */
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setOpen(false);
+      buttonRef.current?.focus();
+    };
+    const onDown = (e: PointerEvent) => {
+      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onDown);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onDown);
+    };
+  }, [open]);
+
   return (
-    <div className="relative">
+    <div ref={rootRef} className="relative">
       <button
+        ref={buttonRef}
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className={`inline-flex min-h-10 items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold transition-colors ${
+        aria-controls={listId}
+        className={`inline-flex min-h-11 items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold transition-colors ${
           tone === "dark"
             ? "border-white/25 text-white hover:border-gold hover:text-gold"
             : "border-ink/25 text-ink hover:border-brand hover:text-brand"
@@ -95,20 +131,21 @@ export function CitySwitcher({ tone = "dark" }: { tone?: "dark" | "light" }) {
         <span className={`text-[0.6rem] transition-transform ${open ? "rotate-180" : ""}`} aria-hidden="true">▾</span>
       </button>
       {open && (
-        <div data-lenis-prevent className={`absolute right-0 top-[110%] z-50 max-h-72 w-56 overflow-auto rounded-2xl border p-2 shadow-card-lg backdrop-blur-xl ${
+        <div id={listId} data-lenis-prevent className={`absolute right-0 top-[110%] z-50 max-h-72 w-56 overflow-auto rounded-2xl border p-2 shadow-card-lg backdrop-blur-xl ${
           tone === "dark" ? "border-white/15 bg-ink/95" : "border-line bg-card"
         }`}>
           {cities.map((c) => (
             <button
               key={c.slug}
               type="button"
-              onClick={() => { setCity(c.slug); setOpen(false); }}
-              className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-sm font-semibold transition-colors ${
-                tone === "dark" ? "text-white/80 hover:bg-white/10" : "text-ink/80 hover:bg-blush"
-              } ${c.slug === city.slug ? "text-gold" : ""}`}
+              aria-pressed={c.slug === city.slug}
+              onClick={() => { setCity(c.slug); setOpen(false); buttonRef.current?.focus(); }}
+              className={`flex min-h-11 w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-sm font-semibold transition-colors ${
+                tone === "dark" ? "text-white/85 hover:bg-white/10" : "text-ink/85 hover:bg-blush"
+              } ${c.slug === city.slug ? (tone === "dark" ? "text-gold" : "text-brand") : ""}`}
             >
-              {c.name}
-              <span className={`text-[0.58rem] uppercase tracking-wider ${tone === "dark" ? "text-white/35" : "text-ink/35"}`}>{c.state}</span>
+              <span>{c.slug === city.slug && <span aria-hidden="true">✓ </span>}{c.name}</span>
+              <span className={`text-[0.62rem] uppercase tracking-wider ${tone === "dark" ? "text-white/60" : "text-ink/65"}`}>{c.state}</span>
             </button>
           ))}
         </div>

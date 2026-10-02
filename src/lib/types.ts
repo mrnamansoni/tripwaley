@@ -176,7 +176,7 @@ export interface Faq { q: string; a: string }
 export const DEFAULT_FAQS: Faq[] = [
   { q: "Are these trips solo-friendly?", a: "Completely. Most of our travellers join solo — you're placed in a small batch with a certified trip captain, and by day two it feels like a friend group." },
   { q: "What does the price include?", a: "Stays, most meals, all transport from the boarding city, permits, and your trip captain. The exact inclusions are listed on every trip page — no hidden costs." },
-  { q: "How do I hold a seat?", a: "Tap 'Hold a seat', drop your number, and we block it free for 24 hours while you decide. No payment needed to hold." },
+  { q: "How do I hold a seat?", a: "Pick a trip and leave your number, and we reserve a seat for you free for 24 hours while you decide. To hold it, pay {hold}% of the trip price{gst} on the site. It counts toward your trip, not on top of it. The rest of your {advance}% advance is collected closer to the date, and the balance at departure." },
   { q: "What's the cancellation policy?", a: "Free cancellation until 7 days before departure. Closer to the date, partial refunds apply — the full policy is shared before you pay." },
 ];
 export type StoryKind = "guide" | "cost" | "seasonal" | "report";

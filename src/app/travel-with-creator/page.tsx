@@ -125,7 +125,7 @@ export default function TravelWithCreatorPage() {
                   <dt className="sr-only">{s.l}</dt>
                   <dd>
                     <span className="block font-display text-3xl font-extrabold tabular-nums text-white sm:text-4xl">{s.v}</span>
-                    <span className="mt-0.5 block font-mono text-[0.55rem] uppercase tracking-[0.28em] text-white/45">{s.l}</span>
+                    <span className="mt-0.5 block font-mono text-[0.55rem] uppercase tracking-[0.28em] text-white/55">{s.l}</span>
                   </dd>
                 </div>
               ))}

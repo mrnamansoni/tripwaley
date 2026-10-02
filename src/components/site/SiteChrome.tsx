@@ -75,7 +75,7 @@ function AnnouncementBar({ bar }: { bar: BarCfg }) {
           // inline on <html>, and removing this property would fall back to it
           document.documentElement.style.setProperty("--ann-h", "0px");
         }}
-        className="absolute right-2 flex h-7 w-7 items-center justify-center rounded-full text-ink/60 hover:bg-ink/10 hover:text-ink"
+        className="absolute right-1 flex h-10 w-10 items-center justify-center rounded-full text-ink/70 hover:bg-ink/10 hover:text-ink"
       >
         ✕
       </button>
@@ -89,7 +89,7 @@ function LeadPopup({ popup }: { popup: PopupCfg }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [state, setState] = useState<"idle" | "sending" | "done" | "error">("idle");
+  const [state, setState] = useState<"idle" | "sending" | "done" | "error" | "failed">("idle");
   const close = () => {
     setOpen(false);
     localStorage.setItem("tw-lead-popup", "seen");
@@ -112,17 +112,23 @@ function LeadPopup({ popup }: { popup: PopupCfg }) {
       return;
     }
     setState("sending");
-    const res = await fetch("/api/lead", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ name, phone, source: leadSource("timed-popup") }),
-    });
-    if (res.ok) {
-      setState("done");
-      localStorage.setItem("tw-lead-popup", "done");
-      setTimeout(() => setOpen(false), 2200);
-    } else {
-      setState("error");
+    // a dropped connection used to throw here and leave the button on
+    // "Sending…" forever; now it says what happened and lets them retry
+    try {
+      const res = await fetch("/api/lead", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ name, phone, source: leadSource("timed-popup") }),
+      });
+      if (res.ok) {
+        setState("done");
+        localStorage.setItem("tw-lead-popup", "done");
+        setTimeout(() => setOpen(false), 2200);
+      } else {
+        setState("failed");
+      }
+    } catch {
+      setState("failed");
     }
   };
 
@@ -131,7 +137,7 @@ function LeadPopup({ popup }: { popup: PopupCfg }) {
   return (
     <div className="fixed inset-0 z-[95] flex items-center justify-center bg-ink/70 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Get this week's departures">
       <div ref={dialogRef} className="relative grid w-full max-w-2xl overflow-hidden rounded-3xl border border-white/12 bg-cream shadow-card-lg sm:grid-cols-2">
-        <button type="button" aria-label="Close" onClick={close} className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-ink/10 text-ink/60 hover:bg-ink/20 hover:text-ink">✕</button>
+        <button type="button" aria-label="Close" onClick={close} className="absolute right-2 top-2 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-ink/10 text-ink/65 hover:bg-ink/20 hover:text-ink">✕</button>
 
         <div className="relative hidden min-h-[18rem] sm:block">
           <SiteMedia src={popup.image} alt="" fill sizes="360px" className="object-cover" />
@@ -143,31 +149,38 @@ function LeadPopup({ popup }: { popup: PopupCfg }) {
             <span className="mb-3 inline-flex w-fit rounded-full bg-brand/10 px-3 py-1 text-[0.62rem] font-bold uppercase tracking-wider text-brand">{popup.incentive}</span>
           )}
           <h2 className="font-display text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">{popup.title}</h2>
-          <p className="mt-2 text-sm text-ink/60">{popup.subtitle}</p>
+          <p className="mt-2 text-sm text-ink/65">{popup.subtitle}</p>
 
           {state === "done" ? (
-            <p className="mt-5 rounded-xl bg-success/12 px-4 py-3 text-sm font-bold text-success-ink">✓ Got it — we&apos;ll be in touch on WhatsApp shortly.</p>
+            <p role="status" className="mt-5 rounded-xl bg-success/12 px-4 py-3 text-sm font-bold text-success-ink">✓ Got it — we&apos;ll be in touch on WhatsApp shortly.</p>
           ) : (
             <form onSubmit={submit} className="mt-5 space-y-2.5" noValidate>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Your name (optional)"
+                aria-label="Your name (optional)"
                 autoComplete="name"
                 className="w-full rounded-xl border border-line bg-card px-4 py-3 text-sm text-ink outline-none focus:border-brand"
               />
               <div className="flex items-center gap-2 rounded-xl border border-line bg-card px-4 py-3 focus-within:border-brand">
-                <span className="text-sm font-bold text-ink/50">+91</span>
+                <span className="text-sm font-bold text-ink/65">+91</span>
                 <input
                   value={phone}
                   onChange={(e) => { setPhone(e.target.value); if (state === "error") setState("idle"); }}
                   inputMode="numeric"
-                  autoComplete="tel"
+                  type="tel"
+                  autoComplete="tel-national"
                   placeholder="10-digit mobile"
+                  aria-label="Mobile number"
+                  aria-required="true"
+                  aria-invalid={state === "error" || undefined}
+                  aria-describedby={state === "error" ? "popup-phone-err" : undefined}
                   className="w-full bg-transparent text-sm text-ink outline-none"
                 />
               </div>
-              {state === "error" && <p className="text-xs font-bold text-brand">Enter a valid 10-digit Indian mobile number.</p>}
+              {state === "error" && <p id="popup-phone-err" role="alert" className="text-xs font-bold text-brand">Enter a valid 10-digit Indian mobile number.</p>}
+              {state === "failed" && <p role="alert" className="text-xs font-bold text-brand">That didn&apos;t go through — check your connection and try again.</p>}
               <button
                 type="submit"
                 disabled={state === "sending"}
@@ -175,7 +188,7 @@ function LeadPopup({ popup }: { popup: PopupCfg }) {
               >
                 {state === "sending" ? "Sending…" : popup.cta || "Send"}
               </button>
-              <button type="button" onClick={close} className="w-full text-center text-[0.7rem] font-semibold uppercase tracking-wider text-ink/40 hover:text-ink/70">
+              <button type="button" onClick={close} className="w-full text-center text-[0.7rem] font-semibold uppercase tracking-wider text-ink/65 hover:text-ink/70">
                 No thanks
               </button>
             </form>

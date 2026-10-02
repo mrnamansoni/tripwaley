@@ -30,7 +30,7 @@ export default function MoreTrips({ trips }: { trips: MoreTrip[] }) {
         <h2 className="mt-1 font-display text-3xl font-extrabold tracking-tight text-white sm:text-5xl">
           More escapes<span className="text-gold">.</span>
         </h2>
-        <p className="mt-2 text-[0.62rem] font-bold uppercase tracking-[0.3em] text-white/40">
+        <p className="mt-2 text-[0.62rem] font-bold uppercase tracking-[0.3em] text-white/55">
           {current ? `${current.name}${current.price != null ? ` · from ${inr(current.price)}` : ""}` : ""}
         </p>
       </div>
@@ -56,7 +56,7 @@ export default function MoreTrips({ trips }: { trips: MoreTrip[] }) {
           </Link>
         ))}
       </SpinCarousel>
-      <p className="mt-4 text-center text-[0.56rem] font-bold uppercase tracking-[0.3em] text-white/30">
+      <p className="mt-4 text-center text-[0.56rem] font-bold uppercase tracking-[0.3em] text-white/55">
         drag to spin · tap to open
       </p>
     </section>

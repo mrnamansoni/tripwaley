@@ -15,7 +15,7 @@ export default function StoryCard({ post }: { post: BlogPost }) {
         <p className="mb-2 text-[0.58rem] font-bold uppercase tracking-[0.25em] text-brand">{label}</p>
         <h2 className="font-display text-xl font-extrabold leading-tight tracking-tight text-ink transition-colors group-hover:text-brand">{post.title}</h2>
         <p className="mt-2 line-clamp-3 flex-1 text-sm text-ink/65">{post.summary || post.excerpt}</p>
-        <p className="mt-4 text-[0.62rem] font-bold uppercase tracking-widest text-ink/55">
+        <p className="mt-4 text-[0.62rem] font-bold uppercase tracking-widest text-ink/65">
           {shortDate(post.date)} · {readingMinutes(post.body)} min read
         </p>
       </div>

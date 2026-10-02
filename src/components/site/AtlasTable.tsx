@@ -2,11 +2,18 @@
 
 /* THE ATLAS TABLE — lab L16 wired to admin photo slots.
    A giant photo map you pan by hand; momentum carries, walls bounce softly.
-   data-lenis-prevent + touch-none keep the drag entirely native. */
+
+   On touch screens the drag is off. `touch-none` on a 56vh well meant a thumb
+   landing on the map could not scroll the PAGE — the map swallowed the swipe
+   and the visitor was stuck until they found its edge. Phones get a native
+   sideways-scrolling strip instead (two rows, snap), so a vertical swipe
+   always scrolls the page. Keyboard users pan the desktop map with arrows. */
 
 import { useEffect, useRef } from "react";
 import SiteMedia from "./SiteMedia";
 import { gsap } from "@/lib/gsap";
+import { prefersReducedMotion } from "@/lib/motion";
+import { useMediaQuery } from "@/lib/useMediaQuery";
 
 export default function AtlasTable({
   tiles,
@@ -21,11 +28,13 @@ export default function AtlasTable({
 }) {
   const wellRef = useRef<HTMLDivElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
+  const touch = useMediaQuery("(pointer: coarse)");
 
   useEffect(() => {
     const well = wellRef.current;
     const sheet = sheetRef.current;
-    if (!well || !sheet) return;
+    if (!well || !sheet || touch) return;
+    const still = prefersReducedMotion();
 
     let x = 0, y = 0, vx = 0, vy = 0, px = 0, py = 0;
     let dragging = false;
@@ -64,7 +73,17 @@ export default function AtlasTable({
     const onUp = () => {
       if (!dragging) return;
       dragging = false;
-      raf = requestAnimationFrame(glide);
+      if (!still) raf = requestAnimationFrame(glide);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      const step = e.shiftKey ? 240 : 80;
+      const d = { ArrowLeft: [step, 0], ArrowRight: [-step, 0], ArrowUp: [0, step], ArrowDown: [0, -step] }[e.key];
+      if (!d) return;
+      e.preventDefault();
+      cancelAnimationFrame(raf);
+      vx = vy = 0;
+      x += d[0]; y += d[1];
+      clampAndSet();
     };
 
     x = -(sheet.scrollWidth - well.clientWidth) / 2;
@@ -75,14 +94,17 @@ export default function AtlasTable({
     well.addEventListener("pointermove", onMove);
     well.addEventListener("pointerup", onUp);
     well.addEventListener("pointercancel", onUp);
+    well.addEventListener("keydown", onKey);
     return () => {
       cancelAnimationFrame(raf);
+      well.removeEventListener("keydown", onKey);
+      gsap.set(sheet, { clearProps: "transform" });
       well.removeEventListener("pointerdown", onDown);
       well.removeEventListener("pointermove", onMove);
       well.removeEventListener("pointerup", onUp);
       well.removeEventListener("pointercancel", onUp);
     };
-  }, []);
+  }, [touch]);
 
   return (
     <section className="bg-blush py-[10vh]">
@@ -93,17 +115,30 @@ export default function AtlasTable({
             {headline} <span className="text-brand">{accent}</span>
           </h2>
         </div>
-        <p className="max-w-xs text-sm leading-relaxed text-ink/55">{sub}</p>
+        {/* the admin line talks about dragging; a phone swipes instead */}
+        <p className="max-w-xs text-sm leading-relaxed text-ink/65">{touch ? "Swipe sideways through the map." : sub}</p>
       </div>
 
+      {/* the gutter wrapper keeps the well inside the viewport — `w-full` plus
+          `sm:mx-8` on the well itself overflowed the page sideways */}
+      <div className="mx-auto w-full max-w-7xl px-5 sm:px-8">
       <div
         ref={wellRef}
-        data-lenis-prevent
-        className="relative mx-auto h-[56vh] w-full max-w-7xl cursor-grab touch-none overflow-hidden rounded-[1.8rem] border border-line bg-cream shadow-card-lg active:cursor-grabbing sm:mx-8 sm:h-[68vh]"
+        role="region"
+        aria-label={touch ? "Trip photo map, scroll sideways" : "Trip photo map, drag or use arrow keys to pan"}
+        tabIndex={0}
+        className={`relative w-full rounded-[1.8rem] border border-line bg-cream shadow-card-lg outline-none focus-visible:ring-2 focus-visible:ring-brand ${
+          touch
+            ? "snap-x snap-mandatory scroll-px-6 overflow-x-auto overflow-y-hidden overscroll-x-contain"
+            : "h-[56vh] cursor-grab touch-none overflow-hidden active:cursor-grabbing sm:h-[68vh]"
+        }`}
       >
-        <div ref={sheetRef} className="grid w-max grid-cols-4 gap-4 p-6 will-change-transform">
+        <div
+          ref={sheetRef}
+          className={`grid w-max gap-4 p-6 ${touch ? "auto-cols-max grid-flow-col grid-rows-2" : "grid-cols-4 will-change-transform"}`}
+        >
           {tiles.map((t, i) => (
-            <figure key={`${t.img}-${i}`} className={`relative overflow-hidden rounded-2xl ${i % 3 === 0 ? "h-56 w-72 sm:h-72 sm:w-96" : "h-56 w-56 sm:h-72 sm:w-72"}`}>
+            <figure key={`${t.img}-${i}`} className={`relative snap-start overflow-hidden rounded-2xl ${i % 3 === 0 ? "h-56 w-72 sm:h-72 sm:w-96" : "h-56 w-56 sm:h-72 sm:w-72"}`}>
               <SiteMedia src={t.img} alt={t.label} fill sizes="400px" className="pointer-events-none object-cover" draggable={false} />
               <figcaption className="absolute bottom-3 left-3 rounded-full bg-ink/55 px-3.5 py-1.5 font-mono text-[0.6rem] font-bold uppercase tracking-widest text-white backdrop-blur-sm">
                 {t.label}
@@ -111,8 +146,13 @@ export default function AtlasTable({
             </figure>
           ))}
         </div>
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-[1.8rem] shadow-[inset_0_0_80px_rgba(22,19,15,0.28)]" />
-        <span className="pointer-events-none absolute right-5 top-5 flex h-11 w-11 items-center justify-center rounded-full bg-ink/60 font-display text-xs font-extrabold text-gold backdrop-blur-sm">N↑</span>
+        {!touch && (
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-[1.8rem] shadow-[inset_0_0_80px_rgba(22,19,15,0.28)]" />
+        )}
+        {!touch && (
+          <span aria-hidden="true" className="pointer-events-none absolute right-5 top-5 flex h-11 w-11 items-center justify-center rounded-full bg-ink/60 font-display text-xs font-extrabold text-gold backdrop-blur-sm">N↑</span>
+        )}
+      </div>
       </div>
     </section>
   );

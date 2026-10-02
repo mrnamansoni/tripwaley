@@ -27,6 +27,7 @@ export default function DrumReviews({
   const drumRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
   const isMobile = useMediaQuery("(max-width: 639px)");
+  const reduced = useMediaQuery("(prefers-reduced-motion: reduce)");
 
   // Two constraints pick the radius:
   // 1. Fit: perspective projection scales a card at translateZ(R) by P/(P−R),
@@ -38,7 +39,39 @@ export default function DrumReviews({
   const minGapRadius = Math.ceil((estCardH * 1.12) / (2 * Math.sin(Math.PI / Math.max(3, reviews.length))));
   const RADIUS = Math.max(isMobile ? 260 : 360, minGapRadius);
 
+  const renderQuote = (r: Review, i: number) => (
+    <blockquote className="rounded-3xl border border-white/12 bg-[#191821] p-4 shadow-card-lg sm:p-8">
+      <div className="flex items-center justify-between">
+        <div className="flex gap-0.5 text-gold" aria-label={`${r.rating} stars`}>
+          {"★★★★★".slice(0, r.rating)}
+          {/* the unearned stars: decoration, and the rating is
+              already announced on the parent's aria-label, so this
+              is hidden rather than lifted to a contrast ratio that
+              would make an empty star look filled */}
+          <span aria-hidden="true" className="text-white/55">{"★★★★★".slice(r.rating)}</span>
+        </div>
+        <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[0.58rem] font-bold uppercase tracking-wider ${
+          r.source === "google" ? "bg-white/10 text-white/75" : "bg-[#833ab4]/25 text-[#e1a8f0]"
+        }`}>
+          {r.source === "google" ? "G · Google review" : "◎ Instagram"}
+        </span>
+      </div>
+      <p className="mt-4 font-display text-base font-bold leading-snug text-white sm:text-xl">&ldquo;{r.text}&rdquo;</p>
+      <footer className="mt-5 flex items-center gap-3">
+        <span className="flex h-10 w-10 items-center justify-center rounded-full font-display text-sm font-extrabold text-white" style={{ backgroundColor: `hsl(${HUES[i % HUES.length]} 55% 45%)` }}>
+          {r.name.charAt(0).toUpperCase()}
+        </span>
+        <div>
+          <p className="text-sm font-bold text-white">{r.name}</p>
+          <p className="text-xs text-white/70">{r.city} · {r.trip}</p>
+        </div>
+        <span className="ml-auto rounded-full bg-success/15 px-3 py-1 text-[0.58rem] font-bold uppercase tracking-wider text-success">verified batch</span>
+      </footer>
+    </blockquote>
+  );
+
   useEffect(() => {
+    if (reduced) return;
     const ctx = gsap.context(() => {
       let cur = 0;
       gsap.fromTo(drumRef.current, { rotateX: 0 }, {
@@ -54,7 +87,25 @@ export default function DrumReviews({
       });
     }, ref);
     return () => ctx.revert();
-  }, [STEP, reviews.length]);
+  }, [STEP, reviews.length, reduced]);
+
+  /* Reduced motion: no scroll-driven drum. Every review, stacked and readable,
+     which also gives a screen reader all of them instead of one at a time. */
+  if (reduced) {
+    return (
+      <section className="bg-[#0f0e11] px-4 py-16 sm:px-5 sm:py-24">
+        <div className="text-center">
+          <p className="text-[0.62rem] font-bold uppercase tracking-[0.4em] text-gold sm:tracking-[0.5em]">{eyebrow}</p>
+          <h2 className="mt-3 font-display text-3xl font-extrabold tracking-tight text-white sm:text-6xl">
+            {headline} <span className="text-gold">{headlineAccent}</span>
+          </h2>
+        </div>
+        <div className="mx-auto mt-10 grid w-full max-w-5xl gap-5 md:grid-cols-2">
+          {reviews.map((r, i) => <div key={r.name}>{renderQuote(r, i)}</div>)}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section ref={ref} className="relative h-[260vh] bg-[#0f0e11] sm:h-[400vh]">
@@ -93,34 +144,7 @@ export default function DrumReviews({
                 className={`absolute left-1/2 top-1/2 w-[72%] max-w-lg transition-opacity duration-300 sm:w-full ${i === active ? "opacity-100" : "invisible opacity-0"}`}
                 style={{ transform: `translate(-50%, -50%) rotateX(${-i * STEP}deg) translateZ(${RADIUS}px)` }}
               >
-                <blockquote className="rounded-3xl border border-white/12 bg-[#191821] p-4 shadow-card-lg sm:p-8">
-                  <div className="flex items-center justify-between">
-                    <div className="flex gap-0.5 text-gold" aria-label={`${r.rating} stars`}>
-                      {"★★★★★".slice(0, r.rating)}
-                      {/* the unearned stars: decoration, and the rating is
-                          already announced on the parent's aria-label, so this
-                          is hidden rather than lifted to a contrast ratio that
-                          would make an empty star look filled */}
-                      <span aria-hidden="true" className="text-white/35">{"★★★★★".slice(r.rating)}</span>
-                    </div>
-                    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[0.58rem] font-bold uppercase tracking-wider ${
-                      r.source === "google" ? "bg-white/10 text-white/75" : "bg-[#833ab4]/25 text-[#e1a8f0]"
-                    }`}>
-                      {r.source === "google" ? "G · Google review" : "◎ Instagram"}
-                    </span>
-                  </div>
-                  <p className="mt-4 font-display text-base font-bold leading-snug text-white sm:text-xl">&ldquo;{r.text}&rdquo;</p>
-                  <footer className="mt-5 flex items-center gap-3">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-full font-display text-sm font-extrabold text-white" style={{ backgroundColor: `hsl(${HUES[i % HUES.length]} 55% 45%)` }}>
-                      {r.name.charAt(0).toUpperCase()}
-                    </span>
-                    <div>
-                      <p className="text-sm font-bold text-white">{r.name}</p>
-                      <p className="text-xs text-white/70">{r.city} · {r.trip}</p>
-                    </div>
-                    <span className="ml-auto rounded-full bg-success/15 px-3 py-1 text-[0.58rem] font-bold uppercase tracking-wider text-success">verified batch</span>
-                  </footer>
-                </blockquote>
+                {renderQuote(r, i)}
               </div>
             ))}
           </div>

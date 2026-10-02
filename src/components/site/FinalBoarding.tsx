@@ -9,6 +9,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useCity } from "./CityProvider";
 import { inr, shortDate, weekday } from "@/lib/types";
+import { fareFor } from "@/lib/fares";
 
 export interface BoardingRow {
   date: string; // ISO yyyy-mm-dd
@@ -57,13 +58,16 @@ export default function FinalBoarding({
   headline = "Seats melt.",
   accent = "Clock's honest.",
   sub = "This is the real clock to the next batch leaving your city.",
+  holdNote,
 }: {
   rows: BoardingRow[];
+  /** e.g. "Hold with 5% + GST · the rest closer to departure" — from settings */
+  holdNote?: string;
   headline?: string;
   accent?: string;
   sub?: string;
 }) {
-  const { city } = useCity();
+  const { city, cities } = useCity();
   const [now, setNow] = useState(0); // 0 until mounted (SSR-safe)
   const started = useRef(false);
 
@@ -82,7 +86,10 @@ export default function FinalBoarding({
   }, [rows, city.slug]);
 
   if (!next) return null;
-  const price = next.fromPrices[city.slug] ?? Object.values(next.fromPrices)[0];
+  /* The fare and the "ex-" label always name the SAME city: the visitor's if
+     this batch boards there, otherwise the first city it does board from. */
+  const fareCity = next.citySlugs.includes(city.slug) ? city : cities.find((c) => next.citySlugs.includes(c.slug));
+  const price = fareCity ? fareFor(next.fromPrices, fareCity.slug) : undefined;
 
   const target = new Date(`${next.date}T06:00:00+05:30`).getTime();
   const left = Math.max(0, Math.floor((target - (now || target)) / 1000));
@@ -100,7 +107,7 @@ export default function FinalBoarding({
       <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-5 sm:px-8 lg:grid-cols-2">
         <div>
           <p className="text-[0.62rem] font-bold uppercase tracking-[0.45em] text-gold">
-            {next.name.slice(0, 28)} · {weekday(next.date)} {shortDate(next.date)} · ex-{city.name}
+            {next.name.slice(0, 28)} · {weekday(next.date)} {shortDate(next.date)} {fareCity ? ` · ex-${fareCity.name}` : ""}
           </p>
           <h2 className="mt-3 font-display text-4xl font-extrabold leading-[1.03] tracking-tight text-white sm:text-6xl">
             {headline}
@@ -119,13 +126,13 @@ export default function FinalBoarding({
             <span className="hidden font-mono text-5xl font-bold text-gold/70 sm:inline">:</span>
             <span className="hidden sm:contents"><FlipDigit ch={ss[0]} /><FlipDigit ch={ss[1]} /></span>
           </div>
-          <p className="mt-2 text-[0.56rem] font-bold uppercase tracking-[0.3em] text-white/40">days · hours · min<span className="hidden sm:inline"> · sec</span></p>
+          <p className="mt-2 text-[0.56rem] font-bold uppercase tracking-[0.3em] text-white/55">days · hours · min<span className="hidden sm:inline"> · sec</span></p>
 
           <div className="mt-8 flex flex-wrap items-center gap-5">
             <Link href={`/trips/${next.slug}`} className="inline-flex min-h-12 items-center rounded-full bg-gold px-8 py-3.5 font-extrabold text-[#0e0c0a] shadow-card-lg transition-transform hover:scale-[1.04]">
-              {price != null ? `Lock ${inr(price)} now` : "Hold my seat"}
+              Hold my seat{price != null ? ` · ${inr(price)} trip` : ""}
             </Link>
-            <p className="text-xs text-white/45">hold is free · cancel in one tap</p>
+            {holdNote && <p className="text-xs text-white/60">{holdNote}</p>}
           </div>
         </div>
 
@@ -143,7 +150,7 @@ export default function FinalBoarding({
                   key={i}
                   aria-hidden="true"
                   className={`flex h-10 items-center justify-center rounded-lg rounded-t-2xl text-[0.58rem] font-bold sm:h-11 ${
-                    isTaken ? "bg-white/8 text-white/25" : "animate-pulse bg-brand text-white shadow-red"
+                    isTaken ? "bg-white/8 text-white/55" : "animate-pulse bg-brand text-white shadow-red"
                   }`}
                 >
                   {isTaken ? "" : "FREE"}
@@ -151,7 +158,7 @@ export default function FinalBoarding({
               );
             })}
           </div>
-          <p className="mt-5 text-center text-[0.62rem] uppercase tracking-[0.25em] text-white/35">
+          <p className="mt-5 text-center text-[0.62rem] uppercase tracking-[0.25em] text-white/55">
             front row goes first · every batch
           </p>
         </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useModal } from "@/hooks/useModal";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { formatINR } from "@/lib/data";
 import { trackInitiateCheckout, trackLead } from "@/lib/analytics";
@@ -23,8 +24,9 @@ interface Props {
 const priceLabel = (n: number) => (n > 0 ? `from ${formatINR(n)}` : "on request");
 
 /**
- * Conversion modal: a free 24h hold, then the option to pay and actually hold
- * the seat. The hold submits to /api/lead — the SAME durable pipeline the
+ * Conversion modal. Two steps with two names, used the same way site-wide:
+ * RESERVE = free for 24 hours (a lead); HOLD = paying the hold % + GST, which
+ * actually secures the seat. The hold submits to /api/lead — the SAME durable pipeline the
  * booking bar uses (persists the lead + forwards to n8n/CRM).
  *
  * The payment step posts to /api/pay/create, which re-prices the trip from the
@@ -40,7 +42,6 @@ export default function HoldSeatModal({ mode, initialTrip, trips, rates, default
   const [trip, setTrip] = useState(
     (initialTrip && trips.some((t) => t.slug === initialTrip) ? initialTrip : trips[0]?.slug) ?? ""
   );
-  const dialogRef = useRef<HTMLDivElement>(null);
   const firstFieldRef = useRef<HTMLInputElement>(null);
 
   const selected: BookingTrip =
@@ -54,18 +55,23 @@ export default function HoldSeatModal({ mode, initialTrip, trips, rates, default
      works — that path is exactly the right one for "tell me when it runs". */
   const canPay = payEnabled && quote.chargeable && Boolean(selected.date);
 
-  /* Focus management + Escape to close + scroll lock */
+  /* Escape, a Tab loop that cannot leave the dialog, and focus handed back to
+     whatever opened it — the shared useModal behaviour. This dialog used to
+     do only the first of the three. */
+  const dialogRef = useModal<HTMLDivElement>(true, onClose);
   useEffect(() => {
     firstFieldRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    document.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
-      document.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
     };
-  }, [onClose]);
+  }, []);
+  /* When the form is swapped for the result, the focused field unmounts and
+     focus would fall to <body>; move it to the new heading so it is read out. */
+  useEffect(() => {
+    if (phase === "held" || phase === "confirmed") document.getElementById("booking-title")?.focus();
+  }, [phase]);
 
   // the modal only ever opens from a Hold-a-seat / Claim click, so mounting it
   // is exactly the InitiateCheckout moment Meta's install doc describes
@@ -180,7 +186,7 @@ export default function HoldSeatModal({ mode, initialTrip, trips, rates, default
         <button
           onClick={onClose}
           aria-label="Close"
-          className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full text-ink/60 transition-colors hover:bg-blush hover:text-brand"
+          className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full text-ink/65 transition-colors hover:bg-blush hover:text-brand"
         >
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
             <path d="M2 2l14 14M16 2L2 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -191,11 +197,12 @@ export default function HoldSeatModal({ mode, initialTrip, trips, rates, default
           <form onSubmit={handleSubmit}>
             <p className="font-script text-2xl text-brand">no payment needed yet!</p>
             <h2 id="booking-title" className="font-display text-3xl font-bold tracking-tight">
-              Hold my seat
+              Reserve my seat
             </h2>
             <p className="mt-2 text-sm text-ink/65">
-              We&apos;ll block a seat on <strong>{selected.name}</strong> for 24 hours,
-              free. Our trip captain will WhatsApp you the full plan.
+              We&apos;ll reserve a seat on <strong>{selected.name}</strong> for 24 hours,
+              free, and our trip captain will WhatsApp you the full plan. To hold it for
+              good you pay {rates.holdPercent}% of the trip price{rates.gstPercent > 0 ? ` + ${rates.gstPercent}% GST` : ""}, now or within those 24 hours.
             </p>
 
             <label className="mt-5 block text-sm font-semibold" htmlFor="hold-name">
@@ -261,9 +268,8 @@ export default function HoldSeatModal({ mode, initialTrip, trips, rates, default
             </select>
 
             {selected.dateLabel !== "flexible dates" && (
-              <p className="mt-3 flex items-center gap-2 text-sm font-semibold text-brand">
-                <span className="animate-live inline-block h-2 w-2 rounded-full bg-brand" aria-hidden="true" />
-                Filling fast — next batch departs {selected.dateLabel}
+              <p className="mt-3 text-sm font-semibold text-ink/70">
+                Next batch departs {selected.dateLabel}
               </p>
             )}
 
@@ -278,9 +284,9 @@ export default function HoldSeatModal({ mode, initialTrip, trips, rates, default
               disabled={phase === "submitting"}
               className="mt-5 w-full rounded-full bg-brand px-6 py-4 text-base font-bold text-white shadow-red transition-all hover:bg-brand-bright active:scale-[0.98] disabled:opacity-60"
             >
-              {phase === "submitting" ? "Holding your seat…" : "Hold my seat — free for 24h"}
+              {phase === "submitting" ? "Reserving your seat…" : "Reserve free for 24 hours"}
             </button>
-            <p className="mt-3 text-center text-xs text-ink/50">
+            <p className="mt-3 text-center text-xs text-ink/65">
               No spam, no charges. One WhatsApp message from your trip captain.
             </p>
           </form>
@@ -293,22 +299,22 @@ export default function HoldSeatModal({ mode, initialTrip, trips, rates, default
                 <path d="M4 12.5l5 5L20 6.5" stroke="var(--color-success)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
-            <h2 id="booking-title" className="mt-4 font-display text-3xl font-bold">
-              Seat held! 🎉
+            <h2 id="booking-title" tabIndex={-1} className="mt-4 font-display text-3xl font-bold outline-none">
+              Seat reserved! 🎉
             </h2>
             <p className="mt-2 text-sm text-ink/65">
               Your seat on <strong>{selected.name} · {selected.dateLabel}</strong> is
-              blocked for the next <strong>24 hours</strong>.
-              {canPay ? " Lock it in now — this amount counts toward your trip, not on top of it." : " A trip captain will call you shortly."}
+              reserved for the next <strong>24 hours</strong>.
+              {canPay ? " Hold it now to secure it — this amount counts toward your trip, not on top of it." : " A trip captain will call you shortly."}
             </p>
 
             {canPay && (
               <div className="mt-5 rounded-xl border border-line bg-cream px-4 py-3 text-left">
                 <div className="flex items-baseline justify-between">
-                  <span className="text-[0.6rem] font-bold uppercase tracking-[0.22em] text-ink/45">pay now to hold</span>
+                  <span className="text-[0.6rem] font-bold uppercase tracking-[0.22em] text-ink/65">pay now to hold</span>
                   <span className="font-display text-xl font-extrabold text-brand">{formatPaise(quote.holdTotalPaise)}</span>
                 </div>
-                <p className="mt-1 text-[0.68rem] leading-relaxed text-ink/50">
+                <p className="mt-1 text-[0.68rem] leading-relaxed text-ink/65">
                   {quote.holdPercent}% of the trip{quote.holdGstPaise > 0 && <> + {quote.gstPercent}% GST</>}.
                   The rest of your {quote.advancePercent}% advance is collected by our team closer to the
                   date; the balance is due at departure.
@@ -343,7 +349,7 @@ export default function HoldSeatModal({ mode, initialTrip, trips, rates, default
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gold/20">
               <span className="text-3xl" aria-hidden="true">🏔️</span>
             </div>
-            <h2 id="booking-title" className="mt-4 font-display text-3xl font-bold">
+            <h2 id="booking-title" tabIndex={-1} className="mt-4 font-display text-3xl font-bold outline-none">
               You&apos;re in, waley!
             </h2>
             <p className="mt-2 text-sm text-ink/65">

@@ -57,10 +57,10 @@ export function CreatorRoster({
                 </div>
 
                 <div className="flex items-center justify-between gap-3 p-5">
-                  <p className="min-w-0 flex-1 text-sm leading-snug text-ink/60">{c.tagline}</p>
+                  <p className="min-w-0 flex-1 text-sm leading-snug text-ink/65">{c.tagline}</p>
                   <span className="shrink-0 text-right">
                     <span className={`block font-display text-2xl font-extrabold leading-none ${accent}`}>{count}</span>
-                    <span className="text-[0.5rem] font-bold uppercase tracking-widest text-ink/40">
+                    <span className="text-[0.5rem] font-bold uppercase tracking-widest text-ink/65">
                       {count === 1 ? "date" : "dates"}
                     </span>
                   </span>
@@ -182,7 +182,7 @@ export function InTheirWords({ creator }: { creator: Creator }) {
 
         {creator.qa.length > 0 && (
           <div className="mt-14">
-            <p className="font-mono text-[0.56rem] uppercase tracking-[0.35em] text-white/40">
+            <p className="font-mono text-[0.56rem] uppercase tracking-[0.35em] text-white/55">
               things people actually DM {creator.firstName.toLowerCase()}
             </p>
             <div className="mt-6 divide-y divide-white/10 border-y border-white/10">
@@ -214,7 +214,7 @@ export function CreatorGallery({ creator }: { creator: Creator }) {
           <h2 className="font-display text-3xl font-extrabold tracking-tight text-ink sm:text-5xl">
             Shot on the road, <span className="text-brand">not in a studio.</span>
           </h2>
-          <p className="font-mono text-[0.56rem] uppercase tracking-[0.3em] text-ink/40">
+          <p className="font-mono text-[0.56rem] uppercase tracking-[0.3em] text-ink/65">
             from {creator.handle}
           </p>
         </div>
@@ -321,12 +321,12 @@ export function CreatorTripCards({
                         {t.price != null && (
                           <>
                             <span className="block font-display text-2xl font-extrabold text-white">{inr(t.price)}</span>
-                            <span className="font-mono text-[0.5rem] uppercase tracking-widest text-white/40">per seat</span>
+                            <span className="font-mono text-[0.5rem] uppercase tracking-widest text-white/55">per seat</span>
                           </>
                         )}
                       </span>
                       <span className="text-right">
-                        <span className={`block font-mono text-[0.58rem] uppercase tracking-widest ${soldOut ? "text-white/35" : "text-gold"}`}>
+                        <span className={`block font-mono text-[0.58rem] uppercase tracking-widest ${soldOut ? "text-white/55" : "text-gold"}`}>
                           {soldOut ? "waitlist" : `${t.seatsLeft} seats left`}
                         </span>
                         <span className="mt-1.5 inline-flex items-center gap-1.5 text-sm font-extrabold text-white group-hover:text-gold">

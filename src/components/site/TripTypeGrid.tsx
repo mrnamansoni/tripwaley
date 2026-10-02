@@ -9,6 +9,7 @@ import { useMemo, useState } from "react";
 import SiteMedia from "./SiteMedia";
 import { useCity, CitySwitcher } from "./CityProvider";
 import { inr, shortDate } from "@/lib/types";
+import { fareFor } from "@/lib/fares";
 
 export interface TypeCard {
   slug: string;
@@ -75,8 +76,8 @@ export default function TripTypeGrid({
                 placeholder="Search trips…"
                 className={`min-h-10 w-44 rounded-full border px-4 py-2 text-xs font-semibold outline-none transition-colors sm:w-52 ${
                   theme.switcher === "dark"
-                    ? "border-white/20 bg-white/5 text-white placeholder:text-white/35 focus:border-gold"
-                    : "border-line bg-card text-ink placeholder:text-ink/35 focus:border-brand"
+                    ? "border-white/20 bg-white/5 text-white placeholder:text-white/55 focus:border-gold"
+                    : "border-line bg-card text-ink placeholder:text-ink/65 focus:border-brand"
                 }`}
               />
             </label>
@@ -86,7 +87,7 @@ export default function TripTypeGrid({
 
         <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
           {shown.map((c) => {
-            const price = c.prices[city.slug] ?? Object.values(c.prices)[0];
+            const price = fareFor(c.prices, city.slug);
             return (
               <Link
                 key={c.slug}
@@ -110,20 +111,20 @@ export default function TripTypeGrid({
                 {/* column + mt-auto on the price row keeps fares aligned across
                     the row no matter how many lines a trip name wraps to */}
                 <div className="flex min-h-[7.5rem] flex-col p-3 sm:min-h-[9.5rem] sm:p-5">
-                  <p className="text-[0.54rem] font-bold uppercase tracking-[0.22em] opacity-45 sm:text-[0.6rem] sm:tracking-[0.25em]">
+                  <p className="text-[0.54rem] font-bold uppercase tracking-[0.22em] opacity-75 sm:text-[0.6rem] sm:tracking-[0.25em]">
                     {c.nightsLabel}
                   </p>
                   <h3 className={`mt-1 line-clamp-2 font-display text-sm font-extrabold leading-snug transition-colors sm:text-xl ${theme.titleHover}`}>
                     {c.name}
                   </h3>
                   <div className="mt-auto flex items-end justify-between gap-2 pt-2 sm:pt-3">
-                    <span className="line-clamp-1 hidden text-xs opacity-55 sm:block">{c.destination}</span>
+                    <span className="line-clamp-1 hidden text-xs opacity-75 sm:block">{c.destination}</span>
                     <span className="shrink-0 text-right">
                       <span className={`block font-display text-base font-extrabold leading-none sm:text-lg ${theme.accent}`}>
-                        {price ? inr(price) : "on ask"}
+                        {price ? inr(price) : "on request"}
                       </span>
                       {price ? (
-                        <span className="text-[0.5rem] font-bold uppercase tracking-wider opacity-45 sm:text-[0.55rem]">{rateLabel}</span>
+                        <span className="text-[0.56rem] font-bold uppercase tracking-wider opacity-75 sm:text-[0.6rem]">{rateLabel}</span>
                       ) : null}
                     </span>
                   </div>

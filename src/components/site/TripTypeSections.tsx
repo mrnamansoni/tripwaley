@@ -149,6 +149,8 @@ export function PromiseCards({
   if (!items.length) return null;
   return (
     <section className={`py-[9vh] ${theme.section}`}>
+      {/* the cards' h3s need a section heading above them (h1 → h3 skipped a level) */}
+      <h2 className="sr-only">What we promise</h2>
       <div className="mx-auto grid w-full max-w-7xl gap-4 px-5 sm:grid-cols-2 sm:px-8 lg:grid-cols-4">
         {items.map((p, i) => (
           <div key={p.title} className={`tt-rise relative overflow-hidden rounded-3xl p-6 ${theme.card}`} style={{ animationDelay: `${i * 70}ms` }}>
@@ -265,7 +267,7 @@ export function ArchGallery({
                 <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-brand/25 via-transparent to-transparent" />
               </div>
               {captions[i] && (
-                <figcaption className="mt-3 text-center font-script text-xl text-ink/55">{captions[i]}</figcaption>
+                <figcaption className="mt-3 text-center font-script text-xl text-ink/65">{captions[i]}</figcaption>
               )}
             </figure>
           ))}
@@ -286,7 +288,7 @@ export function LoveNote({ quote, attribution }: { quote: string; attribution: s
         <blockquote className="-mt-4 font-script text-3xl leading-snug text-ink sm:text-5xl sm:leading-[1.15]">
           {quote}
         </blockquote>
-        <figcaption className="mt-6 text-[0.62rem] font-bold uppercase tracking-[0.35em] text-ink/40">
+        <figcaption className="mt-6 text-[0.62rem] font-bold uppercase tracking-[0.35em] text-ink/65">
           {attribution}
         </figcaption>
       </figure>
@@ -310,7 +312,7 @@ export function TrailMarkers({ items }: { items: { label: string; value: string;
           <div key={m.label} className="bg-ink p-6">
             <p className="font-mono text-[0.56rem] uppercase tracking-[0.3em] text-gold/70">{m.label}</p>
             <p className="mt-2 font-display text-3xl font-extrabold tabular-nums text-white">{m.value}</p>
-            <p className="mt-1.5 text-sm leading-relaxed text-white/45">{m.note}</p>
+            <p className="mt-1.5 text-sm leading-relaxed text-white/55">{m.note}</p>
           </div>
         ))}
       </div>

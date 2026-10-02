@@ -108,9 +108,9 @@ export default function DestinationsPage() {
                         href={`/trips/${p.slug}`}
                         className="group relative w-[74vw] shrink-0 snap-center overflow-hidden rounded-2xl border border-line bg-card p-5 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-gold/60 hover:shadow-card-lg sm:w-auto sm:shrink"
                       >
-                        <p className="text-[0.6rem] font-bold uppercase tracking-[0.25em] text-ink/40">{nightsLabel(p)}</p>
+                        <p className="text-[0.6rem] font-bold uppercase tracking-[0.25em] text-ink/65">{nightsLabel(p)}</p>
                         <h3 className="mt-1.5 font-display text-xl font-extrabold leading-tight text-ink group-hover:text-brand">{p.name}</h3>
-                        <p className="mt-1 line-clamp-1 text-xs text-ink/50">{p.destination || p.route}</p>
+                        <p className="mt-1 line-clamp-1 text-xs text-ink/65">{p.destination || p.route}</p>
                         <p className="mt-3 font-display text-lg font-extrabold text-brand">{price ? `from ${inr(price)}` : "on request"}</p>
                         <span aria-hidden="true" className="absolute inset-x-0 bottom-0 h-[3px] origin-left scale-x-0 bg-[linear-gradient(90deg,#f5a31a,#c9252c)] transition-transform duration-500 group-hover:scale-x-100" />
                       </Link>
@@ -161,7 +161,7 @@ export default function DestinationsPage() {
             <h2 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
               {allDestPages.length} places we run batches to.
             </h2>
-            <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink/60">
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink/65">
               Each one has its own page: what the trip is, when to go, how to get there, what it costs
               from your city, and which batches are currently on the board.
             </p>
@@ -175,8 +175,8 @@ export default function DestinationsPage() {
                     <span className="font-display text-lg font-extrabold text-ink group-hover:text-brand">
                       {d.name} tour packages
                     </span>
-                    <span className="mt-1 font-mono text-[0.55rem] uppercase tracking-[0.2em] text-ink/40">{d.state}</span>
-                    <span className="mt-2.5 text-[0.84rem] leading-relaxed text-ink/55">{d.tagline}</span>
+                    <span className="mt-1 font-mono text-[0.55rem] uppercase tracking-[0.2em] text-ink/65">{d.state}</span>
+                    <span className="mt-2.5 text-[0.84rem] leading-relaxed text-ink/65">{d.tagline}</span>
                   </Link>
                 </li>
               ))}

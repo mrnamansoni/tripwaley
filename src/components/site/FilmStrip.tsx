@@ -7,6 +7,7 @@
 import { useEffect, useRef } from "react";
 import SiteMedia from "./SiteMedia";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
+import { prefersReducedMotion } from "@/lib/motion";
 
 function Strip({ images, label, reverse, dur }: { images: string[]; label: string; reverse?: boolean; dur: number }) {
   const cells = [...images, ...images, ...images];
@@ -47,6 +48,8 @@ export default function FilmStrip({ images, code }: { images: string[]; code: st
   const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
+    // reduced motion: content is already in its finished, visible state
+    if (prefersReducedMotion()) return;
     const ctx = gsap.context(() => {
       const strips = gsap.utils.toArray<HTMLElement>("[data-fs-strip]");
       const lean = gsap.quickTo(strips, "skewY", { duration: 0.5, ease: "power2.out" });
@@ -60,10 +63,12 @@ export default function FilmStrip({ images, code }: { images: string[]; code: st
 
   return (
     <section ref={ref} className="overflow-hidden bg-[#080706] py-10">
-      <p className="mb-5 text-center font-mono text-[0.62rem] font-bold uppercase tracking-[0.4em] text-white/40">
+      <p className="mb-5 text-center font-mono text-[0.62rem] font-bold uppercase tracking-[0.4em] text-white/55">
         contact sheet · roll {code} · shot by previous batches
       </p>
-      <div className="-rotate-1 space-y-2">
+      {/* pure decoration — every photo is alt="" — so the frame codes on the
+          two looping strips (110+ copies) are hidden from screen readers */}
+      <div className="marquee-paused -rotate-1 space-y-2" aria-hidden="true">
         <div data-fs-strip className="will-change-transform">
           <Strip images={images} label={code} dur={40} />
         </div>

@@ -137,7 +137,7 @@ export default async function CreatorTripPage({
             <div className="pb-10 lg:pb-16">
               <Link
                 href={`/travel-with/${creator.slug}`}
-                className="inline-flex items-center gap-2 font-mono text-[0.56rem] uppercase tracking-[0.3em] text-white/45 transition-colors hover:text-gold"
+                className="inline-flex items-center gap-2 font-mono text-[0.56rem] uppercase tracking-[0.3em] text-white/55 transition-colors hover:text-gold"
               >
                 ← all of {creator.firstName}&apos;s trips
               </Link>
@@ -153,7 +153,7 @@ export default async function CreatorTripPage({
                 />
                 <div>
                   <p className={`font-script text-xl ${accentText}`}>travel with {creator.firstName}</p>
-                  <p className="font-mono text-[0.58rem] uppercase tracking-[0.28em] text-white/45">
+                  <p className="font-mono text-[0.58rem] uppercase tracking-[0.28em] text-white/55">
                     {creator.handle} · {creator.socials[0]?.followers} followers
                   </p>
                 </div>
@@ -185,15 +185,15 @@ export default async function CreatorTripPage({
               <div className="mt-8 flex flex-wrap items-end gap-x-8 gap-y-3">
                 {view.price != null && (
                   <div>
-                    <p className="font-mono text-[0.55rem] uppercase tracking-[0.3em] text-white/45">per seat</p>
+                    <p className="font-mono text-[0.55rem] uppercase tracking-[0.3em] text-white/55">per seat</p>
                     <p className="mt-1 font-display text-4xl font-extrabold text-white sm:text-5xl">{inr(view.price)}</p>
                   </div>
                 )}
                 <div className="pb-1.5">
-                  <p className={`font-display text-xl font-extrabold ${soldOut ? "text-white/45" : "text-gold"}`}>
+                  <p className={`font-display text-xl font-extrabold ${soldOut ? "text-white/55" : "text-gold"}`}>
                     {soldOut ? "Sold out" : `${view.seatsLeft} seats left`}
                   </p>
-                  <p className="font-mono text-[0.55rem] uppercase tracking-[0.25em] text-white/40">
+                  <p className="font-mono text-[0.55rem] uppercase tracking-[0.25em] text-white/55">
                     across {view.dates.length} {view.dates.length === 1 ? "date" : "dates"}
                   </p>
                 </div>
@@ -267,12 +267,12 @@ export default async function CreatorTripPage({
                       <div className="flex items-start justify-between gap-3 border-b border-dashed border-ink/25 p-5">
                         <div>
                           <p className="font-display text-3xl font-extrabold leading-none text-brand">{shortDate(d.date)}</p>
-                          <p className="mt-1 font-mono text-[0.55rem] uppercase tracking-widest text-ink/50">
+                          <p className="mt-1 font-mono text-[0.55rem] uppercase tracking-widest text-ink/65">
                             {weekday(d.date)} · {nightsLabel(view.package)}
                           </p>
                         </div>
                         {out ? (
-                          <span className="-rotate-6 rounded border-2 border-ink/45 px-2 py-0.5 font-display text-[0.6rem] font-extrabold uppercase tracking-widest text-ink/45">
+                          <span className="-rotate-6 rounded border-2 border-ink/45 px-2 py-0.5 font-display text-[0.6rem] font-extrabold uppercase tracking-widest text-ink/65">
                             sold out
                           </span>
                         ) : scarce ? (
@@ -289,7 +289,7 @@ export default async function CreatorTripPage({
                       <div className="flex flex-1 flex-col p-5">
                         {d.hook && <p className="font-script text-lg leading-snug text-brand">&ldquo;{d.hook}&rdquo;</p>}
                         <div className="mt-4">
-                          <div className="flex items-center justify-between font-mono text-[0.55rem] uppercase tracking-widest text-ink/45">
+                          <div className="flex items-center justify-between font-mono text-[0.55rem] uppercase tracking-widest text-ink/65">
                             <span>{out ? "waitlist only" : `${d.seatsLeft} of ${d.seats} left`}</span>
                             <span>{Math.round(filled * 100)}% gone</span>
                           </div>
@@ -370,7 +370,7 @@ export default async function CreatorTripPage({
                       <h3 className="font-display text-base font-extrabold leading-snug text-ink group-hover:text-brand">
                         {t.headline}
                       </h3>
-                      <p className="mt-1 text-xs text-ink/50">
+                      <p className="mt-1 text-xs text-ink/65">
                         {t.dates.length} {t.dates.length === 1 ? "date" : "dates"}
                         {t.price != null ? ` · from ${inr(t.price)}` : ""}
                       </p>

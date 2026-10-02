@@ -21,6 +21,7 @@ import {
   fromPrice,
   packageImages,
   nightsLabel,
+  holdSummary,
 } from "@/lib/catalog";
 
 export const metadata: Metadata = {
@@ -46,6 +47,7 @@ export default function TripsPage() {
       name: p.name,
       destination: p.destination || p.route,
       nightsLabel: nightsLabel(p),
+      nights: Number(nightsLabel(p).match(/^(\d+)N/)?.[1]) || null,
       image: packageImages(p)[0],
       fromPrices,
       citySlugs: Object.keys(fromPrices),
@@ -75,7 +77,7 @@ export default function TripsPage() {
 
   return (
     <CityProvider cities={cities} defaultCity={settings.defaultCity}>
-      <Navbar />
+      <Navbar overDarkHero />
       <main id="main" className="pt-16">
         <TripsExplorer
           packages={packages}
@@ -89,9 +91,10 @@ export default function TripsPage() {
             headline={text("trips.countdown.headline")}
             accent={text("trips.countdown.accent")}
             sub={text("trips.countdown.sub")}
+            holdNote={holdSummary()}
           />
         )}
-        {sectionOn("trips", "wire") && (
+        {sectionOn("trips", "wire") && getWire().length > 0 && (
           <BookingWire
             entries={getWire()}
             headline={text("trips.wire.headline")}
@@ -120,7 +123,7 @@ export default function TripsPage() {
               <h2 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
                 Departures from {priced.length} cities.
               </h2>
-              <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink/60">
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink/65">
                 Every trip below is priced from your nearest boarding point — no detour to Delhi
                 to start a holiday.
               </p>

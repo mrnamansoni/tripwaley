@@ -6,6 +6,7 @@
 
 import { useEffect, useRef } from "react";
 import { gsap } from "@/lib/gsap";
+import { prefersReducedMotion } from "@/lib/motion";
 import { useCity } from "./CityProvider";
 
 const LANES = [
@@ -23,7 +24,7 @@ export default function MagnetChant({ whatsappLink }: { whatsappLink: string }) 
   useEffect(() => {
     const field = fieldRef.current;
     const btn = btnRef.current;
-    if (!field || !btn) return;
+    if (!field || !btn || prefersReducedMotion()) return;
     const bx = gsap.quickTo(btn, "x", { duration: 0.55, ease: "power3.out" });
     const by = gsap.quickTo(btn, "y", { duration: 0.55, ease: "power3.out" });
     const onMove = (e: PointerEvent) => {
@@ -37,7 +38,7 @@ export default function MagnetChant({ whatsappLink }: { whatsappLink: string }) 
 
     const onClick = () => {
       const burst = burstRef.current;
-      if (!burst) return;
+      if (!burst || prefersReducedMotion()) return;
       for (let i = 0; i < 14; i++) {
         const chip = document.createElement("span");
         chip.className = `absolute left-1/2 top-1/2 h-2.5 w-2.5 rounded-sm ${i % 3 === 0 ? "bg-gold" : "bg-brand"}`;
@@ -94,7 +95,7 @@ export default function MagnetChant({ whatsappLink }: { whatsappLink: string }) 
         <div ref={burstRef} aria-hidden="true" className="pointer-events-none absolute inset-0" />
       </div>
 
-      <p className="mt-9 text-center text-[0.62rem] font-bold uppercase tracking-[0.4em] text-white/35">
+      <p className="mt-9 text-center text-[0.62rem] font-bold uppercase tracking-[0.4em] text-white/55">
         replies in ~4 minutes · zero payment to start talking
       </p>
     </section>

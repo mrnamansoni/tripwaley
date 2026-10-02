@@ -5,10 +5,16 @@
    own and a horizontal drag spins it directly with momentum. Vertical swipes
    pass through to page scroll (touch-action: pan-y). All motion is a single
    GPU-composited transform on the ring — no per-card JS, so it stays smooth
-   on low-end phones. Pauses entirely while off-screen. */
+   on low-end phones. Pauses entirely while off-screen.
 
-import { useEffect, useRef, type ReactNode } from "react";
+   Moving content that runs on its own must be stoppable (WCAG 2.2.2): the
+   spin stops while the pointer or keyboard focus is on the ring, a button
+   pauses it for good, and it never starts under reduced motion. Tabbing to a
+   card turns the ring so that card faces the viewer. */
+
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { gsap } from "@/lib/gsap";
+import { prefersReducedMotion } from "@/lib/motion";
 
 export default function SpinCarousel({
   children,
@@ -34,6 +40,16 @@ export default function SpinCarousel({
   const wrapRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
   const frontRef = useRef(-1);
+  const [paused, setPaused] = useState(false);
+  const pausedRef = useRef(false);
+  const holdRef = useRef(false); // pointer over, or focus inside
+  const spinTo = useRef<((i: number) => void) | null>(null);
+  useEffect(() => {
+    pausedRef.current = paused;
+  }, [paused]);
+  useEffect(() => {
+    if (prefersReducedMotion()) setTimeout(() => setPaused(true), 0);
+  }, []);
   const n = children.length;
   const step = 360 / Math.max(1, n);
 
@@ -56,8 +72,9 @@ export default function SpinCarousel({
     const tick = (_t: number, deltaMs: number) => {
       if (!visible) return;
       if (!dragging) {
-        // glide momentum back toward the idle auto-spin speed
-        const target = velocity < 0 ? -autoDegPerSec : autoDegPerSec;
+        // glide momentum back toward the idle auto-spin speed — or to rest
+        const spinning = !pausedRef.current && !holdRef.current;
+        const target = spinning ? (velocity < 0 ? -autoDegPerSec : autoDegPerSec) : 0;
         velocity += (target - velocity) * Math.min(1, (deltaMs / 1000) * 2.2);
         rotation += velocity * (deltaMs / 1000);
         ring.style.transform = `rotateX(${tiltDeg}deg) rotateY(${rotation}deg)`;
@@ -71,6 +88,9 @@ export default function SpinCarousel({
     gsap.ticker.add(tick);
 
     const onDown = (e: PointerEvent) => {
+      // the pause button is a plain button, not a drag handle — capturing the
+      // pointer here would retarget its click to the ring
+      if ((e.target as HTMLElement).closest?.("[data-spin-pause]")) return;
       dragging = true;
       moved = 0;
       lastX = e.clientX;
@@ -94,6 +114,18 @@ export default function SpinCarousel({
       if (moved > 8) { e.preventDefault(); e.stopPropagation(); }
     };
 
+    const hold = () => { holdRef.current = true; };
+    const release = () => { holdRef.current = wrap.contains(document.activeElement); };
+    const leave = () => { holdRef.current = false; };
+    spinTo.current = (i: number) => {
+      rotation = -i * step;
+      velocity = 0;
+      ring.style.transform = `rotateX(${tiltDeg}deg) rotateY(${rotation}deg)`;
+    };
+    wrap.addEventListener("pointerenter", hold);
+    wrap.addEventListener("pointerleave", release);
+    wrap.addEventListener("focusin", hold);
+    wrap.addEventListener("focusout", leave);
     wrap.addEventListener("pointerdown", onDown);
     wrap.addEventListener("pointermove", onMove);
     wrap.addEventListener("pointerup", onUp);
@@ -103,6 +135,10 @@ export default function SpinCarousel({
     return () => {
       gsap.ticker.remove(tick);
       io.disconnect();
+      wrap.removeEventListener("pointerenter", hold);
+      wrap.removeEventListener("pointerleave", release);
+      wrap.removeEventListener("focusin", hold);
+      wrap.removeEventListener("focusout", leave);
       wrap.removeEventListener("pointerdown", onDown);
       wrap.removeEventListener("pointermove", onMove);
       wrap.removeEventListener("pointerup", onUp);
@@ -126,6 +162,7 @@ export default function SpinCarousel({
         {children.map((child, i) => (
           <div
             key={i}
+            onFocus={() => spinTo.current?.(i)}
             className={`absolute left-1/2 top-1/2 ${cardClassName}`}
             style={{
               transform: `translate(-50%, -50%) rotateY(${i * step}deg) translateZ(${radius}px)`,
@@ -136,6 +173,17 @@ export default function SpinCarousel({
           </div>
         ))}
       </div>
+      <button
+        type="button"
+        data-spin-pause
+        onClick={() => setPaused((p) => !p)}
+        aria-pressed={paused}
+        className="absolute bottom-2 right-2 z-10 inline-flex min-h-11 items-center gap-2 rounded-full border border-current/25 bg-ink/70 px-4 text-xs font-bold text-white backdrop-blur-sm transition-colors hover:border-gold hover:text-gold"
+      >
+        <span aria-hidden="true">{paused ? "▶" : "❚❚"}</span>
+        {paused ? "Play" : "Pause"}
+        <span className="sr-only"> rotation</span>
+      </button>
     </div>
   );
 }

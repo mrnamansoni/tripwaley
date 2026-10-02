@@ -20,6 +20,7 @@ import TrackTripView from "@/components/site/TrackTripView";
 import { retiredTripTarget } from "@/lib/retiredUrls";
 import ExploreLinks from "@/components/site/ExploreLinks";
 import BeforeYouGo from "@/components/site/BeforeYouGo";
+import TripFaq from "@/components/site/TripFaq";
 import {
   getCities,
   getSettings,
@@ -40,6 +41,7 @@ import {
   shortDate,
   weekday,
 } from "@/lib/catalog";
+import { inCategory } from "@/lib/types";
 
 /* destination coordinates for the live forecast card */
 
@@ -207,16 +209,16 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
             <div className="mt-6 grid grid-cols-2 gap-4 border-t border-line pt-5 sm:grid-cols-3">
               {pkg.bestTime && (
                 <div>
-                  <p className="text-[0.58rem] font-bold uppercase tracking-[0.25em] text-ink/40">best time</p>
+                  <p className="text-[0.58rem] font-bold uppercase tracking-[0.25em] text-ink/65">best time</p>
                   <p className="mt-1 whitespace-pre-line text-sm font-bold text-ink">{pkg.bestTime}</p>
                 </div>
               )}
               <div>
-                <p className="text-[0.58rem] font-bold uppercase tracking-[0.25em] text-ink/40">departure hubs</p>
+                <p className="text-[0.58rem] font-bold uppercase tracking-[0.25em] text-ink/65">departure hubs</p>
                 <p className="mt-1 text-sm font-bold text-ink">{pkg.departureHubs || "Delhi + 9 cities"}</p>
               </div>
               <div>
-                <p className="text-[0.58rem] font-bold uppercase tracking-[0.25em] text-ink/40">to hold a seat</p>
+                <p className="text-[0.58rem] font-bold uppercase tracking-[0.25em] text-ink/65">to hold a seat</p>
                 <p className="mt-1 text-sm font-bold text-brand">{rates.holdPercent}% · rest later</p>
               </div>
             </div>
@@ -298,7 +300,7 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   <p className="font-display text-3xl font-extrabold text-brand">{shortDate(d.date)}</p>
-                  <p className="mt-0.5 text-[0.62rem] font-bold uppercase tracking-widest text-ink/45">{weekday(d.date)} departure · guaranteed</p>
+                  <p className="mt-0.5 text-[0.62rem] font-bold uppercase tracking-widest text-ink/65">{weekday(d.date)} departure · guaranteed</p>
                   <div className="mt-4 flex flex-wrap gap-1.5">
                     {d.cities.map((c) => (
                       <span key={c.slug} className="rounded-full bg-blush px-2.5 py-1 text-[0.6rem] font-bold uppercase tracking-wider text-ink/70 transition-colors group-hover:bg-gold/20">
@@ -322,12 +324,12 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
             <div className="mt-7 overflow-hidden rounded-3xl bg-[#141215] shadow-card-lg">
               <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
                 <p className="font-mono text-[0.62rem] font-bold uppercase tracking-[0.3em] text-gold">fare board · all boarding points</p>
-                <p className="font-mono text-[0.58rem] uppercase tracking-[0.2em] text-white/35">per seat · all-inclusive</p>
+                <p className="font-mono text-[0.58rem] uppercase tracking-[0.2em] text-white/55">per seat · all-inclusive</p>
               </div>
               <div data-lenis-prevent className="overflow-x-auto">
                 <table className="w-full min-w-[28rem] text-left">
                   <thead>
-                    <tr className="text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white/40">
+                    <tr className="text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white/55">
                       <th className="px-6 py-3.5">Boarding city</th>
                       <th className="px-6 py-3.5">Triple sharing</th>
                       <th className="px-6 py-3.5">Double sharing</th>
@@ -344,7 +346,7 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
                           <Link href={`/from/${city.slug}`} className="transition-colors hover:text-gold">
                             {city.name}
                           </Link>
-                          <span className="ml-2 text-[0.58rem] font-semibold uppercase text-white/30">{city.state}</span>
+                          <span className="ml-2 text-[0.58rem] font-semibold uppercase text-white/55">{city.state}</span>
                         </td>
                         <td className="px-6 py-3.5 font-display text-lg font-extrabold text-gold">{rule.triple ? inr(rule.triple) : "—"}</td>
                         <td className="px-6 py-3.5 font-display text-lg font-extrabold text-white/75">{rule.double ? inr(rule.double) : "—"}</td>
@@ -354,7 +356,7 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
                 </table>
               </div>
             </div>
-            <p className="mt-4 text-xs text-ink/45">
+            <p className="mt-4 text-xs text-ink/65">
               Hold any seat by paying {rates.holdPercent}% online
               {rates.gstPercent > 0 ? ` (plus ${rates.gstPercent}% GST on that amount)` : ""}. Our team
               collects the rest of your {rates.advancePercent}% advance closer to the date, and the
@@ -393,6 +395,9 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
           </section>
         )}
 
+        {/* ---- the worries that stop a payment, answered from real data ---- */}
+        <TripFaq tripName={pkg.name} rates={rates} priced={priced} deps={deps} forSolo={!inCategory(pkg, "honeymoon")} />
+
         {/* ---- proof, lowkey scarcity, back link ---- */}
         <section className="mx-auto w-full max-w-4xl px-5 py-12 text-center sm:px-8">
           {pkg.socialProof && (
@@ -401,7 +406,7 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
             </blockquote>
           )}
           {pkg.scarcityNote && (
-            <p className="mt-4 whitespace-pre-line text-xs text-ink/45">{pkg.scarcityNote}</p>
+            <p className="mt-4 whitespace-pre-line text-xs text-ink/65">{pkg.scarcityNote}</p>
           )}
           <Link href="/trips" className="mt-8 inline-flex min-h-11 items-center rounded-full border-2 border-ink px-6 py-3 text-sm font-bold text-ink transition-colors hover:bg-ink hover:text-cream">
             ← All departures

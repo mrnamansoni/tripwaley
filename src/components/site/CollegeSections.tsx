@@ -70,7 +70,7 @@ export function CollegeWall({
                   ].map((cell) => (
                     <div key={cell.k} className="px-3 py-3 text-center">
                       <dd className="font-display text-base font-extrabold leading-none text-gold">{cell.v}</dd>
-                      <dt className="mt-1 font-mono text-[0.5rem] uppercase tracking-[0.18em] text-white/40">{cell.k}</dt>
+                      <dt className="mt-1 font-mono text-[0.5rem] uppercase tracking-[0.18em] text-white/55">{cell.k}</dt>
                     </div>
                   ))}
                 </dl>
@@ -88,7 +88,7 @@ export function CollegeWall({
                         <p className="text-[0.86rem] leading-relaxed text-white/60">&ldquo;{r.quote}&rdquo;</p>
                       </ReadMore>
                       {r.quoteBy && (
-                        <footer className="mt-2 font-mono text-[0.55rem] uppercase tracking-[0.2em] text-white/35">
+                        <footer className="mt-2 font-mono text-[0.55rem] uppercase tracking-[0.2em] text-white/55">
                           {r.quoteBy}
                         </footer>
                       )}

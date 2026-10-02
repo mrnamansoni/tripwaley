@@ -49,7 +49,9 @@ function CardFace({ c, sizes }: { c: DeckCard; sizes: string }) {
 export default function DeckDestinations({ cards, eyebrow = "somewhere in here is your next trip" }: { cards: DeckCard[]; eyebrow?: string }) {
   const ref = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
-  const isTouch = useMediaQuery("(pointer: coarse)");
+  /* Touch devices get the swipeable ring; so does anyone who asked for reduced
+     motion, because the desktop coverflow is a scroll-scrubbed 3D fly-past. */
+  const isTouch = useMediaQuery("(pointer: coarse), (prefers-reduced-motion: reduce)");
   const { city } = useCity();
 
   useEffect(() => {
@@ -138,7 +140,7 @@ export default function DeckDestinations({ cards, eyebrow = "somewhere in here i
             <span key={i} className={`h-1 rounded-full transition-all duration-500 ${i === active ? "w-6 bg-gold" : "w-2 bg-white/25"}`} />
           ))}
         </div>
-        <p className="mt-3 text-center text-[0.56rem] font-bold uppercase tracking-[0.3em] text-white/30">
+        <p className="mt-3 text-center text-[0.62rem] font-bold uppercase tracking-[0.3em] text-white/65">
           drag to spin · tap to open
         </p>
       </section>

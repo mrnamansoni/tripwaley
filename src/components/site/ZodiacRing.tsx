@@ -39,7 +39,7 @@ export default function ZodiacRing({
             <br />
             <span className="text-brand">{accent}</span>
           </h2>
-          <p className="mt-5 max-w-sm text-base leading-relaxed text-ink/60">{sub}</p>
+          <p className="mt-5 max-w-sm text-base leading-relaxed text-ink/65">{sub}</p>
           <p className="mt-6 min-h-9 font-script text-2xl text-brand">
             {held ? `${held}. good choice.` : "spin the wheel →"}
           </p>

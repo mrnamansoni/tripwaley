@@ -12,6 +12,7 @@ import { useEffect, useRef } from "react";
 import SiteMedia from "./SiteMedia";
 import Link from "next/link";
 import { gsap } from "@/lib/gsap";
+import { prefersReducedMotion } from "@/lib/motion";
 import { useCity, CitySwitcher } from "./CityProvider";
 import { inr, shortDate, weekday } from "@/lib/types";
 
@@ -62,13 +63,26 @@ export default function OpeningShot({
   const film = heroFilm.map((src, i) => ({ src, ...FILM_CAPTIONS[i % FILM_CAPTIONS.length] }));
 
   useEffect(() => {
+    /* Reduced motion: no fly-through. Show the finished frame — blinds closed,
+       departures card up — and let the section collapse to one screen. */
+    if (prefersReducedMotion()) {
+      const ctx = gsap.context(() => {
+        gsap.set("[data-os-slat]", { yPercent: 0 });
+        gsap.set(["[data-os-intro]", "[data-os-type]", "[data-os-film]"], { autoAlpha: 0 });
+        gsap.set("[data-os-live]", { opacity: 1, y: 0, pointerEvents: "auto" });
+      }, ref);
+      return () => ctx.revert();
+    }
     const ctx = gsap.context(() => {
       const frames = gsap.utils.toArray<HTMLElement>("[data-os-frame]");
       const metas = gsap.utils.toArray<HTMLElement>("[data-os-meta]");
       const slats = gsap.utils.toArray<HTMLElement>("[data-os-slat]");
       slats.forEach((s, i) => gsap.set(s, { yPercent: i % 2 === 0 ? 104 : -104 }));
       gsap.set("[data-os-film]", { autoAlpha: 0 });
-      gsap.set("[data-os-live]", { autoAlpha: 0, y: 44 });
+      /* opacity, NOT autoAlpha: autoAlpha sets visibility:hidden, which took the
+         page's h1 and both calls to action out of the accessibility tree and
+         the tab order until the visitor had scrolled ~87% of the way through. */
+      gsap.set("[data-os-live]", { opacity: 0, y: 44, pointerEvents: "none" });
 
       const tl = gsap.timeline({
         defaults: { ease: "none" },
@@ -108,16 +122,26 @@ export default function OpeningShot({
         .to("[data-os-film]", { autoAlpha: 0, scale: 0.94, duration: 0.07 }, 0.71)
         /* ACT III — blinds, then live data */
         .to(slats, { yPercent: 0, duration: 0.15 }, 0.73)
-        .to("[data-os-live]", { autoAlpha: 1, y: 0, duration: 0.1 }, 0.87);
+        .set("[data-os-live]", { pointerEvents: "auto" }, 0.87)
+        .to("[data-os-live]", { opacity: 1, y: 0, duration: 0.1 }, 0.87);
     }, ref);
     return () => ctx.revert();
   }, [heroFilm.length]);
+
+  /* Tabbing into the departures card while it is still invisible jumps to the
+     end of the sequence, so a keyboard user never focuses something unseen. */
+  const revealLive = () => {
+    const el = ref.current;
+    const live = el?.querySelector<HTMLElement>("[data-os-live]");
+    if (!el || !live || Number(getComputedStyle(live).opacity) > 0.9) return;
+    window.scrollTo({ top: el.offsetTop + el.offsetHeight - window.innerHeight, behavior: "instant" });
+  };
 
   const cityDeps = (departures[city.slug] ?? []).slice(0, 3);
   const cityPrices = fromPrices[city.slug] ?? {};
 
   return (
-    <section ref={ref} className="relative h-[300vh] bg-ink sm:h-[380vh]">
+    <section ref={ref} className="relative h-[300vh] bg-ink motion-reduce:h-screen sm:h-[380vh] sm:motion-reduce:h-screen">
       <div className="sticky top-0 h-screen overflow-hidden">
         {/* footage living inside the letters */}
         <div className="absolute inset-0 z-10">
@@ -137,8 +161,12 @@ export default function OpeningShot({
 
         {/* ACT I chrome */}
         <div data-os-intro className="absolute inset-x-0 top-[12%] z-30 px-4 text-center">
-          <p className="text-[0.56rem] font-bold uppercase tracking-[0.4em] text-gold sm:text-[0.62rem] sm:tracking-[0.5em]">
+          <p className="text-[0.62rem] font-bold uppercase tracking-[0.4em] text-gold sm:tracking-[0.5em]">
             {eyebrow}
+          </p>
+          {/* the first frame says what this is, in plain words, before the film */}
+          <p className="mx-auto mt-3 max-w-xs text-sm font-semibold text-white/85 sm:max-w-md sm:text-base">
+            {headline} {headlineAccent}
           </p>
         </div>
 
@@ -239,7 +267,7 @@ export default function OpeningShot({
             </div>
           ))}
         </div>
-        <div data-os-live className="absolute inset-0 z-[60] flex flex-col items-center justify-center px-4 opacity-0 sm:px-5">
+        <div data-os-live onFocus={revealLive} className="pointer-events-none absolute inset-0 z-[60] flex flex-col items-center justify-center px-4 opacity-0 sm:px-5">
           <div className="max-h-[86vh] w-full max-w-2xl overflow-y-auto rounded-[1.6rem] border border-white/15 bg-ink/60 p-5 text-center backdrop-blur-xl sm:rounded-[1.8rem] sm:p-9">
             <div className="flex items-center justify-center">
               <CitySwitcher tone="dark" />

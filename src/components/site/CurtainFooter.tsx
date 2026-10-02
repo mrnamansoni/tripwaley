@@ -24,6 +24,15 @@ function prettyPhone(raw: string): string {
   return ten.length === 10 ? `+${cc} ${ten.slice(0, 5)} ${ten.slice(5)}` : `+${d}`;
 }
 
+/* where the curtain runs — must match the static fallbacks below */
+const CURTAIN = "(prefers-reduced-motion: no-preference) and (min-height: 561px)";
+const STATIC_WHEN_NO_CURTAIN = {
+  footer: "motion-reduce:h-auto sm:motion-reduce:h-auto [@media(max-height:560px)]:h-auto sm:[@media(max-height:560px)]:h-auto",
+  stage: "motion-reduce:static motion-reduce:h-auto motion-reduce:overflow-visible [@media(max-height:560px)]:static [@media(max-height:560px)]:h-auto [@media(max-height:560px)]:overflow-visible",
+  credits: "motion-reduce:relative motion-reduce:gap-10 motion-reduce:pb-8 [@media(max-height:560px)]:relative [@media(max-height:560px)]:gap-10 [@media(max-height:560px)]:pb-8",
+  curtain: "motion-reduce:hidden [@media(max-height:560px)]:hidden",
+};
+
 export default function CurtainFooter({
   whatsappLink,
   whatsapp = "",
@@ -44,37 +53,53 @@ export default function CurtainFooter({
 }) {
   const ref = useRef<HTMLElement>(null);
 
+  /* The curtain only runs where it fits and is wanted: a tall-enough screen and
+     no reduced-motion preference. Everywhere else the footer is a plain static
+     block (the CSS below), so a phone held sideways no longer clips half the
+     policy links off the bottom of a fixed-height stage. */
   useEffect(() => {
-    const ctx = gsap.context(() => {
+    const mm = gsap.matchMedia(ref);
+    mm.add(CURTAIN, () => {
       const st = { trigger: ref.current, start: "top top", end: "bottom bottom", scrub: 0.45 };
       gsap.to("[data-cf-curtain]", { yPercent: -100, ease: "none", scrollTrigger: st });
       gsap.fromTo("[data-cf-mark]", { yPercent: 40 }, { yPercent: 0, ease: "none", scrollTrigger: st });
-      gsap.fromTo("[data-cf-item]", { autoAlpha: 0, y: 24 }, {
-        autoAlpha: 1, y: 0, ease: "none", stagger: 0.04,
+      // opacity, not autoAlpha: visibility:hidden took every footer link out of
+      // the tab order and the accessibility tree until the visitor scrolled
+      gsap.fromTo("[data-cf-item]", { opacity: 0, y: 24 }, {
+        opacity: 1, y: 0, ease: "none", stagger: 0.04,
         scrollTrigger: { ...st, start: "40% bottom", end: "80% bottom" },
       });
-    }, ref);
-    return () => ctx.revert();
+    });
+    return () => mm.revert();
   }, []);
 
+  /* Tabbing into the credits while the curtain still covers them scrolls to
+     the end of the footer, where they are fully shown. */
+  const revealCredits = () => {
+    const el = ref.current;
+    if (!el || !window.matchMedia(CURTAIN).matches) return;
+    const end = el.offsetTop + el.offsetHeight - window.innerHeight;
+    if (window.scrollY < end - 4) window.scrollTo({ top: end, behavior: "instant" });
+  };
+
   return (
-    <footer ref={ref} className="relative h-[160vh] sm:h-[200vh]">
-      <div className="sticky top-0 h-screen overflow-hidden bg-[#12100d]">
+    <footer ref={ref} className={`relative h-[160vh] sm:h-[200vh] ${STATIC_WHEN_NO_CURTAIN.footer}`}>
+      <div className={`sticky top-0 h-screen overflow-hidden bg-[#12100d] ${STATIC_WHEN_NO_CURTAIN.stage}`}>
         {/* the credits, underneath all along — compact 2-col on phones so it
             always fits one screen */}
-        <div className="absolute inset-0 flex flex-col justify-between px-5 pb-4 pt-[9vh] sm:px-10 sm:pb-6 sm:pt-[12vh]">
+        <div onFocus={revealCredits} className={`absolute inset-0 flex flex-col justify-between px-5 pb-4 pt-[9vh] sm:px-10 sm:pb-6 sm:pt-[12vh] ${STATIC_WHEN_NO_CURTAIN.credits}`}>
           <div className="mx-auto grid w-full max-w-6xl grid-cols-2 gap-x-6 gap-y-7 sm:grid-cols-[1.3fr_1fr_1fr_1fr] sm:gap-10">
             <div data-cf-item className="col-span-2 sm:col-span-1">
               <p className="font-script text-2xl text-gold sm:text-3xl">stay restless</p>
-              <p className="mt-2 max-w-xs text-xs leading-relaxed text-white/45 sm:mt-3 sm:text-sm">{announcement}</p>
-              <a href={whatsappLink} target="_blank" rel="noreferrer" className="mt-3.5 inline-flex min-h-10 items-center gap-2.5 rounded-full bg-success px-5 py-2.5 text-xs font-bold text-white transition-transform hover:scale-[1.03] sm:mt-5 sm:min-h-11 sm:px-6 sm:py-3 sm:text-sm">
+              <p className="mt-2 max-w-xs text-xs leading-relaxed text-white/65 sm:mt-3 sm:text-sm">{announcement}</p>
+              <a href={whatsappLink} target="_blank" rel="noreferrer" className="mt-3.5 inline-flex min-h-10 items-center gap-2.5 rounded-full bg-success-ink-ink px-5 py-2.5 text-xs font-bold text-white transition-transform hover:scale-[1.03] sm:mt-5 sm:min-h-11 sm:px-6 sm:py-3 sm:text-sm">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.66 15L2 22l5.16-1.3A10 10 0 1 0 12 2Z" /></svg>
                 {prettyPhone(whatsapp) || "WhatsApp us"}
               </a>
             </div>
             {COLS.map((col) => (
               <nav key={col.head} data-cf-item aria-label={col.head}>
-                <p className="text-[0.58rem] font-bold uppercase tracking-[0.3em] text-white/40 sm:text-[0.62rem] sm:tracking-[0.35em]">{col.head}</p>
+                <p className="text-[0.62rem] font-bold uppercase tracking-[0.3em] text-white/60 sm:tracking-[0.35em]">{col.head}</p>
                 <ul className="mt-2.5 space-y-1.5 sm:mt-4 sm:space-y-2.5">
                   {col.links.map(([label, href]) => (
                     <li key={label}>
@@ -119,15 +144,15 @@ export default function CurtainFooter({
             </p>
           </div>
 
-          <div data-cf-item className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 border-t border-white/10 pt-3.5 text-[0.52rem] font-semibold uppercase tracking-[0.18em] text-white/35 sm:pt-5 sm:text-[0.6rem] sm:tracking-[0.2em]">
+          <div data-cf-item className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 border-t border-white/10 pt-3.5 text-[0.6rem] font-semibold uppercase tracking-[0.18em] text-white/60 sm:pt-5 sm:tracking-[0.2em]">
             <p>© 2026 Tripwaley · departures from 12 cities</p>
-            <p className="hidden text-white/25 sm:block">free cancellation until 7 days before departure</p>
+            <p className="hidden text-white/60 sm:block">free cancellation until 7 days before departure</p>
             <p>made between trips</p>
           </div>
         </div>
 
         {/* the curtain */}
-        <div data-cf-curtain className="absolute inset-0 flex flex-col items-center justify-center bg-cream px-6 text-center will-change-transform">
+        <div data-cf-curtain className={`${STATIC_WHEN_NO_CURTAIN.curtain} absolute inset-0 flex flex-col items-center justify-center bg-cream px-6 text-center will-change-transform`}>
           <p className="text-[0.62rem] font-bold uppercase tracking-[0.5em] text-ink/70">{eyebrow}</p>
           <h2 className="mt-4 font-display text-4xl font-extrabold tracking-tight sm:text-6xl">
             {headline}

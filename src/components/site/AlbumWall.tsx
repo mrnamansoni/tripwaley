@@ -7,6 +7,7 @@
 import { useEffect, useRef } from "react";
 import SiteMedia from "./SiteMedia";
 import { gsap } from "@/lib/gsap";
+import { prefersReducedMotion } from "@/lib/motion";
 
 const SPEEDS = [-8, 14, -14];
 
@@ -26,6 +27,8 @@ export default function AlbumWall({
   const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
+    // reduced motion: content is already in its finished, visible state
+    if (prefersReducedMotion()) return;
     const ctx = gsap.context(() => {
       gsap.utils.toArray<HTMLElement>("[data-album-col]").forEach((col, i) => {
         gsap.fromTo(

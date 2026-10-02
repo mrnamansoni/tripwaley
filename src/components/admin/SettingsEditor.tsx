@@ -47,7 +47,7 @@ function LadderPreview({ holdPercent, gstPercent, advancePercent }: { holdPercen
   );
 }
 
-const DEF_BAR: AnnouncementBar = { enabled: false, text: "Monsoon batches are filling fast — hold a seat free for 24h.", href: "/trips", emoji: "🎒" };
+const DEF_BAR: AnnouncementBar = { enabled: false, text: "Monsoon batches are out — reserve a seat free for 24 hours.", href: "/trips", emoji: "🎒" };
 const DEF_POPUP: LeadPopup = { enabled: false, delaySeconds: 15, title: "Wait — grab your seat", subtitle: "Drop your number and we'll send this week's departures + a first-timer discount.", incentive: "₹500 off your first batch", cta: "Send me departures", image: "/images/group-mountains.jpg" };
 const DEF_SEO: Seo = { title: "", description: "", ogImage: "/images/ladakh.jpg" };
 const DEF_SOCIALS: Socials = { instagram: "", youtube: "", facebook: "" };

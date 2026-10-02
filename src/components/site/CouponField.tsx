@@ -80,7 +80,7 @@ export default function CouponField({
         <button
           type="button"
           onClick={onClear}
-          className="shrink-0 text-[0.62rem] font-bold uppercase tracking-wider text-white/45 underline-offset-2 hover:text-white hover:underline"
+          className="shrink-0 text-[0.62rem] font-bold uppercase tracking-wider text-white/55 underline-offset-2 hover:text-white hover:underline"
         >
           remove
         </button>
@@ -94,7 +94,7 @@ export default function CouponField({
         type="button"
         disabled={disabled}
         onClick={() => setOpen(true)}
-        className="mt-4 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-gold underline-offset-4 hover:underline disabled:opacity-40"
+        className="mt-2 min-h-11 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-gold underline-offset-4 hover:underline disabled:opacity-40"
       >
         + Have a coupon code?
       </button>
@@ -103,7 +103,7 @@ export default function CouponField({
 
   return (
     <div className="mt-4">
-      <label className="block text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white/45" htmlFor="coupon-code">
+      <label className="block text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white/55" htmlFor="coupon-code">
         coupon code
       </label>
       <div className="mt-1.5 flex gap-2">
@@ -114,7 +114,10 @@ export default function CouponField({
             setCode(e.target.value.toUpperCase());
             setErr("");
           }}
-          onKeyDown={(e) => e.key === "Enter" && check()}
+          // Enter checks the code only — this field sits inside the booking <form>, and
+          // letting Enter through would submit it and start a payment before the
+          // coupon applied
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); check(); } }}
           autoCapitalize="characters"
           spellCheck={false}
           placeholder="e.g. FIRSTTRIP"
@@ -129,7 +132,7 @@ export default function CouponField({
           {busy ? "…" : "Apply"}
         </button>
       </div>
-      {err && <p className="mt-2 text-sm font-semibold text-brand-bright">{err}</p>}
+      {err && <p role="alert" className="mt-2 text-sm font-semibold text-brand-soft">{err}</p>}
     </div>
   );
 }

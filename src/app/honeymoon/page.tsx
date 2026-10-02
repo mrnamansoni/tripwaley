@@ -83,7 +83,7 @@ export default function HoneymoonPage() {
             card: "border border-brand/12 bg-card shadow-card",
             num: "text-brand/20",
             title: "text-ink",
-            detail: "text-ink/60",
+            detail: "text-ink/65",
           }}
         />
 

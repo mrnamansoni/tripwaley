@@ -69,34 +69,34 @@ export default function ContactPage() {
                 {...(c.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                 className="group rounded-3xl border border-line bg-card p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand hover:shadow-card"
               >
-                <p className="font-mono text-[0.6rem] uppercase tracking-[0.25em] text-ink/40">{c.label}</p>
+                <p className="font-mono text-[0.6rem] uppercase tracking-[0.25em] text-ink/65">{c.label}</p>
                 <p className="mt-2 font-display text-xl font-extrabold break-words text-ink transition-colors group-hover:text-brand">
                   {c.value}
                 </p>
-                <p className="mt-2 text-[0.88rem] leading-relaxed text-ink/60">{c.note}</p>
+                <p className="mt-2 text-[0.88rem] leading-relaxed text-ink/65">{c.note}</p>
               </a>
             ))}
           </div>
 
           {(s.address || s.legalName || s.gstin) && (
             <section className="mt-10 rounded-3xl border border-line bg-card p-6 shadow-sm sm:p-8">
-              <p className="font-mono text-[0.6rem] uppercase tracking-[0.25em] text-ink/40">
+              <p className="font-mono text-[0.6rem] uppercase tracking-[0.25em] text-ink/65">
                 registered business
               </p>
               <dl className="mt-4 grid gap-5 sm:grid-cols-2">
                 <div>
-                  <dt className="text-[0.78rem] font-bold uppercase tracking-wide text-ink/45">entity</dt>
+                  <dt className="text-[0.78rem] font-bold uppercase tracking-wide text-ink/65">entity</dt>
                   <dd className="mt-1 font-display text-lg font-extrabold text-ink">{entity}</dd>
                 </div>
                 {s.gstin && (
                   <div>
-                    <dt className="text-[0.78rem] font-bold uppercase tracking-wide text-ink/45">GSTIN</dt>
+                    <dt className="text-[0.78rem] font-bold uppercase tracking-wide text-ink/65">GSTIN</dt>
                     <dd className="mt-1 font-mono text-ink/80">{s.gstin}</dd>
                   </div>
                 )}
                 {s.address && (
                   <div className="sm:col-span-2">
-                    <dt className="text-[0.78rem] font-bold uppercase tracking-wide text-ink/45">address</dt>
+                    <dt className="text-[0.78rem] font-bold uppercase tracking-wide text-ink/65">address</dt>
                     <dd className="mt-1 leading-relaxed text-ink/75">{s.address}</dd>
                   </div>
                 )}

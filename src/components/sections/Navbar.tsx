@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { LogoLockup } from "@/components/ui/Logo";
 import { navLinks } from "@/lib/data";
@@ -21,6 +21,19 @@ export default function Navbar({ overDarkHero = false }: { overDarkHero?: boolea
   const [menuOpen, setMenuOpen] = useState(false);
   const { open, waLink } = useBooking();
   const { open: openSearch } = useSearch();
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Escape closes the mobile menu and returns focus to the button that opened it
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setMenuOpen(false);
+      menuButtonRef.current?.focus();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [menuOpen]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -102,7 +115,7 @@ export default function Navbar({ overDarkHero = false }: { overDarkHero?: boolea
           >
             <SearchIcon />
             Search
-            <kbd className="ml-0.5 hidden rounded border border-current/30 px-1.5 py-0.5 text-[0.55rem] font-bold uppercase opacity-50 2xl:inline">⌘K</kbd>
+            <kbd className="ml-0.5 hidden rounded border border-current/30 px-1.5 py-0.5 text-[0.55rem] font-bold uppercase opacity-75 2xl:inline">⌘K</kbd>
           </button>
           <a
             href={waLink("Hi Tripwaley! Tell me about upcoming departures ✈️")}
@@ -119,7 +132,7 @@ export default function Navbar({ overDarkHero = false }: { overDarkHero?: boolea
             onClick={() => open("hold")}
             className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-full bg-brand px-5 py-2.5 text-sm font-bold text-white shadow-red transition-all hover:bg-brand-bright active:scale-[0.97]"
           >
-            Hold a seat
+            Reserve a seat
           </button>
         </div>
 
@@ -133,8 +146,10 @@ export default function Navbar({ overDarkHero = false }: { overDarkHero?: boolea
           <SearchIcon />
         </button>
         <button
+          ref={menuButtonRef}
           onClick={() => setMenuOpen((v) => !v)}
           aria-expanded={menuOpen}
+          aria-controls="mobile-menu"
           aria-label={menuOpen ? "Close menu" : "Open menu"}
           className="flex h-11 w-11 flex-col items-center justify-center gap-[5px] rounded-full"
         >
@@ -155,6 +170,7 @@ export default function Navbar({ overDarkHero = false }: { overDarkHero?: boolea
         />
       )}
       <div
+        id="mobile-menu"
         className={`fixed inset-x-3 z-40 origin-top rounded-3xl border border-line bg-cream shadow-card-lg transition-all duration-300 xl:hidden ${
           menuOpen ? "visible scale-100 opacity-100" : "invisible scale-[0.97] opacity-0"
         }`}
@@ -174,7 +190,7 @@ export default function Navbar({ overDarkHero = false }: { overDarkHero?: boolea
                   className="flex items-center justify-between px-3 py-3.5 font-display text-lg font-extrabold tracking-tight text-ink transition-colors hover:text-brand"
                 >
                   {l.label}
-                  <span aria-hidden="true" className="text-sm text-ink/25">→</span>
+                  <span aria-hidden="true" className="text-sm text-ink/65">→</span>
                 </a>
               </li>
             ))}
@@ -187,7 +203,7 @@ export default function Navbar({ overDarkHero = false }: { overDarkHero?: boolea
               }}
               className="rounded-full bg-brand px-4 py-3 text-sm font-bold text-white shadow-red"
             >
-              Hold a seat
+              Reserve a seat
             </button>
             <a
               href={waLink("Hi Tripwaley! Tell me about upcoming departures ✈️")}

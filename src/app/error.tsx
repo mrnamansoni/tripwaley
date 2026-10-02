@@ -48,7 +48,7 @@ export default function Error({
         </Link>
       </div>
       {error.digest && (
-        <p className="mt-8 font-mono text-[0.6rem] tracking-widest text-white/25">ref {error.digest}</p>
+        <p className="mt-8 font-mono text-[0.6rem] tracking-widest text-white/55">ref {error.digest}</p>
       )}
     </main>
   );

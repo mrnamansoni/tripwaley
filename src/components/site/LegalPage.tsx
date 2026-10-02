@@ -87,19 +87,19 @@ export function LegalContact() {
       <dl className="mt-5 grid gap-4 text-[0.95rem] sm:grid-cols-2">
         {s.legalName && (
           <div>
-            <dt className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-ink/40">registered entity</dt>
+            <dt className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-ink/65">registered entity</dt>
             <dd className="mt-1 font-bold text-ink">{s.legalName}</dd>
           </div>
         )}
         {s.gstin && (
           <div>
-            <dt className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-ink/40">GSTIN</dt>
+            <dt className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-ink/65">GSTIN</dt>
             <dd className="mt-1 font-mono text-ink">{s.gstin}</dd>
           </div>
         )}
         {tel && (
           <div>
-            <dt className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-ink/40">phone / whatsapp</dt>
+            <dt className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-ink/65">phone / whatsapp</dt>
             <dd className="mt-1 font-bold text-ink">
               <a href={`tel:+${tel}`} className="hover:text-brand">
                 +{tel}
@@ -109,7 +109,7 @@ export function LegalContact() {
         )}
         {s.email && (
           <div>
-            <dt className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-ink/40">email</dt>
+            <dt className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-ink/65">email</dt>
             <dd className="mt-1 font-bold break-words text-ink">
               <a href={`mailto:${s.email}`} className="hover:text-brand">
                 {s.email}
@@ -119,13 +119,13 @@ export function LegalContact() {
         )}
         {s.address && (
           <div className="sm:col-span-2">
-            <dt className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-ink/40">registered address</dt>
+            <dt className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-ink/65">registered address</dt>
             <dd className="mt-1 text-ink/80">{s.address}</dd>
           </div>
         )}
         {s.supportHours && (
           <div className="sm:col-span-2">
-            <dt className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-ink/40">support hours</dt>
+            <dt className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-ink/65">support hours</dt>
             <dd className="mt-1 text-ink/80">{s.supportHours}</dd>
           </div>
         )}
@@ -177,7 +177,7 @@ export function GrievanceBlock() {
       <dl className="mt-6 divide-y divide-line rounded-2xl border border-line">
         {rows.map(([k, v]) => (
           <div key={k} className="grid grid-cols-[6.5rem_1fr] gap-3 px-4 py-3 sm:grid-cols-[9rem_1fr]">
-            <dt className="font-mono text-[0.6rem] uppercase tracking-[0.18em] text-ink/40">{k}</dt>
+            <dt className="font-mono text-[0.6rem] uppercase tracking-[0.18em] text-ink/65">{k}</dt>
             <dd className="break-words text-[0.92rem] text-ink/80">
               {v ? (
                 k === "Email" ? (
@@ -225,7 +225,7 @@ export default function LegalPage({
   return (
     <CityProvider cities={getCities()} defaultCity={settings.defaultCity}>
       <Navbar overDarkHero />
-      <main className="bg-cream">
+      <main id="main" className="bg-cream">
         <section className="bg-ink px-5 pb-14 pt-36 sm:px-8">
           <div className="mx-auto w-full max-w-4xl">
             <p className="font-script text-2xl text-gold sm:text-3xl">{kicker}</p>
@@ -233,7 +233,7 @@ export default function LegalPage({
               {title}
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/60">{intro}</p>
-            <p className="mt-6 font-mono text-[0.6rem] uppercase tracking-[0.25em] text-white/40">
+            <p className="mt-6 font-mono text-[0.6rem] uppercase tracking-[0.25em] text-white/55">
               last updated · {updatedLabel}
             </p>
           </div>
@@ -247,7 +247,7 @@ export default function LegalPage({
           <LegalContact />
 
           <nav className="mt-10" aria-label="Other policies">
-            <p className="font-mono text-[0.6rem] uppercase tracking-[0.25em] text-ink/40">other policies</p>
+            <p className="font-mono text-[0.6rem] uppercase tracking-[0.25em] text-ink/65">other policies</p>
             <ul className="mt-3 flex flex-wrap gap-2">
               {LEGAL_PAGES.map((p) => (
                 <li key={p.href}>

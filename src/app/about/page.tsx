@@ -4,7 +4,7 @@ import Navbar from "@/components/sections/Navbar";
 import CityProvider from "@/components/site/CityProvider";
 import SiteFooter from "@/components/site/SiteFooter";
 import { CaptainsBand, SafetyBand, CtaBand } from "@/components/site/PageExtras";
-import { getCities, getSettings, getLivePackages, getPricedCities, getFaqs, slotOne } from "@/lib/catalog";
+import { getCities, getSettings, getLivePackages, getPricedCities, getFaqs, slotOne, holdRates } from "@/lib/catalog";
 import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -64,7 +64,7 @@ export default function AboutPage() {
           </h2>
           <div className="mt-9 grid gap-6 sm:grid-cols-3">
             {[
-              { n: "01", t: "Pick & hold", d: "Choose a trip and date, hold your seat with a 40% advance — on the site or over WhatsApp. Takes about 90 seconds." },
+              { n: "01", t: "Pick & hold", d: `Choose a trip and date and reserve a seat free for 24 hours, then hold it with ${holdRates().holdPercent}% of the trip price — on the site or over WhatsApp.` },
               { n: "02", t: "Join the thread", d: "You're added to the batch's WhatsApp group with your captain. Packing lists, pickup points, playlists — all handled there." },
               { n: "03", t: "Just show up", d: "Board in your own city. Stays, transport, permits, chai stops — the captain runs it, you live it." },
             ].map((s) => (
@@ -98,7 +98,7 @@ export default function AboutPage() {
             {FAQS.map((f, i) => (
               <details key={f.q} className="group px-6 py-5 sm:px-8" open={i === 0}>
                 <summary className="flex cursor-pointer list-none items-center gap-4 font-display text-lg font-extrabold text-ink">
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-ink/25 text-lg text-ink/50 transition-all duration-500 group-open:rotate-45 group-open:border-brand group-open:bg-brand group-open:text-white" aria-hidden="true">+</span>
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-ink/25 text-lg text-ink/65 transition-all duration-500 group-open:rotate-45 group-open:border-brand group-open:bg-brand group-open:text-white" aria-hidden="true">+</span>
                   {f.q}
                 </summary>
                 <p className="mt-3 pl-12 text-[0.95rem] leading-relaxed text-ink/65">{f.a}</p>

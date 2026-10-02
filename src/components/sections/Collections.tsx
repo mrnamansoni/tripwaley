@@ -77,7 +77,7 @@ export default function Collections({ items = defaultCollections }: { items?: Co
                 Curated <span className="text-brand">collections.</span>
               </h2>
             </div>
-            <p className="hidden text-sm font-semibold uppercase tracking-[0.2em] text-ink/40 md:block" aria-hidden="true">
+            <p className="hidden text-sm font-semibold uppercase tracking-[0.2em] text-ink/65 md:block" aria-hidden="true">
               scroll → to explore
             </p>
           </div>

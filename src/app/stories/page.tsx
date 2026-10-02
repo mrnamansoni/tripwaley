@@ -67,9 +67,9 @@ export default async function StoriesPage({
         <section className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-8">
           {posts.length === 0 ? (
             place && all.length > 0 ? (
-              <p className="text-ink/50">No stories about this place yet — <Link href="/stories" className="font-bold text-brand">see all stories</Link>.</p>
+              <p className="text-ink/65">No stories about this place yet — <Link href="/stories" className="font-bold text-brand">see all stories</Link>.</p>
             ) : (
-              <p className="text-ink/50">No stories published yet — check back soon.</p>
+              <p className="text-ink/65">No stories published yet — check back soon.</p>
             )
           ) : (
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">

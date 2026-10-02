@@ -223,7 +223,7 @@ export default function MemoryArc({
             <h2 className="mt-2 font-display text-4xl font-extrabold tracking-tight sm:text-6xl">
               {headline}
             </h2>
-            <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-ink/60 sm:text-base">
+            <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-ink/65 sm:text-base">
               {sub}
             </p>
           </div>
@@ -231,7 +231,7 @@ export default function MemoryArc({
           {/* circle-phase hint */}
           <p
             ref={hintRef}
-            className="pointer-events-none absolute z-0 text-xs font-bold uppercase tracking-[0.25em] text-ink/45 opacity-0"
+            className="pointer-events-none absolute z-0 text-xs font-bold uppercase tracking-[0.25em] text-ink/65 opacity-0"
           >
 every frame shot by a real traveller
           </p>

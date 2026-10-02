@@ -309,8 +309,8 @@ export default function VideoReel({ vt }: { vt: VideoTestimonial }) {
             </div>
 
             {/* frame HUD marks */}
-            <span aria-hidden="true" className="absolute left-[7%] top-2 font-mono text-[0.52rem] uppercase tracking-widest text-white/45">● rec</span>
-            <span aria-hidden="true" className="absolute right-[7%] top-2 font-mono text-[0.52rem] uppercase tracking-widest text-white/45 [font-variant-numeric:tabular-nums]">4.9★ verified</span>
+            <span aria-hidden="true" className="absolute left-[7%] top-2 font-mono text-[0.52rem] uppercase tracking-widest text-white/55">● rec</span>
+            <span aria-hidden="true" className="absolute right-[7%] top-2 font-mono text-[0.52rem] uppercase tracking-widest text-white/55 [font-variant-numeric:tabular-nums]">4.9★ verified</span>
 
             {/* grain + vignette */}
             <span aria-hidden="true" className={`pointer-events-none absolute inset-0 ${reduced ? "" : "reel-grain"}`} />

@@ -8,6 +8,7 @@ import { useEffect, useRef } from "react";
 import SiteMedia from "./SiteMedia";
 import Link from "next/link";
 import { gsap } from "@/lib/gsap";
+import { prefersReducedMotion } from "@/lib/motion";
 import { useCity } from "./CityProvider";
 import { inr } from "@/lib/types";
 
@@ -26,6 +27,8 @@ export default function PileUp({ cards }: { cards: PileCard[] }) {
   const { city } = useCity();
 
   useEffect(() => {
+    // reduced motion: content is already in its finished, visible state
+    if (prefersReducedMotion()) return;
     const ctx = gsap.context(() => {
       const els = gsap.utils.toArray<HTMLElement>("[data-pile-card]");
       els.forEach((card, i) => {
@@ -73,17 +76,17 @@ export default function PileUp({ cards }: { cards: PileCard[] }) {
                     <p className="text-[0.62rem] font-bold uppercase tracking-widest text-white/60">{c.nightsLabel} · ex-{city.name}</p>
                     <p className="font-display text-3xl font-extrabold text-gold">{price ? inr(price) : "on request"}</p>
                   </div>
-                  {/* Four cards render this same "Claim →" text pointing at
+                  {/* Four cards render this same "See trip →" text pointing at
                       four different trips. To anyone listing the page's links
                       — a screen-reader user, or a crawler — they were four
                       identical links with four different destinations. The
                       visible label stays; the accessible name names the trip. */}
                   <Link
                     href={`/trips/${c.slug}`}
-                    aria-label={`Claim your seat on ${c.name}`}
+                    aria-label={`See the ${c.name} trip`}
                     className="inline-flex min-h-12 items-center rounded-full bg-white px-7 py-3.5 font-bold text-ink transition-colors hover:bg-gold"
                   >
-                    Claim →
+                    See trip →
                   </Link>
                 </div>
               </div>

@@ -21,7 +21,8 @@ import { readCatalog as readCatalogRaw, readReviews as readReviewsRaw } from "./
 const readCatalog = cache(readCatalogRaw);
 const readReviews = cache(readReviewsRaw);
 import type { BlogPost, Captain, City, CollegeTrip, Coupon, Creator, CreatorPose, CreatorTrip, CreatorTripDate, Departure, Faq, Package, PriceRule, Review, Settings, TripCategory, VideoTestimonial, WireEntry } from "./types";
-import { DEFAULT_BANK, DEFAULT_CAPTAINS, DEFAULT_HOLD_PERCENT, DEFAULT_GST_PERCENT, normalizeCaptain, normalizeCollegeTrip, normalizeCouponCode, resolveSlot as resolveSlotPure, resolveContent as resolveContentPure, resolvePageSection, minRate, inCategory, normalizeCreator, packageImages, resolveFigure, DEFAULT_FAQS, DEFAULT_VIDEO_TESTIMONIAL } from "./types";
+import { DEFAULT_BANK, DEFAULT_CAPTAINS, DEFAULT_HOLD_PERCENT, DEFAULT_GST_PERCENT, normalizeCaptain, normalizeCollegeTrip, normalizeCouponCode, resolveSlot as resolveSlotPure, resolveContent as resolveContentPure, resolvePageSection, inCategory, normalizeCreator, packageImages, resolveFigure, DEFAULT_FAQS, DEFAULT_VIDEO_TESTIMONIAL } from "./types";
+import { lowestFare } from "./fares";
 import {
   collections as collectionDefaults,
   galleryPhotos as galleryDefaults,
@@ -50,9 +51,17 @@ export function text(key: string): string {
 
 /* ------------------------------------------------ global FAQ + blog */
 
+/** FAQs with the booking-ladder numbers filled in from Settings, so an answer
+ *  can never quote a hold % the checkout doesn't charge. Tokens: {hold},
+ *  {advance}, {gst} (" + 5% GST", or nothing when GST is 0). */
 export const getFaqs = (): Faq[] => {
   const f = readCatalog().faqs;
-  return f && f.length ? f : DEFAULT_FAQS;
+  const { holdPercent, gstPercent, advancePercent } = holdRates();
+  const fill = (t: string) =>
+    t.replaceAll("{hold}", String(holdPercent))
+      .replaceAll("{advance}", String(advancePercent))
+      .replaceAll("{gst}", gstPercent > 0 ? ` + ${gstPercent}% GST` : "");
+  return (f && f.length ? f : DEFAULT_FAQS).map((x) => ({ ...x, q: fill(x.q), a: fill(x.a) }));
 };
 export const getPosts = (): BlogPost[] => (readCatalog().posts ?? []).filter((p) => p.published);
 /** every story row, drafts included — story pages decide liveness themselves
@@ -98,6 +107,14 @@ export const holdRates = (): { holdPercent: number; gstPercent: number; advanceP
   };
 };
 
+/** THE one sentence that says what holding a seat costs. Every surface that
+ *  mentions holding (countdown, lead form, FAQ, About) reads this, so the site
+ *  can never again promise "free" in one place and charge in another. */
+export const holdSummary = (): string => {
+  const { holdPercent, gstPercent } = holdRates();
+  return `Hold your seat with ${holdPercent}% of the trip price${gstPercent > 0 ? ` + ${gstPercent}% GST` : ""} · the rest is paid closer to departure`;
+};
+
 /** Bank details for the invoice's "Pay To" block, resolved against defaults.
  *  Nullish coalescing on purpose: an admin who clears a field to "" means it,
  *  and an empty field hides the whole block — a half-filled bank account on a
@@ -135,20 +152,11 @@ export const getVideoTestimonial = (): VideoTestimonial => {
 export const sectionOn = (page: "trips" | "destinations", key: string): boolean =>
   resolvePageSection(readCatalog().pageSections, page, key);
 
-const DEFAULT_WIRE: WireEntry[] = [
-  { name: "Sneha", city: "Pune", act: "held a seat on", trip: "Manali · next batch" },
-  { name: "Kabir", city: "Delhi", act: "just booked", trip: "Jibhi · next batch" },
-  { name: "Ishita", city: "Mumbai", act: "joined the waitlist for", trip: "Kashmir · Aug" },
-  { name: "Dev", city: "Bengaluru", act: "paid the balance for", trip: "Kedarkantha · Dec" },
-  { name: "Mira", city: "Jaipur", act: "just booked", trip: "Manikaran · next batch" },
-  { name: "Aarav", city: "Kochi", act: "held a seat on", trip: "Rishikesh · next batch" },
-];
 
-/** admin-curated live-booking wire entries (falls back to a seeded set) */
-export const getWire = (): WireEntry[] => {
-  const w = readCatalog().wire;
-  return w && w.length ? w : DEFAULT_WIRE;
-};
+/** Admin-curated booking-wire entries — ONLY what the owner entered. This used
+ *  to fall back to six made-up bookings (two from cities we don't depart
+ *  from) presented as "live"; with no entries the section now simply hides. */
+export const getWire = (): WireEntry[] => readCatalog().wire ?? [];
 export const getCities = (): City[] => readCatalog().cities;
 export const getPricedCities = (): City[] => readCatalog().cities.filter((c) => c.priced);
 export const getCity = (slug: string): City | undefined => readCatalog().cities.find((c) => c.slug === slug);
@@ -330,15 +338,11 @@ export function creatorDates(opts: { creatorSlug?: string; from?: string } = {})
 export function priceFor(packageSlug: string, citySlug: string): PriceRule | undefined {
   return readCatalog().prices.find((r) => r.packageSlug === packageSlug && r.citySlug === citySlug);
 }
+/** With a city: that city's fare or undefined — never another city's (this
+ *  used to fall back to the cheapest fare anywhere, so /from/kochi priced
+ *  Delhi trips "ex-Kochi"). Without a city: the cheapest fare anywhere. */
 export function fromPrice(packageSlug: string, citySlug?: string): number | undefined {
-  const prices = readCatalog().prices;
-  if (citySlug) {
-    const r = prices.find((x) => x.packageSlug === packageSlug && x.citySlug === citySlug);
-    if (r) return minRate(r.triple, r.double, r.quad);
-  }
-  const all = prices.filter((r) => r.packageSlug === packageSlug);
-  if (!all.length) return undefined;
-  return minRate(...all.flatMap((r) => [r.triple, r.double, r.quad]));
+  return lowestFare(readCatalog().prices, packageSlug, citySlug || undefined);
 }
 export function citiesPricedFor(packageSlug: string): { city: City; rule: PriceRule }[] {
   const cat = readCatalog();

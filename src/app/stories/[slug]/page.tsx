@@ -77,7 +77,7 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
 
   return (
     <>
-      <Navbar />
+      <Navbar overDarkHero />
       <main id="main" className="bg-cream">
         <script
           type="application/ld+json"
@@ -99,7 +99,8 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
           ]) }}
         />
         {/* cover */}
-        <section className="relative h-[52vh] min-h-[22rem] w-full overflow-hidden">
+        {/* min-h keeps a long title clear of the fixed announcement bar + navbar */}
+        <section className="relative h-[52vh] min-h-[30rem] w-full overflow-hidden">
           <SiteMedia src={post.cover} alt={post.title} fill priority sizes="100vw" className="object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-ink/20" aria-hidden="true" />
           <div className="absolute inset-x-0 bottom-0 mx-auto w-full max-w-3xl px-5 pb-10 sm:px-8">
@@ -160,14 +161,14 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
           )}
 
           <div className="mt-12 border-t border-line pt-8">
-            <Link href="/stories" className="text-sm font-bold text-brand hover:text-brand-bright">← All stories</Link>
+            <Link href="/stories" className="inline-flex min-h-11 items-center text-sm font-bold text-brand hover:text-brand-bright">← All stories</Link>
           </div>
         </article>
 
         {/* more */}
         {more.length > 0 && (
           <section className="mx-auto w-full max-w-6xl px-5 pb-20 sm:px-8">
-            <p className="mb-6 text-[0.62rem] font-bold uppercase tracking-[0.35em] text-ink/45">keep reading</p>
+            <h2 className="mb-6 text-[0.62rem] font-bold uppercase tracking-[0.35em] text-ink/65">keep reading</h2>
             <div className="grid gap-6 sm:grid-cols-3">
               {more.map((p) => (
                 <Link key={p.slug} href={`/stories/${p.slug}`} className="group overflow-hidden rounded-2xl border border-line bg-card shadow-card transition-transform hover:-translate-y-1">

@@ -43,7 +43,7 @@ export default async function TopicPage({ params }: { params: Promise<{ kind: st
       <main id="main" className="bg-cream">
         <section className="bg-ink px-5 pb-14 pt-36 sm:px-8">
           <div className="mx-auto w-full max-w-6xl">
-            <Link href="/stories" className="font-mono text-[0.58rem] uppercase tracking-[0.3em] text-white/45 hover:text-gold">← all stories</Link>
+            <Link href="/stories" className="font-mono text-[0.58rem] uppercase tracking-[0.3em] text-white/55 hover:text-gold">← all stories</Link>
             <h1 className="mt-4 font-display text-5xl font-extrabold leading-[0.98] tracking-tight text-white sm:text-6xl">
               {meta.label}<span className="text-gold">.</span>
             </h1>
@@ -52,7 +52,7 @@ export default async function TopicPage({ params }: { params: Promise<{ kind: st
         </section>
         <section className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-8">
           {posts.length === 0 ? (
-            <p className="text-ink/60">Nothing here yet — <Link href="/stories" className="font-bold text-brand">read everything else</Link>.</p>
+            <p className="text-ink/65">Nothing here yet — <Link href="/stories" className="font-bold text-brand">read everything else</Link>.</p>
           ) : (
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {posts.map((p) => <StoryCard key={p.slug} post={p} />)}

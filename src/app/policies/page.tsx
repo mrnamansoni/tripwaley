@@ -47,8 +47,8 @@ export default function PoliciesPage() {
                   <h2 className="font-display text-xl font-extrabold text-ink transition-colors group-hover:text-brand">
                     {p.label}
                   </h2>
-                  <p className="mt-2 flex-1 text-[0.9rem] leading-relaxed text-ink/60">{p.blurb}</p>
-                  <span className="mt-4 font-mono text-[0.6rem] font-bold uppercase tracking-[0.25em] text-ink/35 transition-colors group-hover:text-brand">
+                  <p className="mt-2 flex-1 text-[0.9rem] leading-relaxed text-ink/65">{p.blurb}</p>
+                  <span className="mt-4 font-mono text-[0.6rem] font-bold uppercase tracking-[0.25em] text-ink/65 transition-colors group-hover:text-brand">
                     read →
                   </span>
                 </Link>

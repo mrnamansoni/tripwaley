@@ -88,7 +88,7 @@ export default function NotFound() {
                         />
                       </div>
                       <div className="p-5">
-                        <p className="font-mono text-[0.58rem] uppercase tracking-[0.2em] text-ink/45">
+                        <p className="font-mono text-[0.58rem] uppercase tracking-[0.2em] text-ink/65">
                           {weekday(d.date)} · {shortDate(d.date)}
                         </p>
                         <h3 className="mt-1.5 font-display text-lg font-extrabold leading-snug text-ink transition-colors group-hover:text-brand">
@@ -97,7 +97,7 @@ export default function NotFound() {
                         {price != null && (
                           <p className="mt-2 font-display text-base font-extrabold text-brand">
                             {inr(price)}
-                            <span className="ml-1 text-[0.6rem] font-bold uppercase tracking-wider text-ink/40">/seat</span>
+                            <span className="ml-1 text-[0.6rem] font-bold uppercase tracking-wider text-ink/65">/seat</span>
                           </p>
                         )}
                       </div>

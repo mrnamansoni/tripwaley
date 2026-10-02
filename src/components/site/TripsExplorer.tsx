@@ -5,17 +5,20 @@
    the next real departures. Below: the full catalog, filtered live by
    the visitor's city and month. */
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import SiteMedia from "./SiteMedia";
 import Link from "next/link";
 import { useCity, CitySwitcher } from "./CityProvider";
 import { inr, shortDate, weekday } from "@/lib/types";
+import { fareFor } from "@/lib/fares";
 
 export interface ExplorerPackage {
   slug: string;
   name: string;
   destination: string;
   nightsLabel: string;
+  /** nights on the road, for the length filter; null when unknown */
+  nights: number | null;
   image: string;
   fromPrices: Record<string, number>;
   citySlugs: string[]; // priced cities
@@ -29,27 +32,61 @@ export interface ExplorerDeparture {
   fromPrices: Record<string, number>;
 }
 
+type LengthKey = "any" | "short" | "mid" | "long";
+/* Buckets sized to how people plan leave: a long weekend, a week off, more. */
+const LENGTHS: Record<LengthKey, { label: string; test: (n: number | null) => boolean }> = {
+  any: { label: "Any length", test: () => true },
+  short: { label: "Weekend · up to 3 nights", test: (n) => n != null && n <= 3 },
+  mid: { label: "4 to 5 nights", test: (n) => n != null && n >= 4 && n <= 5 },
+  long: { label: "6 nights or more", test: (n) => n != null && n >= 6 },
+};
+
+function FilterSelect({ label, value, onChange, children }: { label: string; value: string; onChange: (v: string) => void; children: ReactNode }) {
+  return (
+    <label className="relative inline-flex min-h-11 items-center gap-1.5 rounded-full border border-line bg-card pl-4 pr-3 text-sm font-bold text-ink transition-colors focus-within:border-brand hover:border-brand">
+      <span className="text-ink/65">{label}</span>
+      <select value={value} onChange={(e) => onChange(e.target.value)} className="min-h-11 cursor-pointer appearance-none bg-transparent pr-5 font-bold text-ink outline-none">
+        {children}
+      </select>
+      <span aria-hidden="true" className="pointer-events-none absolute right-3.5 text-xs text-ink/65">▾</span>
+    </label>
+  );
+}
+
 export default function TripsExplorer({ packages, departures, showRack = true, showGrid = true }: { packages: ExplorerPackage[]; departures: ExplorerDeparture[]; showRack?: boolean; showGrid?: boolean }) {
-  const { city } = useCity();
+  const { city, cities } = useCity();
   const [month, setMonth] = useState<string>("all");
+  const [length, setLength] = useState<LengthKey>("any");
+  const [sort, setSort] = useState<"soon" | "price">("soon");
 
   const months = useMemo(() => {
     const s = new Set(departures.map((d) => d.date.slice(0, 7)));
     return [...s].sort();
   }, [departures]);
 
+  const boardsHere = useMemo(() => departures.some((d) => d.citySlugs.includes(city.slug)), [departures, city.slug]);
   const stubs = useMemo(() => {
     const mine = departures.filter((d) => d.citySlugs.includes(city.slug));
     return (mine.length ? mine : departures).slice(0, 8);
   }, [departures, city.slug]);
 
+  /* Each card carries the departure it is showing, so the date on the card is
+     always one that matches the filter — picking January used to leave cards
+     reading "next · 29 Oct". */
   const grid = useMemo(() => {
-    return packages.filter((p) => {
-      const cityOk = p.citySlugs.includes(city.slug) || p.citySlugs.length === 0;
-      const monthOk = month === "all" || departures.some((d) => d.packageSlug === p.slug && d.date.startsWith(month) && (d.citySlugs.includes(city.slug) || !cityOk));
-      return cityOk && (month === "all" || monthOk);
-    });
-  }, [packages, departures, city.slug, month]);
+    const rows = packages
+      .filter((p) => p.citySlugs.includes(city.slug) || p.citySlugs.length === 0)
+      .filter((p) => LENGTHS[length].test(p.nights))
+      .map((p) => {
+        const own = departures.filter((d) => d.packageSlug === p.slug && (d.citySlugs.includes(city.slug) || p.citySlugs.length === 0));
+        const inMonth = month === "all" ? own : own.filter((d) => d.date.startsWith(month));
+        return { p, dep: inMonth[0] as ExplorerDeparture | undefined, price: fareFor(p.fromPrices, city.slug) };
+      })
+      .filter((r) => month === "all" || r.dep);
+    const byDate = (a: (typeof rows)[number], b: (typeof rows)[number]) =>
+      (a.dep?.date ?? "9999").localeCompare(b.dep?.date ?? "9999");
+    return rows.sort(sort === "price" ? (a, b) => (a.price ?? Infinity) - (b.price ?? Infinity) || byDate(a, b) : byDate);
+  }, [packages, departures, city.slug, month, length, sort]);
 
   const monthLabel = (m: string) => new Date(m + "-01T00:00:00").toLocaleDateString("en-IN", { month: "long", year: "numeric" });
 
@@ -61,7 +98,7 @@ export default function TripsExplorer({ packages, departures, showRack = true, s
         <div className="mx-auto w-full max-w-7xl px-5 sm:px-8">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="text-[0.62rem] font-bold uppercase tracking-[0.5em] text-gold">departures rack · ex-{city.name}</p>
+              <p className="text-[0.62rem] font-bold uppercase tracking-[0.5em] text-gold">{boardsHere ? `departures rack · ex-${city.name}` : `no batches from ${city.name} yet · nearest departures`}</p>
               <h1 className="mt-2 font-display text-4xl font-extrabold tracking-tight text-white sm:text-6xl">
                 Tear off your <span className="text-gold">next one.</span>
               </h1>
@@ -71,7 +108,9 @@ export default function TripsExplorer({ packages, departures, showRack = true, s
         </div>
         <div data-lenis-prevent className="mt-8 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-4 sm:px-8">
           {stubs.map((s) => {
-            const price = s.fromPrices[city.slug] ?? Object.values(s.fromPrices)[0];
+            // fare and label name the same city: the visitor's, or the city this batch boards from
+            const fareCity = s.citySlugs.includes(city.slug) ? city : cities.find((c) => s.citySlugs.includes(c.slug));
+            const price = fareCity ? fareFor(s.fromPrices, fareCity.slug) : undefined;
             return (
               <Link
                 key={s.packageSlug + s.date}
@@ -87,9 +126,12 @@ export default function TripsExplorer({ packages, departures, showRack = true, s
                   ))}
                 </div>
                 <div className="flex-1 p-4">
-                  <p className="font-mono text-[0.56rem] uppercase tracking-widest text-ink/45">{weekday(s.date)} · {shortDate(s.date)}</p>
+                  <p className="font-mono text-[0.56rem] uppercase tracking-widest text-ink/65">{weekday(s.date)} · {shortDate(s.date)}</p>
                   <p className="mt-1 line-clamp-2 font-display text-base font-extrabold leading-tight text-ink">{s.packageName}</p>
-                  <p className="mt-1.5 font-display text-lg font-extrabold text-brand">{price ? inr(price) : "—"}</p>
+                  <p className="mt-1.5 font-display text-lg font-extrabold text-brand">
+                    {price ? inr(price) : "on request"}
+                    {fareCity && fareCity.slug !== city.slug && <span className="ml-1.5 font-body text-[0.62rem] font-bold uppercase tracking-wider text-ink/65">ex-{fareCity.name}</span>}
+                  </p>
                 </div>
               </Link>
             );
@@ -106,50 +148,49 @@ export default function TripsExplorer({ packages, departures, showRack = true, s
             <h2 className="font-display text-3xl font-extrabold tracking-tight sm:text-5xl">
               Every trip <span className="text-brand">from {city.name}.</span>
             </h2>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => setMonth("all")}
-                className={`min-h-10 rounded-full px-4 py-2 text-xs font-bold transition-colors ${month === "all" ? "bg-ink text-cream" : "border border-line bg-card text-ink/70 hover:border-brand"}`}
-              >
-                Any month
-              </button>
-              {months.map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => setMonth(m)}
-                  className={`min-h-10 rounded-full px-4 py-2 text-xs font-bold transition-colors ${month === m ? "bg-ink text-cream" : "border border-line bg-card text-ink/70 hover:border-brand"}`}
-                >
-                  {monthLabel(m)}
-                </button>
-              ))}
+            <div className="flex flex-wrap gap-2" role="group" aria-label="Filter and sort trips">
+              <FilterSelect label="When" value={month} onChange={setMonth}>
+                <option value="all">Any month</option>
+                {months.map((m) => (
+                  <option key={m} value={m}>{monthLabel(m)}</option>
+                ))}
+              </FilterSelect>
+              <FilterSelect label="Length" value={length} onChange={(v) => setLength(v as LengthKey)}>
+                {(Object.keys(LENGTHS) as LengthKey[]).map((k) => (
+                  <option key={k} value={k}>{LENGTHS[k].label}</option>
+                ))}
+              </FilterSelect>
+              <FilterSelect label="Sort" value={sort} onChange={(v) => setSort(v as "soon" | "price")}>
+                <option value="soon">Soonest first</option>
+                <option value="price">Lowest price</option>
+              </FilterSelect>
             </div>
           </div>
+          <p className="mt-4 text-sm font-semibold text-ink/70" aria-live="polite">
+            {grid.length} {grid.length === 1 ? "trip" : "trips"} from {city.name}
+            {month !== "all" && ` in ${monthLabel(month)}`}
+            {length !== "any" && ` · ${LENGTHS[length].label.toLowerCase()}`}
+          </p>
 
           {/* 2-up on phones (was one huge card per screen), 3-up on desktop */}
           <div className="mt-9 grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
-            {grid.map((p) => {
-              const price = p.fromPrices[city.slug] ?? Object.values(p.fromPrices)[0];
-              const next =
-                departures.find((d) => d.packageSlug === p.slug && d.citySlugs.includes(city.slug)) ??
-                departures.find((d) => d.packageSlug === p.slug);
+            {grid.map(({ p, dep: next, price }) => {
               return (
                 <Link key={p.slug} href={`/trips/${p.slug}`} className="group overflow-hidden rounded-2xl border border-line bg-card shadow-sm transition-all hover:-translate-y-1 hover:shadow-card-lg sm:rounded-3xl">
                   <div className="relative aspect-[4/3] overflow-hidden">
                     <SiteMedia src={p.image} alt={p.name} fill sizes="(max-width:640px) 46vw, 30vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.06]" />
                     {next && (
                       <span className="absolute left-2.5 top-2.5 rounded-full bg-ink/60 px-2.5 py-1 text-[0.54rem] font-bold uppercase tracking-wider text-white backdrop-blur-sm sm:left-4 sm:top-4 sm:px-3 sm:py-1.5 sm:text-[0.6rem]">
-                        next · {shortDate(next.date)}
+                        {month === "all" ? "next · " : ""}{shortDate(next.date)}
                       </span>
                     )}
                   </div>
                   <div className="p-3 sm:p-5">
-                    <p className="text-[0.54rem] font-bold uppercase tracking-[0.22em] text-ink/45 sm:text-[0.6rem] sm:tracking-[0.25em]">{p.nightsLabel}</p>
+                    <p className="text-[0.54rem] font-bold uppercase tracking-[0.22em] text-ink/65 sm:text-[0.6rem] sm:tracking-[0.25em]">{p.nightsLabel}</p>
                     <h3 className="mt-1 line-clamp-2 font-display text-sm font-extrabold leading-snug text-ink group-hover:text-brand sm:text-xl">{p.name}</h3>
                     <div className="mt-2 flex items-center justify-between sm:mt-3">
-                      <span className="line-clamp-1 hidden text-xs text-ink/50 sm:block">{p.destination}</span>
-                      <span className="shrink-0 font-display text-base font-extrabold text-brand sm:text-lg">{price ? inr(price) : "ask"}</span>
+                      <span className="line-clamp-1 hidden text-xs text-ink/65 sm:block">{p.destination}</span>
+                      <span className="shrink-0 font-display text-base font-extrabold text-brand sm:text-lg">{price ? inr(price) : "on request"}</span>
                     </div>
                   </div>
                 </Link>
@@ -157,8 +198,8 @@ export default function TripsExplorer({ packages, departures, showRack = true, s
             })}
           </div>
           {grid.length === 0 && (
-            <p className="mt-10 text-center text-sm text-ink/50">
-              Nothing matches that filter from {city.name} yet — switch city or month, or WhatsApp us and we&apos;ll make it exist.
+            <p className="mt-10 text-center text-sm text-ink/65">
+              Nothing matches that filter from {city.name} yet — try another month or length, switch city, or WhatsApp us and we&apos;ll make it exist.
             </p>
           )}
         </div>

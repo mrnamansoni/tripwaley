@@ -160,7 +160,7 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/80 to-ink/50" aria-hidden="true" />
           <div className="relative mx-auto w-full max-w-6xl">
-            <nav aria-label="Breadcrumb" className="font-mono text-[0.58rem] uppercase tracking-[0.25em] text-white/40">
+            <nav aria-label="Breadcrumb" className="font-mono text-[0.58rem] uppercase tracking-[0.25em] text-white/55">
               <Link href="/destinations" className="transition-colors hover:text-gold">Destinations</Link>
               <span className="mx-2" aria-hidden="true">/</span>
               <span className="text-white/70">{dest.state}</span>
@@ -175,24 +175,24 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
 
             <dl className="mt-9 flex flex-wrap gap-x-10 gap-y-5">
               <div>
-                <dt className="font-mono text-[0.55rem] uppercase tracking-[0.25em] text-white/40">trips running</dt>
+                <dt className="font-mono text-[0.55rem] uppercase tracking-[0.25em] text-white/55">trips running</dt>
                 <dd className="mt-1 font-display text-2xl font-extrabold text-white">{trips.length}</dd>
               </div>
               {deps.length > 0 && (
                 <div>
-                  <dt className="font-mono text-[0.55rem] uppercase tracking-[0.25em] text-white/40">dated batches</dt>
+                  <dt className="font-mono text-[0.55rem] uppercase tracking-[0.25em] text-white/55">dated batches</dt>
                   <dd className="mt-1 font-display text-2xl font-extrabold text-white">{deps.length}</dd>
                 </div>
               )}
               {cheapest != null && (
                 <div>
-                  <dt className="font-mono text-[0.55rem] uppercase tracking-[0.25em] text-white/40">from</dt>
+                  <dt className="font-mono text-[0.55rem] uppercase tracking-[0.25em] text-white/55">from</dt>
                   <dd className="mt-1 font-display text-2xl font-extrabold text-gold">{inr(cheapest)}</dd>
                 </div>
               )}
               {nights.length > 0 && (
                 <div>
-                  <dt className="font-mono text-[0.55rem] uppercase tracking-[0.25em] text-white/40">length</dt>
+                  <dt className="font-mono text-[0.55rem] uppercase tracking-[0.25em] text-white/55">length</dt>
                   <dd className="mt-1 font-display text-2xl font-extrabold text-white">
                     {Math.min(...nights)}{Math.max(...nights) !== Math.min(...nights) ? `–${Math.max(...nights)}` : ""}N
                   </dd>
@@ -227,13 +227,13 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
                     />
                   </div>
                   <div className="p-5">
-                    <p className="font-mono text-[0.58rem] uppercase tracking-[0.25em] text-ink/45">{nightsLabel(pkg)}</p>
+                    <p className="font-mono text-[0.58rem] uppercase tracking-[0.25em] text-ink/65">{nightsLabel(pkg)}</p>
                     <h3 className="mt-1.5 font-display text-lg font-extrabold leading-tight text-ink group-hover:text-brand">
                       {pkg.name}
                     </h3>
-                    {pkg.destination && <p className="mt-1 text-[0.8rem] text-ink/55">{pkg.destination}</p>}
+                    {pkg.destination && <p className="mt-1 text-[0.8rem] text-ink/65">{pkg.destination}</p>}
                     <p className="mt-3 font-display text-lg font-extrabold text-brand">
-                      {low != null ? <>from {inr(low)}<span className="ml-1 text-[0.7rem] font-bold uppercase tracking-wider text-ink/40">/seat</span></> : "on request"}
+                      {low != null ? <>from {inr(low)}<span className="ml-1 text-[0.7rem] font-bold uppercase tracking-wider text-ink/65">/seat</span></> : "on request"}
                     </p>
                   </div>
                 </Link>
@@ -248,7 +248,7 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
             <h2 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
               On the board <span className="text-brand">right now.</span>
             </h2>
-            <p className="mt-2 max-w-xl text-sm text-ink/55">
+            <p className="mt-2 max-w-xl text-sm text-ink/65">
               Real dated departures with seats still open. Every batch has a captain and a capped group size.
             </p>
             <div className="mt-6 overflow-hidden rounded-3xl border border-line bg-card shadow-sm">
@@ -260,12 +260,12 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
                 >
                   <span>
                     <span className="block font-display text-xl font-extrabold text-brand">{shortDate(d.date)}</span>
-                    <span className="font-mono text-[0.55rem] uppercase tracking-widest text-ink/45">{weekday(d.date)}</span>
+                    <span className="font-mono text-[0.55rem] uppercase tracking-widest text-ink/65">{weekday(d.date)}</span>
                   </span>
                   <span className="min-w-0 truncate font-display text-base font-extrabold text-ink group-hover:text-brand sm:text-lg">
                     {d.package.name}
                   </span>
-                  <span className="font-mono text-[0.6rem] uppercase tracking-widest text-ink/45">view →</span>
+                  <span className="font-mono text-[0.6rem] uppercase tracking-widest text-ink/65">view →</span>
                 </Link>
               ))}
             </div>
@@ -304,13 +304,13 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
             <h2 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
               {dest.name}, priced from <span className="text-brand">your city.</span>
             </h2>
-            <p className="mt-2 max-w-xl text-sm text-ink/55">
+            <p className="mt-2 max-w-xl text-sm text-ink/65">
               You board where you live. No routing through Delhi first to start a holiday.
             </p>
             <div data-lenis-prevent className="mt-6 overflow-x-auto rounded-3xl border border-line bg-card shadow-sm">
               <table className="w-full min-w-[26rem] text-left">
                 <thead>
-                  <tr className="border-b border-line font-mono text-[0.58rem] uppercase tracking-[0.22em] text-ink/45">
+                  <tr className="border-b border-line font-mono text-[0.58rem] uppercase tracking-[0.22em] text-ink/65">
                     <th className="px-6 py-3.5">Boarding city</th>
                     <th className="px-6 py-3.5">Trips from here</th>
                     <th className="px-6 py-3.5">From</th>
@@ -324,7 +324,7 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
                           {city.name}
                         </Link>
                       </td>
-                      <td className="px-6 py-3.5 text-ink/60">{n}</td>
+                      <td className="px-6 py-3.5 text-ink/65">{n}</td>
                       <td className="px-6 py-3.5 font-display text-lg font-extrabold text-brand">{inr(from)}</td>
                     </tr>
                   ))}
@@ -351,7 +351,7 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
 
         {/* ---------------- other destinations ---------------- */}
         <section className="mx-auto w-full max-w-6xl px-5 pb-20 sm:px-8">
-          <h2 className="font-mono text-[0.6rem] uppercase tracking-[0.3em] text-ink/45">where else we go</h2>
+          <h2 className="font-mono text-[0.6rem] uppercase tracking-[0.3em] text-ink/65">where else we go</h2>
           <ul className="mt-5 flex flex-wrap gap-2.5">
             {DESTINATIONS.filter((d) => d.slug !== dest.slug && livePackagesFor(d.slug).length > 0).map((d) => (
               <li key={d.slug}>
@@ -378,9 +378,9 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
                   <Link href={`/stories/${p.slug}`} className="group flex items-baseline justify-between gap-4 py-3.5">
                     <span>
                       <span className="font-display text-lg font-extrabold leading-tight text-ink group-hover:text-brand">{p.title}</span>
-                      {p.summary && <span className="mt-0.5 block text-sm text-ink/60">{p.summary}</span>}
+                      {p.summary && <span className="mt-0.5 block text-sm text-ink/65">{p.summary}</span>}
                     </span>
-                    <span className="shrink-0 text-[0.68rem] font-bold uppercase tracking-wider text-ink/45">{readingMinutes(p.body)} min</span>
+                    <span className="shrink-0 text-[0.68rem] font-bold uppercase tracking-wider text-ink/65">{readingMinutes(p.body)} min</span>
                   </Link>
                 </li>
               ))}

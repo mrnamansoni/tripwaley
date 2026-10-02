@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef } from "react";
 import { gsap } from "@/lib/gsap";
+import { prefersReducedMotion } from "@/lib/motion";
 
 interface RouteDrawProps {
   /** SVG path `d` for the route */
@@ -40,6 +41,8 @@ export default function RouteDraw({
   const markersRef = useRef<SVGGElement>(null);
 
   useEffect(() => {
+    // reduced motion: content is already in its finished, visible state
+    if (prefersReducedMotion()) return;
     const maskPath = maskPathRef.current;
     const svg = svgRef.current;
     if (!maskPath || !svg) return;
@@ -61,7 +64,7 @@ export default function RouteDraw({
           {
             scale: 1,
             opacity: 1,
-            ease: "back.out(2.5)",
+            ease: "power3.out",
             stagger: 0.15,
             scrollTrigger: { trigger: svg, start, end, scrub: 0.6 },
           }

@@ -23,7 +23,7 @@ export function WeatherStrip() {
           <h2 className="font-display text-3xl font-extrabold tracking-tight text-white sm:text-5xl">
             Live from the <span className="text-gold">mountains.</span>
           </h2>
-          <p className="text-xs font-bold uppercase tracking-[0.25em] text-white/40">real weather · updates hourly</p>
+          <p className="text-xs font-bold uppercase tracking-[0.25em] text-white/55">real weather · updates hourly</p>
         </div>
         <div className="grid gap-4 sm:grid-cols-3 sm:gap-5">
           {STATIONS.map((s) => (
@@ -57,7 +57,7 @@ export function SeasonsBand() {
               <p className="font-mono text-[0.62rem] font-bold uppercase tracking-[0.25em] text-gold">{s.months}</p>
               <p className="mt-2 font-display text-xl font-extrabold text-ink">{s.name}</p>
               <p className="mt-1.5 text-xs font-bold uppercase tracking-wider text-brand">{s.go}</p>
-              <p className="mt-2.5 text-sm leading-relaxed text-ink/60">{s.note}</p>
+              <p className="mt-2.5 text-sm leading-relaxed text-ink/65">{s.note}</p>
               <span aria-hidden="true" className="absolute inset-x-0 bottom-0 h-[3px] origin-left scale-x-0 bg-[linear-gradient(90deg,#f5a31a,#c9252c)] transition-transform duration-500 group-hover:scale-x-100" />
             </div>
           ))}
@@ -80,7 +80,7 @@ export function CaptainsBand() {
           <h2 className="font-display text-3xl font-extrabold tracking-tight sm:text-5xl">
             The <span className="text-brand">captains.</span>
           </h2>
-          <p className="max-w-xs text-sm text-ink/55">Every batch ships with one. Trained, certified, chronically early.</p>
+          <p className="max-w-xs text-sm text-ink/65">Every batch ships with one. Trained, certified, chronically early.</p>
         </div>
         <div className="grid gap-5 sm:grid-cols-3">
           {captains.map((c) => (
@@ -94,7 +94,7 @@ export function CaptainsBand() {
               <figcaption className="p-5">
                 <p className="font-display text-xl font-extrabold text-ink">Captain {c.name}</p>
                 <p className="text-[0.62rem] font-bold uppercase tracking-[0.25em] text-brand">{c.beat}</p>
-                <p className="mt-2 text-sm leading-relaxed text-ink/60">{c.line}</p>
+                <p className="mt-2 text-sm leading-relaxed text-ink/65">{c.line}</p>
               </figcaption>
             </figure>
           ))}
@@ -145,7 +145,7 @@ export function MonthsBand() {
         <h2 className="font-display text-3xl font-extrabold tracking-tight sm:text-5xl">
           Or just pick a <span className="text-brand">month.</span>
         </h2>
-        <p className="mx-auto mt-3 max-w-md text-sm text-ink/55">
+        <p className="mx-auto mt-3 max-w-md text-sm text-ink/65">
           Batches run every week of the year. Tell us when you can escape — we&apos;ll show you where to.
         </p>
         <div className="mt-7 flex flex-wrap justify-center gap-3">

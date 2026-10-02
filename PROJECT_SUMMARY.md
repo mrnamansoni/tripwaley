@@ -1,6 +1,6 @@
 # Project Summary: Tripwaley
 
-Last updated: 2026-09-26
+Last updated: 2026-10-02
 
 ## Project Overview
 Tripwaley is a production-grade travel booking website for a premium, group-departure travel brand in India. It is a Next.js 16 site with 3D/scroll-driven visuals (React Three Fiber, GSAP, Lenis), city-aware pricing, a lead-capture booking flow, and a full custom admin panel (CMS-style) so the owner can edit trips, prices, departures, cities, media, reviews, and bookings without touching code. There is no database — everything is stored in JSON files under `data/`.
@@ -38,6 +38,73 @@ Tripwaley is a production-grade travel booking website for a premium, group-depa
 - **New standing rule from the owner (2026-08-01, still in effect):** never push any change to GitHub directly. Always explain the plan in chat first and wait for a clear "yes" before making or pushing any change.
 
 ## Recent Changes
+
+### 2026-10-02 — Design critique fixes, round 2: mobile booking bar, /trips map (deployed with round 1)
+
+Owner said: skip the made-up-numbers item for now ("4 seats left", 4.9★, vibe-check stats,
+collections counts — still open); do the booking bar and the map; deploy round 1 + 2 together.
+
+- **Booking bar (`BookingBar.tsx`)** — below 1280px (`xl:`) the sticky bar is one slim row: price
+  (with "ex-City · date" above it) + the Reserve/Hold button, 65px tall. It was ~200px on phones
+  (four wrapped pill rows, 36px targets) and 123px at 1024px. Sharing / travellers / boarding city /
+  date now live in the booking sheet below xl, as 44px labelled rows; from xl up they stay inline in
+  the bar. Both homes render from one `tripControls(sheet)` function. Sheet close button 44px; bar
+  bottom padding respects the iPhone home-indicator safe area. CouponField's "Have a coupon code?"
+  toggle is 44px tall.
+- **Atlas map on /trips (`AtlasTable.tsx`)** — on touch screens the custom drag is off: the well was
+  `touch-none`, so a thumb landing on the 56vh map could not scroll the page. Phones get a native
+  two-row sideways strip with snap; vertical swipes scroll the page. Desktop keeps drag + momentum,
+  adds arrow-key panning (Shift = bigger steps), a focus ring and a region label; momentum is skipped
+  under reduced motion. `data-lenis-prevent` removed (the well never used the wheel). The well moved
+  inside a gutter wrapper — `w-full` + `sm:mx-8` on the well overflowed the page sideways at sm–xl.
+- Verified: tsc, eslint 0 errors, all `scripts/test-*.mjs`, `next build` exit 0; in the browser at
+  375 / 1024 / 1440: bar heights 65 / 65 / 69px, no page overflow, sheet controls 44px, date change
+  in the sheet updates the bar, map arrow keys pan, phone map is native scroll.
+
+### 2026-09-29 — Design critique fixes, round 1: status, wording, prices, trip FAQ, accessibility
+
+Context: `PRODUCT.md` and `DESIGN.md` ("The Trip Reel") were written 2026-09-28 with the owner, then a
+whole-site Impeccable critique scored 19/40 and a technical audit 8/20. Snapshot:
+`.impeccable/critique/2026-09-28T03-48-23Z__tripwaley-com.md`. The owner asked to fix six areas first:
+visibility of status, match with the real world, error prevention, efficiency, help (trip FAQ) and
+accessibility. Fabricated-proof items (seat map, 4.9★, vibe-check stats, collections counts) are the NEXT round.
+
+- **One word per step.** RESERVE = free for 24 hours (the lead form, opened by the navbar's
+  "Reserve a seat"). HOLD = paying the hold % + GST. `holdSummary()` in catalog.ts is the one sentence
+  every surface uses; default FAQs fill `{hold}` / `{advance}` / `{gst}` from Settings (`getFaqs`).
+  Gone: "hold is free · cancel in one tap", "Lock ₹X now", About's "40% advance", "Filling fast" on
+  every trip, "Claim →" / "Hold →" on cards (now "See trip →"), "ask" / "on ask" (now "on request").
+- **No borrowed prices.** `src/lib/fares.ts` (`fareFor`, `lowestFare`, tested by
+  `scripts/test-fares.mjs`, 10 cases). `fromPrice(pkg, city)` no longer falls back to another city's
+  fare, which fixes /from/kochi pricing Delhi trips "ex-Kochi". Where a batch doesn't board in the
+  visitor's city, the card names the city it does board from and shows THAT city's fare.
+- **Coupon Enter** no longer submits the booking form (it could start a PhonePe payment).
+- **/trips filters**: native selects for month, length (weekend / 4–5 / 6+ nights) and sort (soonest /
+  lowest price), a live result count, and each card shows the date inside the chosen month.
+- **Booking wire** shows only owner-entered entries (the six seeded fake bookings are deleted) and
+  never says "live", "on air" or "now". It hides when there are none — which is production today.
+- **Trip-page FAQ** (`TripFaq.tsx`, before the proof block): booking ladder, boarding cities + fares,
+  next dates, the refund slab (now shared from `src/lib/refunds.ts` with /refund-policy), solo
+  promises from the owner's own solo-page settings (hidden on honeymoon trips), FAQPage schema, and
+  refund/terms/privacy links — the money page had no policy links before.
+- **City change is announced** (live region), the city list closes on Escape / outside click and
+  marks the current city.
+- **Accessibility**: skip link and #anchors now move focus (SmoothScroll); every `<main>` has
+  `id="main"`; the reserve modal and search use the shared `useModal` (Tab loop, focus return); the
+  navbar drawer closes on Escape; the home h1/CTAs and footer links use `opacity` not `autoAlpha`
+  (were invisible to screen readers and the keyboard until scrolled) and tabbing into them reveals
+  them; faint text floored at ink/65 and white/55 across 54 files; WhatsApp buttons on `success-ink`;
+  new `brand-soft` token for red text on dark; pause button + hover/focus hold on the spinning ring;
+  reduced-motion branches for every GSAP component (`src/lib/motion.ts`), a static reviews list and
+  the swipe ring instead of the desktop coverflow; curtain footer turns static on short screens.
+- DESIGN.md gained The Readable Faint Rule and the no-`autoAlpha` rule.
+
+Verified locally: tsc clean, eslint 0 errors, all `scripts/test-*.mjs` pass, `next build` passes,
+detector clean on changed files, and in the browser: filters, sort, month dates, Kochi fares, city
+announcement, Escape/focus return, reserve-modal copy and Tab loop, skip link focus, FAQ + schema.
+**Owner action:** if the live FAQ list was edited in admin, its "How do I hold a seat?" answer still
+says "No payment needed to hold" — update it there (tokens `{hold}`, `{advance}`, `{gst}` now work).
+The live homepage eyebrow ("tripwaley presents · memories by youuuuu") is admin text too.
 
 ### 2026-09-26 — SEO stories, build 2: the admin can finally write those fields
 

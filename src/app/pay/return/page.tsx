@@ -127,7 +127,7 @@ export default async function PayReturn({ searchParams }: { searchParams: Promis
         </div>
 
         <div className="mt-8 rounded-2xl border border-white/12 bg-white/[0.04] p-5">
-          <p className={`${mono} text-white/40`}>what happens next</p>
+          <p className={`${mono} text-white/55`}>what happens next</p>
           <ol className="mt-4 space-y-4">
             <Step n={1} done title={`${formatPaise(q.holdTotalPaise)} paid — seat held`}>
               {formatPaise(q.holdBasePaise)} hold{q.holdGstPaise > 0 && <> + {formatPaise(q.holdGstPaise)} GST</>}.
@@ -149,7 +149,7 @@ export default async function PayReturn({ searchParams }: { searchParams: Promis
         >
           Download invoice (PDF)
         </a>
-        <p className="mt-3 text-sm text-white/45">
+        <p className="mt-3 text-sm text-white/55">
           Reference <span className="font-mono text-white/70">{existing.id}</span> — keep this for any query.
         </p>
         <Actions settings={settings} />
@@ -188,7 +188,7 @@ export default async function PayReturn({ searchParams }: { searchParams: Promis
             </>
           )}
         </p>
-        <p className="mt-6 text-sm text-white/45">
+        <p className="mt-6 text-sm text-white/55">
           Reference <span className="font-mono text-white/70">{existing.id}</span>
         </p>
         <Actions settings={settings} retry={mismatch ? undefined : `/trips/${existing.packageSlug}`} />
@@ -209,7 +209,7 @@ export default async function PayReturn({ searchParams }: { searchParams: Promis
           : "If you approved a UPI request, this can take a minute or two. Keep this page open — it updates itself."}
       </p>
       <PendingPoll orderId={existing.id} />
-      <p className="mt-6 text-sm text-white/45">
+      <p className="mt-6 text-sm text-white/55">
         Reference <span className="font-mono text-white/70">{existing.id}</span>
       </p>
       <Actions settings={settings} />
