@@ -11,8 +11,8 @@ import { gsap } from "@/lib/gsap";
 
 const COLS = [
   { head: "Trips", links: [["All departures", "/trips"], ["College trips", "/college-trips"], ["Honeymoon", "/honeymoon"], ["Solo", "/solo"]] },
-  { head: "Company", links: [["About us", "/about"], ["Reviews", "/#reviews"], ["Contact", "/contact"], ["Stories", "/stories"]] },
-  { head: "Help", links: [["WhatsApp us", "wa"], ["FAQs", "/about#faqs"], ["Cancellation", "/refund-policy"], ["Privacy", "/privacy"], ["Terms", "/terms"], ["Policies", "/policies"]] },
+  { head: "Company", links: [["The Paltan", "/team"], ["Corporate trips", "/corporate-trips"], ["Reviews", "/#reviews"], ["Contact", "/contact"], ["Stories", "/stories"]] },
+  { head: "Help", links: [["WhatsApp us", "wa"], ["FAQs", "/team#faqs"], ["Cancellation", "/refund-policy"], ["Privacy", "/privacy"], ["Terms", "/terms"], ["Policies", "/policies"]] },
 ];
 
 /** 919625330270 → +91 96253 30270, so the footer never drifts from Settings */

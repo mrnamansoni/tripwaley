@@ -1,9 +1,9 @@
 "use client";
 
 /* THE OPENING SHOT — homepage hero.
-   Act I  · camera flies through giant type (vector zoom — the scale runs on
-            an inner SVG <g>, not the element, so both scroll directions
-            re-render crisp with zero raster flicker)
+   Act I  · camera flies through giant type (CSS scale on the wrapper divs,
+            no standing will-change, so both scroll directions re-rasterize
+            crisp — see the slab comment below)
    Act II · letterboxed one-take film scrub with timecode
    Act III· blinds resolve into LIVE departures from the visitor's city.
    Separate landscape / portrait compositions keep phones cinematic. */
@@ -171,12 +171,15 @@ export default function OpeningShot({
         </div>
 
         {/* the slab. The zoom scales each wrapper DIV (a GPU-composited CSS
-            transform) rather than the SVG <g> — the mask rasterizes once and the
-            compositor scales that layer, so the fly-through stays smooth on
-            mobile instead of re-rasterizing the mask every frame. */}
+            transform) rather than the SVG <g>.
+            No standing will-change here: with it, Chrome keeps the layer's
+            raster scale frozen. Scrolling back un-hides the slab at ~26×, the
+            layer gets rasterized at that size, and as it shrinks it never
+            re-rasterizes — the SCENE letters vanished or tore on the way back
+            up. GSAP's force3D still composites it while the zoom runs. */}
         <div data-os-type className="absolute inset-0 z-20">
           {/* landscape composition */}
-          <div data-os-zoom-l className="hidden h-full w-full will-change-transform [backface-visibility:hidden] sm:block" style={{ transformOrigin: "51.2% 44.8%" }}>
+          <div data-os-zoom-l className="hidden h-full w-full sm:block" style={{ transformOrigin: "51.2% 44.8%" }}>
             <svg className="h-full w-full" viewBox="0 0 1000 563" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
               <defs>
                 <mask id="os-cut-l">
@@ -194,7 +197,7 @@ export default function OpeningShot({
             </svg>
           </div>
           {/* portrait composition */}
-          <div data-os-zoom-p className="h-full w-full will-change-transform [backface-visibility:hidden] sm:hidden" style={{ transformOrigin: "52.6% 42.8%" }}>
+          <div data-os-zoom-p className="h-full w-full sm:hidden" style={{ transformOrigin: "52.6% 42.8%" }}>
             <svg className="h-full w-full" viewBox="0 0 563 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
               <defs>
                 <mask id="os-cut-p">

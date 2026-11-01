@@ -103,7 +103,7 @@ export default function DepartureBoard({
               key={r.packageSlug}
               href={`/trips/${r.packageSlug}`}
               data-db-stub
-              className="group flex min-h-[13rem] w-[20.5rem] shrink-0 snap-center overflow-hidden rounded-2xl bg-[#f7f2e4] opacity-0 motion-reduce:opacity-100 shadow-card-lg transition-transform duration-500 hover:-translate-y-1.5 sm:min-h-[14.5rem] sm:w-[25rem] sm:snap-start"
+              className="group flex min-h-[12rem] w-[18.5rem] shrink-0 snap-center overflow-hidden rounded-2xl bg-[#f7f2e4] opacity-0 motion-reduce:opacity-100 shadow-card-lg transition-transform duration-500 hover:-translate-y-1.5 sm:min-h-[14.5rem] sm:w-[25rem] sm:snap-start"
             >
               {/* photo edge */}
               <span className="relative w-[34%] shrink-0">
@@ -158,7 +158,7 @@ export default function DepartureBoard({
           target="_blank"
           rel="noreferrer"
           data-db-stub
-          className="flex w-[17rem] shrink-0 snap-center flex-col items-center justify-center rounded-2xl border-2 border-dashed border-brand/35 px-6 text-center opacity-0 motion-reduce:opacity-100 sm:snap-start"
+          className="flex w-[15.5rem] shrink-0 snap-center flex-col items-center justify-center rounded-2xl border-2 border-dashed border-brand/35 px-6 text-center opacity-0 motion-reduce:opacity-100 sm:snap-start"
         >
           <p className="font-script text-2xl text-brand">your city missing?</p>
           <p className="mt-2 font-display text-lg font-extrabold text-ink">We add boarding points on demand.</p>

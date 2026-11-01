@@ -30,7 +30,10 @@ export const metadata: Metadata = {
   description: "Every upcoming Tripwaley group departure: Himachal, Uttarakhand, Kashmir, Rajasthan & more — priced from your nearest city.",
 };
 
-export default function TripsPage() {
+export default async function TripsPage({ searchParams }: { searchParams: Promise<{ month?: string | string[] }> }) {
+  // the navbar's "leaving in …" links land here pre-filtered
+  const m = (await searchParams).month;
+  const initialMonth = typeof m === "string" && /^\d{4}-\d{2}$/.test(m) ? m : undefined;
   const settings = getSettings();
   const cities = getCities();
   const priced = getPricedCities();
@@ -80,6 +83,8 @@ export default function TripsPage() {
       <Navbar overDarkHero />
       <main id="main" className="pt-16">
         <TripsExplorer
+          key={initialMonth ?? "all"}
+          initialMonth={initialMonth}
           packages={packages}
           departures={departures}
           showRack={sectionOn("trips", "rack")}

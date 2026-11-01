@@ -127,6 +127,9 @@ export function Head({ title, sub, children }: { title: string; sub?: string; ch
   );
 }
 
+/** "3 departures", "1 price rule" — or "" for none, so it filters out */
+export const count = (n: number, noun: string) => (n ? `${n} ${noun}${n === 1 ? "" : "s"}` : "");
+
 /** newline-joined textarea ⇄ string[] */
 export const linesToArr = (s: string) => s.split("\n").map((x) => x.trim()).filter(Boolean);
 export const arrToLines = (a: string[]) => a.join("\n");

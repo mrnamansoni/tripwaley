@@ -277,6 +277,8 @@ export interface Booking {
   price: number | null;
   /** the control that produced the lead — booking-bar, hold-modal, … */
   source: string;
+  /** free-text brief from an enquiry form (corporate) — shown under the package */
+  notes?: string;
   /* ---- attribution (optional for back-compat with rows written earlier) ----
      "source" alone could not answer "which page did this come from" or "which
      creator sent it", which is what the CRM actually needs to credit a lead. */
@@ -341,6 +343,8 @@ export interface Catalog {
   captains?: Captain[];
   /** discount codes applied at booking (admin Coupons tab) */
   coupons?: Coupon[];
+  /** short vertical videos for the homepage reel stage (admin Reels tab) */
+  reels?: Reel[];
   /** highest seed batch already merged in — see mergeSeedContent() in store.ts */
   seedVersion?: number;
 }
@@ -724,6 +728,8 @@ export const SLOT_DEFS: SlotDef[] = [
   { key: "college.gallery", group: "College page", label: "Campus gallery", hint: "The wall of previous college batches", kind: "list", defaults: ["/images/group-trek.jpg", "/images/tw-bonfire-dog.jpg", "/images/tw-g-bench.jpg", "/images/camp-tents.jpg", "/images/tw-dhaba.jpg", "/images/group-mountains.jpg"], max: 12 },
   { key: "college.safety", group: "College page", label: "Safety band photo", hint: "Beside the what-we-handle list", kind: "single", defaults: ["/images/tw-captain-1.jpg"] },
   { key: "college.quote", group: "College page", label: "Quote band photo", hint: "Behind the coordinator testimonial", kind: "single", defaults: ["/images/tw-bus-banner.jpg"] },
+  { key: "corporate.hero", group: "Corporate page", label: "Hero photo", hint: "The polaroid beside the out-of-office reply", kind: "single", defaults: ["/images/group-mountains.jpg"] },
+  { key: "corporate.gallery", group: "Corporate page", label: "Team-trip photos", hint: "The strip under 'what's handled' — real team trips only", kind: "list", defaults: ["/images/tw-bonfire-dog.jpg", "/images/camp-tents.jpg", "/images/tw-dhaba.jpg", "/images/group-trek.jpg"], max: 8 },
   { key: "solo.hero", group: "Solo page", label: "Hero background", hint: "Photo or video behind the page title", kind: "single", defaults: ["/images/traveller-street.jpg"] },
   { key: "solo.gallery", group: "Solo page", label: "Crew gallery", hint: "Strangers-to-friends photo band", kind: "list", defaults: ["/images/tw-hero-huddle.jpg", "/images/group-trek.jpg", "/images/tw-bonfire-dog.jpg", "/images/tw-g-bench.jpg", "/images/tw-dhaba.jpg", "/images/tw-g-forest2.jpg"], max: 12 },
   { key: "solo.safety", group: "Solo page", label: "Safety band photo", hint: "Beside the solo-safety promises", kind: "single", defaults: ["/images/tw-captain-1.jpg"] },
@@ -860,6 +866,20 @@ export const CONTENT_DEFS: ContentDef[] = [
   { key: "college.formTitle", group: "College page", label: "Quote form title", kind: "line", default: "Get a quote for your batch." },
   { key: "college.formSub", group: "College page", label: "Quote form sub-line", kind: "multiline", default: "Tell us the numbers and we'll come back within one working day with three costed routes. No deposit, no obligation." },
   { key: "college.markers", group: "College page", label: "Stat markers (one per line — label | value | note)", kind: "multiline", default: "students carried | 4,200+  | Across engineering, management and design campuses.\nlargest single batch | 180  | Four buses, one itinerary, zero students left behind.\ncaptain to student | 1:20  | Every twenty students travel with their own certified captain.\nrepeat colleges | 68%  | Most campuses book us again the following year." },
+  /* ---- Homepage reels ---- */
+  { key: "reels.eyebrow", group: "Homepage reels", label: "Eyebrow", kind: "line", default: "reels from the batches" },
+  { key: "reels.headline", group: "Homepage reels", label: "Headline", kind: "line", default: "Straight off" },
+  { key: "reels.accent", group: "Homepage reels", label: "Headline accent (gold)", kind: "line", default: "the bus." },
+
+  /* ---- Corporate page ---- */
+  { key: "corporate.headline", group: "Corporate page", label: "Headline", kind: "line", default: "Take the whole team" },
+  { key: "corporate.accent", group: "Corporate page", label: "Headline accent (red)", kind: "line", default: "out of office." },
+  { key: "corporate.sub", group: "Corporate page", label: "Sub-line", kind: "multiline", default: "Offsites, incentive trips and team getaways across India — planned around your headcount and your budget, and run on the ground by the same captains who lead our group departures." },
+  { key: "corporate.formats", group: "Corporate page", label: "Trip formats (one per line — title | duration | detail)", kind: "multiline", default: "Team offsite | 2–4 days | Strategy in the morning, the mountains after lunch. We find the stay with a room that works as a room, and plan the rest around it.\nIncentive trip | 3–6 days | A reward that doesn't feel like a work trip — the destination your top performers would have picked themselves.\nWeekend team outing | 1–2 days | Close to the city, back by Sunday night. Rafting, a bonfire, a long table — the easy yes for a first trip.\nPartner & vendor trip | 3–5 days | Hosting channel partners or suppliers. Polished stays, a tight schedule, nobody waiting on a cab." },
+  { key: "corporate.handled", group: "Corporate page", label: "What's handled (one per line)", kind: "multiline", default: "Stays checked by our own team, with room lists done to your org chart\nTransport from more than one office city, on one itinerary\nA captain on the ground the whole trip — one number for everything\nTeam activities picked for the group, not a fixed menu\nA meeting room or a quiet lawn, if work is on the agenda\nOne quote for the company, with the headcount written into it" },
+  { key: "corporate.formTitle", group: "Corporate page", label: "Enquiry form title", kind: "line", default: "Send us the brief." },
+  { key: "corporate.formSub", group: "Corporate page", label: "Enquiry form sub-line", kind: "multiline", default: "Headcount, rough dates and a budget is enough to start. We'll come back within one working day with routes to choose from." },
+
   { key: "solo.eyebrow", group: "Solo page", label: "Eyebrow (script)", kind: "line", default: "book for one ✦ arrive to fifteen" },
   { key: "solo.headline", group: "Solo page", label: "Headline", kind: "line", default: "Go alone." },
   { key: "solo.accent", group: "Solo page", label: "Headline accent (gold)", kind: "line", default: "Come back with a crew." },
@@ -959,6 +979,28 @@ export function normalizeCollegeTrip(c: Partial<CollegeTrip>): CollegeTrip {
    The people who actually run a batch. Until now these were a hardcoded array
    in PageExtras.tsx with only their photos editable through a media slot, so
    adding a fourth captain or correcting a trip count needed a deploy. */
+
+/* ------------------------------------------------ reels
+
+   Short vertical videos from real batches, played on the homepage reel stage.
+   Admin-curated and order-preserving: the first live reel is the one that
+   plays first. Never seeded — the stage stays hidden until one is added. */
+export interface Reel {
+  id: string;
+  /** media ref — must be a video (upload or pasted link) */
+  video: string;
+  /** still shown before the video decodes, and under reduced motion */
+  poster?: string;
+  /** one short line under the reel */
+  title: string;
+  /** where it was shot, e.g. "Chandratal, Spiti" */
+  place?: string;
+  /** who shot it, e.g. "@rashi.travels" or "Captain Aman" */
+  credit?: string;
+  /** optional live package the "see this trip" link opens */
+  packageSlug?: string;
+  published: boolean;
+}
 
 export interface Captain {
   slug: string;

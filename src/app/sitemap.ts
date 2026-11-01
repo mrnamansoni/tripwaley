@@ -48,7 +48,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ["/destinations", 0.7, "weekly"],
     ["/collections", 0.6, "weekly"],
     ["/stories", 0.6, "weekly"],
-    ["/about", 0.5, "monthly"],
+    ["/team", 0.5, "monthly"],
+    ["/corporate-trips", 0.6, "monthly"],
     ["/contact", 0.5, "monthly"],
     ["/vibe-check", 0.4, "monthly"],
     // policy pages: low priority but they must be indexable — a payment

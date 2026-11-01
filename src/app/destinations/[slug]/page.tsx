@@ -207,7 +207,7 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
           <h2 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
             {trips.length === 1 ? "The trip" : `${trips.length} trips`} to <span className="text-brand">{dest.name}.</span>
           </h2>
-          <div className="mt-7 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-7 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {trips.map((pkg) => {
               const rates = priced.map((c) => fromPrice(pkg.slug, c.slug)).filter((v): v is number => typeof v === "number");
               const low = rates.length ? Math.min(...rates) : null;
@@ -222,7 +222,7 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
                       src={pkg.heroMedia || packageImages(pkg)[0]}
                       alt={`${pkg.name} — group departure to ${dest.name}`}
                       fill
-                      sizes="(max-width:640px) 100vw, 30vw"
+                      sizes="(max-width:640px) 100vw, (max-width:1280px) 30vw, 22vw"
                       className="object-cover transition-transform duration-700 group-hover:scale-[1.06]"
                     />
                   </div>

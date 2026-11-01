@@ -53,9 +53,11 @@ function FilterSelect({ label, value, onChange, children }: { label: string; val
   );
 }
 
-export default function TripsExplorer({ packages, departures, showRack = true, showGrid = true }: { packages: ExplorerPackage[]; departures: ExplorerDeparture[]; showRack?: boolean; showGrid?: boolean }) {
+export default function TripsExplorer({ packages, departures, showRack = true, showGrid = true, initialMonth }: { packages: ExplorerPackage[]; departures: ExplorerDeparture[]; showRack?: boolean; showGrid?: boolean; initialMonth?: string }) {
   const { city, cities } = useCity();
-  const [month, setMonth] = useState<string>("all");
+  const [month, setMonth] = useState<string>(() =>
+    initialMonth && departures.some((d) => d.date.startsWith(initialMonth)) ? initialMonth : "all"
+  );
   const [length, setLength] = useState<LengthKey>("any");
   const [sort, setSort] = useState<"soon" | "price">("soon");
 
@@ -172,22 +174,22 @@ export default function TripsExplorer({ packages, departures, showRack = true, s
             {length !== "any" && ` · ${LENGTHS[length].label.toLowerCase()}`}
           </p>
 
-          {/* 2-up on phones (was one huge card per screen), 3-up on desktop */}
-          <div className="mt-9 grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
+          {/* 2-up on phones (was one huge card per screen), 3-up on desktop, 4-up wide */}
+          <div className="mt-9 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
             {grid.map(({ p, dep: next, price }) => {
               return (
                 <Link key={p.slug} href={`/trips/${p.slug}`} className="group overflow-hidden rounded-2xl border border-line bg-card shadow-sm transition-all hover:-translate-y-1 hover:shadow-card-lg sm:rounded-3xl">
                   <div className="relative aspect-[4/3] overflow-hidden">
-                    <SiteMedia src={p.image} alt={p.name} fill sizes="(max-width:640px) 46vw, 30vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.06]" />
+                    <SiteMedia src={p.image} alt={p.name} fill sizes="(max-width:640px) 46vw, (max-width:1280px) 30vw, 22vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.06]" />
                     {next && (
                       <span className="absolute left-2.5 top-2.5 rounded-full bg-ink/60 px-2.5 py-1 text-[0.54rem] font-bold uppercase tracking-wider text-white backdrop-blur-sm sm:left-4 sm:top-4 sm:px-3 sm:py-1.5 sm:text-[0.6rem]">
                         {month === "all" ? "next · " : ""}{shortDate(next.date)}
                       </span>
                     )}
                   </div>
-                  <div className="p-3 sm:p-5">
+                  <div className="p-3 sm:p-4">
                     <p className="text-[0.54rem] font-bold uppercase tracking-[0.22em] text-ink/65 sm:text-[0.6rem] sm:tracking-[0.25em]">{p.nightsLabel}</p>
-                    <h3 className="mt-1 line-clamp-2 font-display text-sm font-extrabold leading-snug text-ink group-hover:text-brand sm:text-xl">{p.name}</h3>
+                    <h3 className="mt-1 line-clamp-2 font-display text-sm font-extrabold leading-snug text-ink group-hover:text-brand sm:text-lg">{p.name}</h3>
                     <div className="mt-2 flex items-center justify-between sm:mt-3">
                       <span className="line-clamp-1 hidden text-xs text-ink/65 sm:block">{p.destination}</span>
                       <span className="shrink-0 font-display text-base font-extrabold text-brand sm:text-lg">{price ? inr(price) : "on request"}</span>

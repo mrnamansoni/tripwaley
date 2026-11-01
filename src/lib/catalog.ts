@@ -21,7 +21,7 @@ import { readCatalog as readCatalogRaw, readReviews as readReviewsRaw } from "./
 const readCatalog = cache(readCatalogRaw);
 const readReviews = cache(readReviewsRaw);
 import type { BlogPost, Captain, City, CollegeTrip, Coupon, Creator, CreatorPose, CreatorTrip, CreatorTripDate, Departure, Faq, Package, PriceRule, Review, Settings, TripCategory, VideoTestimonial, WireEntry } from "./types";
-import { DEFAULT_BANK, DEFAULT_CAPTAINS, DEFAULT_HOLD_PERCENT, DEFAULT_GST_PERCENT, normalizeCaptain, normalizeCollegeTrip, normalizeCouponCode, resolveSlot as resolveSlotPure, resolveContent as resolveContentPure, resolvePageSection, inCategory, normalizeCreator, packageImages, resolveFigure, DEFAULT_FAQS, DEFAULT_VIDEO_TESTIMONIAL } from "./types";
+import { DEFAULT_BANK, DEFAULT_CAPTAINS, DEFAULT_HOLD_PERCENT, DEFAULT_GST_PERCENT, normalizeCaptain, normalizeCollegeTrip, normalizeCouponCode, resolveSlot as resolveSlotPure, resolveContent as resolveContentPure, resolvePageSection, inCategory, normalizeCreator, packageImages, resolveFigure, DEFAULT_FAQS, DEFAULT_VIDEO_TESTIMONIAL, isVideoMedia, normalizeMediaUrl } from "./types";
 import { lowestFare } from "./fares";
 import {
   collections as collectionDefaults,
@@ -216,6 +216,35 @@ export const getCreator = (slug: string): Creator | undefined =>
 /** Published captains, newest edits first. Falls back to the shipped defaults
  *  only when the catalog has no captains at all, so a fresh install still
  *  renders a populated band. */
+/* ------------------------------------------------ reels */
+
+export interface ReelView {
+  id: string;
+  video: string;
+  poster?: string;
+  title: string;
+  place?: string;
+  credit?: string;
+  /** set only when the linked package is live */
+  href?: string;
+}
+
+/** Live reels in admin order, with links only to trips that are still on sale. */
+export function getReels(): ReelView[] {
+  const live = new Set(getLivePackages().map((p) => p.slug));
+  return (readCatalog().reels ?? [])
+    .filter((r) => r.published && isVideoMedia(r.video))
+    .map((r) => ({
+      id: r.id,
+      video: normalizeMediaUrl(r.video),
+      poster: r.poster ? normalizeMediaUrl(r.poster) : undefined,
+      title: r.title,
+      place: r.place || undefined,
+      credit: r.credit || undefined,
+      href: r.packageSlug && live.has(r.packageSlug) ? `/trips/${r.packageSlug}` : undefined,
+    }));
+}
+
 export const getCaptains = (): Captain[] => {
   const rows = (readCatalog().captains ?? []).map(normalizeCaptain).filter((c) => c.published);
   return rows.length ? rows : DEFAULT_CAPTAINS;

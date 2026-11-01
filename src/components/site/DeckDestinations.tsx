@@ -173,7 +173,7 @@ export default function DeckDestinations({ cards, eyebrow = "somewhere in here i
                 key={c.slug}
                 href={`/trips/${c.slug}`}
                 data-deck-card
-                className="absolute left-1/2 top-1/2 h-[38vh] w-[29vh] -translate-x-1/2 -translate-y-1/2 will-change-transform"
+                className="absolute left-1/2 top-1/2 h-[34vh] w-[26vh] -translate-x-1/2 -translate-y-1/2 will-change-transform"
                 style={{ transformStyle: "preserve-3d" }}
                 tabIndex={i === active ? 0 : -1}
               >

@@ -35,7 +35,7 @@ export function CollegeWall({
           {headline} <span className="text-gold">{accent}</span>
         </h2>
 
-        <ul className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {runs.map((r) => (
             <li key={r.slug}>
               <article className="group relative flex h-full flex-col overflow-hidden rounded-[1.6rem] border border-white/10 bg-white/[0.03] transition-all duration-500 hover:-translate-y-1.5 hover:border-gold/50">
@@ -44,7 +44,7 @@ export function CollegeWall({
                     src={r.cover}
                     alt={`${r.college} in ${r.destination}`}
                     fill
-                    sizes="(max-width:640px) 92vw, (max-width:1024px) 46vw, 30vw"
+                    sizes="(max-width:640px) 92vw, (max-width:1024px) 46vw, (max-width:1280px) 30vw, 22vw"
                     className="object-cover transition-transform duration-[1.2s] group-hover:scale-[1.06]"
                   />
                   <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-ink via-ink/25 to-transparent" />

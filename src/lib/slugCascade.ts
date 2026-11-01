@@ -137,3 +137,76 @@ export function findOrphans(cat: Catalog): Orphans {
     ),
   };
 }
+
+/* ------------------------------------------------ deletions */
+
+/**
+ * Slugs the admin deleted in this save.
+ *
+ * Only answered when it is unambiguous: if the save also carries a slug that
+ * did not exist before, a "missing" slug may really be a rename (handled
+ * above, or deliberately not guessed at), and cascading it would purge the
+ * prices of a package that still exists. Then this returns nothing.
+ */
+export function detectDeletions(before: string[], after: string[]): string[] {
+  const had = new Set(before.filter(Boolean));
+  const has = new Set(after.filter(Boolean));
+  for (const s of has) if (!had.has(s)) return [];
+  return [...had].filter((s) => !has.has(s));
+}
+
+/** Drop every row that pointed at a deleted package. Mutates `cat`. */
+export function applyPackageDeletions(cat: Catalog, slugs: string[]) {
+  const result = { prices: 0, departures: 0, creatorTrips: 0 };
+  if (!slugs.length) return result;
+  const dead = new Set(slugs);
+
+  const prices = (cat.prices ?? []).filter((r) => !dead.has(r.packageSlug));
+  result.prices = (cat.prices ?? []).length - prices.length;
+  cat.prices = prices;
+
+  const departures = (cat.departures ?? []).filter((d) => !dead.has(d.packageSlug));
+  result.departures = (cat.departures ?? []).length - departures.length;
+  cat.departures = departures;
+
+  if (cat.creators?.length) {
+    cat.creators = cat.creators.map((c) => {
+      const trips = (c.trips ?? []).filter((t) => !dead.has(t.packageSlug));
+      result.creatorTrips += (c.trips ?? []).length - trips.length;
+      return trips.length === (c.trips ?? []).length ? c : { ...c, trips };
+    });
+  }
+
+  // an old address that redirected to the deleted package would now 301 to a 404
+  if (cat.slugAliases) {
+    cat.slugAliases = Object.fromEntries(Object.entries(cat.slugAliases).filter(([, to]) => !dead.has(to)));
+  }
+  return result;
+}
+
+/**
+ * Drop a deleted city's prices and take it off every batch. A batch it was
+ * the only boarding point for has nowhere left to board, so it goes too.
+ * Mutates `cat`.
+ */
+export function applyCityDeletions(cat: Catalog, slugs: string[]) {
+  const result = { prices: 0, departures: 0, departuresTrimmed: 0 };
+  if (!slugs.length) return result;
+  const dead = new Set(slugs);
+
+  const prices = (cat.prices ?? []).filter((r) => !dead.has(r.citySlug));
+  result.prices = (cat.prices ?? []).length - prices.length;
+  cat.prices = prices;
+
+  const departures: Catalog["departures"] = [];
+  for (const d of cat.departures ?? []) {
+    const citySlugs = d.citySlugs.filter((s) => !dead.has(s));
+    if (citySlugs.length === d.citySlugs.length) departures.push(d);
+    else if (citySlugs.length) {
+      result.departuresTrimmed++;
+      departures.push({ ...d, citySlugs });
+    } else result.departures++;
+  }
+  cat.departures = departures;
+  return result;
+}

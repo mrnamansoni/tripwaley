@@ -13,7 +13,7 @@
  */
 
 import { useState } from "react";
-import { useAdmin, Field, Area, Btn, Head, input, label, linesToArr, arrToLines } from "./ui";
+import { useAdmin, Field, Area, Btn, Head, input, label, linesToArr, arrToLines, count } from "./ui";
 import MediaPicker from "./MediaPicker";
 import { CREATOR_POSE_DEFS } from "@/lib/types";
 import type { Creator, CreatorFigures, CreatorPose, CreatorTrip, CreatorTripDate, ItineraryDay, Meal } from "@/lib/types";
@@ -65,6 +65,22 @@ export default function CreatorsEditor() {
   const livePackages = data.catalog.packages.filter((p) => p.status === "live");
   const pkgOf = (slug: string) => data.catalog.packages.find((p) => p.slug === slug);
 
+  /* saves at once, from the saved list minus this creator, so other unsaved
+     edits stay pending */
+  const remove = async (c: Creator) => {
+    const saved = data.catalog.creators ?? [];
+    if (saved.some((x) => x.slug === c.slug)) {
+      const dates = c.trips.reduce((n, t) => n + t.dates.length, 0);
+      const msg =
+        `Delete ${c.name} for good?` +
+        `\n\nTheir page /travel-with/${c.slug}, ${count(c.trips.length, "trip") || "no trips"} and ${count(dates, "date") || "no dates"} go with them.` +
+        `\n\nTo just take them off the site, switch them to hidden instead.`;
+      if (!confirm(msg)) return;
+      if (!(await save("creators", saved.filter((x) => x.slug !== c.slug)))) return;
+    } else if (!confirm(`Discard the unsaved creator "${c.name}"?`)) return;
+    setCreators((all) => all.filter((x) => x.slug !== c.slug));
+  };
+
   /* ---------------------------------------------- list ---------------- */
   if (!creator) {
     return (
@@ -106,6 +122,7 @@ export default function CreatorsEditor() {
               </button>
               <a href={`/travel-with/${c.slug}`} target="_blank" rel="noreferrer" className="text-[0.6rem] font-bold uppercase tracking-wider text-white/40 hover:text-gold">↗ view</a>
               <Btn tone="ghost" onClick={() => setOpenSlug(c.slug)}>edit →</Btn>
+              <Btn tone="danger" onClick={() => remove(c)}>Delete</Btn>
             </div>
           ))}
         </div>

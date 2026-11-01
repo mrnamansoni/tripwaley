@@ -27,7 +27,7 @@ export function CreatorRoster({
           Whose trip are you <span className="text-brand">gatecrashing?</span>
         </h2>
 
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {creators.map((c) => {
             const count = dateCounts[c.slug] ?? 0;
             const accent = c.accent === "brand" ? "text-brand" : "text-gold";
@@ -42,7 +42,7 @@ export function CreatorRoster({
                     src={c.portrait}
                     alt={c.name}
                     fill
-                    sizes="(max-width:640px) 92vw, (max-width:1024px) 46vw, 30vw"
+                    sizes="(max-width:640px) 92vw, (max-width:1024px) 46vw, (max-width:1280px) 30vw, 22vw"
                     className="object-cover transition-transform duration-[1.2s] group-hover:scale-[1.06]"
                     style={{ objectPosition: c.focal ?? "50% 30%" }}
                   />

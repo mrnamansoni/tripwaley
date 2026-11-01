@@ -39,6 +39,35 @@ Tripwaley is a production-grade travel booking website for a premium, group-depa
 
 ## Recent Changes
 
+### 2026-11-01 — Nine-item change round (local only, NOT committed or pushed)
+
+1. **Hero "Scene" glitch** (`OpeningShot.tsx`) — removed `will-change-transform` from the zoom
+   wrappers; Chrome froze the layer's raster scale and left the word unpainted on scroll-back.
+2. **/team "Meet the Paltan"** (new) — merges About + captains: dictionary-entry hero, origin story
+   as a group chat, captains as a notebook roll call. Numbers are counted, not typed.
+   `/about`, `/about-us`, `/career` → 301 `/team`; `src/app/about` removed.
+3. **Navbar** — Trips▾ · Destinations▾ · Creators · Corporate · Paltan▾ with mega-panels built from
+   real data (`NavMenuProvider`, built in `layout.tsx`); mobile uses accordions. `/trips?month=YYYY-MM`
+   preselects the month.
+4. **Admin deletes** — Delete on packages, cities and creators. Package/city deletes cascade to
+   prices and departures (`applyPackageDeletions` / `applyCityDeletions` in `slugCascade.ts`, test
+   `scripts/test-delete-cascade.mjs`); the default city can't be deleted.
+5. **Creator calendar** — one row per creator (other dates as "also" chips) + Show more (4 at a time).
+6. **Destinations wheel** (`ZodiacRing.tsx`) — the centre is a real spin button; lands a region
+   under the needle and links to it. `/destinations#wheel`.
+7. **/corporate-trips** (new) — "out of office" concept: auto-reply hero, trip formats, a sample
+   day as a struck-through agenda, real destinations, enquiry form that drafts a calendar invite.
+   `POST /api/corporate-quote` → Bookings row (notes shown in admin) + shared CRM envelope
+   (`surface: corporate-quote`, no new payload block). Copy is admin-editable (Content →
+   Corporate page); photos via Media slots `corporate.hero` / `corporate.gallery`.
+   No client logos, ratings or "teams hosted" counts — owner's truth-over-hype rule.
+8. **Reels** (new) — admin **Reels** tab (`ReelsEditor.tsx`, `catalog.reels`, validated in the
+   catalog PUT). Homepage `ReelStage.tsx` after TripMoments: coverflow deck, only the middle reel
+   plays, auto-advance, story bars, sound toggle, swipe/arrow keys, and an ambient `<canvas>` that
+   repaints from the playing video behind the section. Hidden until a reel is live.
+9. **Smaller cards** — photo-card grids go 4-up at `xl`, slightly tighter padding/titles;
+   departure-board stubs, destination deck and pile-up cards trimmed ~10%.
+
 ### 2026-10-02 — Design critique fixes, round 2: mobile booking bar, /trips map (deployed with round 1)
 
 Owner said: skip the made-up-numbers item for now ("4 seats left", 4.9★, vibe-check stats,

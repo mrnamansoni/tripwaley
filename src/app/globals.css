@@ -437,3 +437,42 @@ body {
     will-change: auto;
   }
 }
+
+/* ---- /team roll call ------------------------------------------------------
+   Ruled notebook paper: blue rules every 2.25rem, one red margin line. */
+.notebook {
+  background-color: #fffdf7;
+  background-image:
+    linear-gradient(90deg, transparent 2.75rem, rgb(201 37 44 / 0.35) 2.75rem, rgb(201 37 44 / 0.35) calc(2.75rem + 1.5px), transparent calc(2.75rem + 1.5px)),
+    repeating-linear-gradient(to bottom, transparent 0 2.25rem, rgb(70 120 200 / 0.16) 2.25rem calc(2.25rem + 1px));
+}
+@media (min-width: 640px) {
+  .notebook {
+    background-image:
+      linear-gradient(90deg, transparent 4.5rem, rgb(201 37 44 / 0.35) 4.5rem, rgb(201 37 44 / 0.35) calc(4.5rem + 1.5px), transparent calc(4.5rem + 1.5px)),
+      repeating-linear-gradient(to bottom, transparent 0 2.25rem, rgb(70 120 200 / 0.16) 2.25rem calc(2.25rem + 1px));
+  }
+}
+/* The red-pen "P" is drawn as its row scrolls in. Finished by default, so
+   browsers without scroll-driven animations (and reduced motion) just see it. */
+.roll-tick path {
+  stroke-dasharray: 60;
+  stroke-dashoffset: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .roll-tick path {
+      animation: rollTick linear both;
+      animation-timeline: view();
+      animation-range: entry 60% cover 40%;
+    }
+  }
+}
+@keyframes rollTick {
+  from {
+    stroke-dashoffset: 60;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}

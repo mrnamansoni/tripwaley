@@ -87,6 +87,8 @@ ${creators.map((c) => `- [${c.name}](${SITE_ORIGIN}/travel-with/${c.slug})${c.ni
 - [Honeymoon trips](${SITE_ORIGIN}/honeymoon)
 - [College and student groups](${SITE_ORIGIN}/college-trips)
 - [Group departures](${SITE_ORIGIN}/group-departures)
+- [Corporate trips and team offsites](${SITE_ORIGIN}/corporate-trips)
+- [Who runs Tripwaley — the trip captains](${SITE_ORIGIN}/team)
 - [Destinations](${SITE_ORIGIN}/destinations)
 - [Stories from the batches](${SITE_ORIGIN}/stories)
 - [Contact](${SITE_ORIGIN}/contact)

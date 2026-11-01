@@ -350,7 +350,7 @@ export default async function CreatorTripPage({
               <h2 className="font-display text-2xl font-extrabold tracking-tight text-ink sm:text-4xl">
                 {creator.firstName}&apos;s other trips
               </h2>
-              <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {otherTrips.map((t) => (
                   <Link
                     key={t.package.slug}

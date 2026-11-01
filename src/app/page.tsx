@@ -9,6 +9,7 @@ import PileUp, { type PileCard } from "@/components/site/PileUp";
 import MomentumBreak from "@/components/site/MomentumBreak";
 import DrumReviews from "@/components/site/DrumReviews";
 import MagnetChant from "@/components/site/MagnetChant";
+import ReelStage from "@/components/site/ReelStage";
 import SiteFooter from "@/components/site/SiteFooter";
 import {
   getCities,
@@ -19,6 +20,7 @@ import {
   getReviews,
   getGalleryPhotos,
   getMoments,
+  getReels,
   text,
   upcomingDepartures,
   fromPrice,
@@ -144,6 +146,12 @@ export default function Home() {
         <PileUp cards={pileCards} />
         <MomentumBreak />
         <TripMoments moments={getMoments()} />
+        <ReelStage
+          reels={getReels()}
+          eyebrow={text("reels.eyebrow")}
+          headline={text("reels.headline")}
+          accent={text("reels.accent")}
+        />
         <MemoryArc
           photos={getGalleryPhotos()}
           eyebrow={text("gallery.eyebrow")}

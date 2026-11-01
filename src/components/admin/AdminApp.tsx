@@ -5,7 +5,7 @@
    departures, reviews, photos. Every save revalidates the live site. */
 
 import { useState } from "react";
-import { AdminProvider, useAdmin, Field, Area, Btn, Head, input, label } from "./ui";
+import { AdminProvider, useAdmin, Field, Area, Btn, Head, input, label, count } from "./ui";
 import PackagesEditor from "./PackagesEditor";
 import MediaManager from "./MediaManager";
 import ContentEditor from "./ContentEditor";
@@ -18,11 +18,12 @@ import PaymentsView from "./PaymentsView";
 import WebhookPanel from "./WebhookPanel";
 import CollegesEditor from "./CollegesEditor";
 import CouponsEditor from "./CouponsEditor";
+import ReelsEditor from "./ReelsEditor";
 import SettingsEditor from "./SettingsEditor";
 import { inr, shortDate } from "@/lib/types";
 import type { City, Departure, PriceRule, Review } from "@/lib/types";
 
-const TABS = ["Dashboard", "Content", "Pages", "Packages", "Creators", "Captains", "Colleges", "Coupons", "Prices", "Departures", "Cities", "Media", "Reviews", "FAQ", "Stories", "Settings", "Payments", "Bookings"] as const;
+const TABS = ["Dashboard", "Content", "Pages", "Packages", "Creators", "Captains", "Colleges", "Coupons", "Reels", "Prices", "Departures", "Cities", "Media", "Reviews", "FAQ", "Stories", "Settings", "Payments", "Bookings"] as const;
 type Tab = (typeof TABS)[number];
 
 export default function AdminApp() {
@@ -74,6 +75,7 @@ function Shell() {
         {tab === "Captains" && <CaptainsEditor />}
         {tab === "Colleges" && <CollegesEditor />}
         {tab === "Coupons" && <CouponsEditor />}
+        {tab === "Reels" && <ReelsEditor />}
         {tab === "Prices" && <PricesEditor />}
         {tab === "Departures" && <DeparturesEditor />}
         {tab === "Cities" && <CitiesEditor />}
@@ -274,6 +276,33 @@ function CitiesEditor() {
   const [cities, setCities] = useState<City[]>(data.catalog.cities);
   const upd = (i: number, patch: Partial<City>) => setCities((c) => c.map((x, j) => (j === i ? { ...x, ...patch } : x)));
 
+  /* saves at once, from the saved list minus this city, so other unsaved
+     edits stay pending; the server drops its prices and takes it off batches */
+  const remove = async (i: number) => {
+    const c = cities[i];
+    const cat = data.catalog;
+    if (c.slug && cat.cities.some((x) => x.slug === c.slug)) {
+      if (c.slug === cat.settings.defaultCity) {
+        alert(`${c.name} is the site's default city. Pick another default in Settings first.`);
+        return;
+      }
+      const deps = cat.departures.filter((d) => d.citySlugs.includes(c.slug));
+      const solo = deps.filter((d) => d.citySlugs.length === 1).length;
+      const also = [
+        count(cat.prices.filter((r) => r.citySlug === c.slug).length, "price rule"),
+        solo ? `${count(solo, "departure")} that only ${solo === 1 ? "boards" : "board"} here` : "",
+      ].filter(Boolean);
+      const shared = deps.filter((d) => d.citySlugs.length > 1).length;
+      const msg =
+        `Delete ${c.name} for good?` +
+        (also.length ? `\n\nThis also removes ${also.join(" and ")}.` : "") +
+        (shared ? `\n\n${count(shared, "other departure")} keep running without it.` : "");
+      if (!confirm(msg)) return;
+      if (!(await save("cities", cat.cities.filter((x) => x.slug !== c.slug)))) return;
+    }
+    setCities((x) => x.filter((_, j) => j !== i));
+  };
+
   return (
     <>
       <Head title="Cities" sub="Boarding points. 'Priced' cities appear in switchers & fare boards.">
@@ -292,7 +321,7 @@ function CitiesEditor() {
               <input type="checkbox" checked={c.priced} onChange={(e) => upd(i, { priced: e.target.checked })} className="h-4 w-4 accent-gold" />
               priced
             </label>
-            <Btn tone="danger" onClick={() => setCities((x) => x.filter((_, j) => j !== i))}>✕</Btn>
+            <Btn tone="danger" onClick={() => remove(i)}>Delete</Btn>
           </div>
         ))}
       </div>
@@ -365,7 +394,10 @@ function BookingsView() {
                     </span>
                   ) : "—"}
                 </td>
-                <td className="px-4 py-2.5 font-bold text-white">{b.package}</td>
+                <td className="px-4 py-2.5 font-bold text-white">
+                  {b.package}
+                  {b.notes && <span className="mt-1 block max-w-xs whitespace-pre-line text-xs font-normal text-white/55">{b.notes}</span>}
+                </td>
                 <td className="px-4 py-2.5">{b.city}</td>
                 <td className="px-4 py-2.5">{b.date || "—"}</td>
                 <td className="px-4 py-2.5">{b.pax ?? 1} · {b.occupancy || "—"}</td>

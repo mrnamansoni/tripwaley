@@ -54,7 +54,7 @@ export default async function TopicPage({ params }: { params: Promise<{ kind: st
           {posts.length === 0 ? (
             <p className="text-ink/65">Nothing here yet — <Link href="/stories" className="font-bold text-brand">read everything else</Link>.</p>
           ) : (
-            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {posts.map((p) => <StoryCard key={p.slug} post={p} />)}
             </div>
           )}

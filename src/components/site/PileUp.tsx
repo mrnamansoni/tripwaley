@@ -55,7 +55,7 @@ export default function PileUp({ cards }: { cards: PileCard[] }) {
         const price = c.fromPrices[city.slug];
         return (
           <div key={c.slug} className="sticky top-0 flex h-screen items-center justify-center px-4 sm:px-8">
-            <article data-pile-card className="relative h-[82vh] w-full max-w-6xl overflow-hidden rounded-[2rem] bg-[#181614] shadow-card-lg will-change-transform">
+            <article data-pile-card className="relative h-[74vh] w-full max-w-5xl overflow-hidden rounded-[2rem] bg-[#181614] shadow-card-lg will-change-transform">
               <SiteMedia src={c.image} alt={c.name} fill sizes="92vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-transparent to-ink/25" aria-hidden="true" />
               <span className="absolute left-7 top-7 flex h-12 w-12 items-center justify-center rounded-full border border-white/25 bg-ink/40 font-display text-sm font-extrabold text-white backdrop-blur-md">

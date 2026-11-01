@@ -85,7 +85,7 @@ export default function TripTypeGrid({
           </div>
         </div>
 
-        <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
           {shown.map((c) => {
             const price = fareFor(c.prices, city.slug);
             return (
@@ -99,7 +99,7 @@ export default function TripTypeGrid({
                     src={c.media}
                     alt={c.name}
                     fill
-                    sizes="(max-width:640px) 46vw, 30vw"
+                    sizes="(max-width:640px) 46vw, (max-width:1280px) 30vw, 22vw"
                     className="object-cover transition-transform duration-700 group-hover:scale-[1.06]"
                   />
                   {c.nextDate && (
@@ -110,11 +110,11 @@ export default function TripTypeGrid({
                 </div>
                 {/* column + mt-auto on the price row keeps fares aligned across
                     the row no matter how many lines a trip name wraps to */}
-                <div className="flex min-h-[7.5rem] flex-col p-3 sm:min-h-[9.5rem] sm:p-5">
+                <div className="flex min-h-[7.5rem] flex-col p-3 sm:min-h-[8.5rem] sm:p-4">
                   <p className="text-[0.54rem] font-bold uppercase tracking-[0.22em] opacity-75 sm:text-[0.6rem] sm:tracking-[0.25em]">
                     {c.nightsLabel}
                   </p>
-                  <h3 className={`mt-1 line-clamp-2 font-display text-sm font-extrabold leading-snug transition-colors sm:text-xl ${theme.titleHover}`}>
+                  <h3 className={`mt-1 line-clamp-2 font-display text-sm font-extrabold leading-snug transition-colors sm:text-lg ${theme.titleHover}`}>
                     {c.name}
                   </h3>
                   <div className="mt-auto flex items-end justify-between gap-2 pt-2 sm:pt-3">

@@ -4,7 +4,7 @@
  *
  * These used to be a hardcoded array with only their photos editable through a
  * media slot, so adding a captain or correcting a trip count needed a deploy.
- * Now they are rows: the band on /about and /vibe-check renders every published
+ * Now they are rows: the roll call on /team and the band on /vibe-check renders every published
  * one, and the first published captain fronts the feed on every trip page.
  */
 
@@ -48,7 +48,7 @@ export default function CaptainsEditor() {
     <>
       <Head
         title="Captains"
-        sub="Shown on /about and /vibe-check. The first published captain also fronts the feed on every trip page — use the arrows to choose who that is."
+        sub="Shown on /team (the roll call) and /vibe-check. The first published captain also fronts the feed on every trip page — use the arrows to choose who that is."
       >
         <Btn tone="ghost" onClick={() => setRows((all) => [...all, blank(all.length + 1)])}>
           + New captain

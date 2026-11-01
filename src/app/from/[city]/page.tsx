@@ -249,7 +249,7 @@ export default async function FromCityPage({ params }: { params: Promise<{ city:
           <h2 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
             Everything priced <span className="text-brand">ex-{city.name}.</span>
           </h2>
-          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {priced.map(({ pkg, price }) => (
               <Link key={pkg.slug} href={`/trips/${pkg.slug}`} className="group overflow-hidden rounded-3xl border border-line bg-card shadow-sm transition-all hover:-translate-y-1 hover:shadow-card-lg">
                 <div className="relative aspect-[4/3] overflow-hidden">

@@ -10,12 +10,12 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { sameOrigin } from "@/lib/auth";
 import { listMedia, readBookings, readCatalog, readReviews, readSeedCatalog, writeCatalog, writeReviews } from "@/lib/store";
-import { isSeedSection, removalsForSection } from "@/lib/seedGuard";
-import { SLOT_DEFS, CONTENT_DEFS, resolveSlot, PAGE_SECTION_DEFS, isValidMediaRef, CATEGORY_DEFS, CREATOR_POSE_DEFS } from "@/lib/types";
-import { applySlugRenames, detectSlugRenames } from "@/lib/slugCascade";
+import { isSeedSection, removalsForSection, type SeedSection } from "@/lib/seedGuard";
+import { SLOT_DEFS, CONTENT_DEFS, resolveSlot, PAGE_SECTION_DEFS, isValidMediaRef, isVideoMedia, CATEGORY_DEFS, CREATOR_POSE_DEFS } from "@/lib/types";
+import { applyCityDeletions, applyPackageDeletions, applySlugRenames, detectDeletions, detectSlugRenames } from "@/lib/slugCascade";
 import { applyStoryRenames, detectStoryRenames, dropAliasesOwnedByLiveStories } from "@/lib/storyCascade";
 import { DESTINATIONS } from "@/lib/destinations";
-import type { BlogPost, Captain, CollegeTrip, Coupon, Catalog, City, Creator, Departure, Faq, Package, PriceRule, Review, WireEntry } from "@/lib/types";
+import type { BlogPost, Captain, CollegeTrip, Coupon, Catalog, City, Creator, Departure, Faq, Package, PriceRule, Reel, Review, WireEntry } from "@/lib/types";
 
 export async function GET() {
   const cat = readCatalog();
@@ -191,6 +191,23 @@ function validate(section: string, data: unknown): string | null {
       }
       return null;
     }
+    case "reels": {
+      const seen = new Set<string>();
+      for (const [i, r] of (data as Reel[]).entries()) {
+        const at = `reel ${i + 1}`;
+        if (!isStr(r.id) || !r.id.trim()) return `${at}: missing id`;
+        if (seen.has(r.id)) return `${at}: duplicate id ${r.id}`;
+        seen.add(r.id);
+        if (!isValidMediaRef(r.video) || !isVideoMedia(r.video)) return `${at}: the reel must be a video (.mp4, .webm, .mov)`;
+        if (r.poster && !(okMedia(r.poster) && !isVideoMedia(r.poster))) return `${at}: the cover must be a photo`;
+        if (!isStr(r.title)) return `${at}: invalid caption`;
+        for (const k of ["place", "credit", "packageSlug"] as const) {
+          if (r[k] != null && !isStr(r[k])) return `${at}: invalid ${k}`;
+        }
+        if (typeof r.published !== "boolean") return `${at}: published must be true or false`;
+      }
+      return null;
+    }
     case "colleges":
       return (data as CollegeTrip[]).every(
         (c) =>
@@ -277,6 +294,41 @@ export async function PUT(req: Request) {
     // creator trip would just vanish from the site with no error. Detect the
     // rename here, while both versions are in hand, and carry the references
     // across with it.
+    /* sections a deletion cascaded into — their seed tombstones are
+       recomputed below, or the seed merge would bring the dropped rows back */
+    const cascaded: SeedSection[] = [];
+
+    if (section === "packages") {
+      const deleted = detectDeletions((cat.packages ?? []).map((p) => p.slug), (data as Package[]).map((p) => p.slug));
+      if (deleted.length) {
+        const r = applyPackageDeletions(cat, deleted);
+        cascaded.push("prices", "departures");
+        console.log(
+          `[admin] package(s) deleted: ${deleted.join(", ")} — dropped ${r.prices} price rule(s),` +
+            ` ${r.departures} departure(s), ${r.creatorTrips} creator trip(s)`
+        );
+      }
+    }
+
+    if (section === "cities") {
+      const defaultCity = cat.settings?.defaultCity;
+      if (defaultCity && !(data as City[]).some((c) => c.slug === defaultCity)) {
+        return NextResponse.json(
+          { error: `${defaultCity} is the site's default city — pick another in Settings before deleting it` },
+          { status: 422 }
+        );
+      }
+      const deleted = detectDeletions((cat.cities ?? []).map((c) => c.slug), (data as City[]).map((c) => c.slug));
+      if (deleted.length) {
+        const r = applyCityDeletions(cat, deleted);
+        cascaded.push("prices", "departures");
+        console.log(
+          `[admin] city/cities deleted: ${deleted.join(", ")} — dropped ${r.prices} price rule(s),` +
+            ` ${r.departures} departure(s), trimmed ${r.departuresTrimmed}`
+        );
+      }
+    }
+
     if (section === "packages") {
       const renames = detectSlugRenames(cat.packages ?? [], data as Package[]);
       if (renames.length) {
@@ -360,6 +412,7 @@ export async function PUT(req: Request) {
     if (section === "wire") cat.wire = data as WireEntry[];
     if (section === "creators") cat.creators = data as Creator[];
     if (section === "colleges") cat.colleges = data as CollegeTrip[];
+    if (section === "reels") cat.reels = (data as Reel[]).map((r) => ({ ...r, title: r.title.trim().slice(0, 120) }));
     // a blank slug would collide on the next save; derive one from the name
     if (section === "captains")
       cat.captains = (data as Captain[]).map((c, i) => ({
@@ -381,6 +434,10 @@ export async function PUT(req: Request) {
       if (gone.length !== before) {
         console.log(`[admin] ${section}: ${gone.length} seed row(s) now marked deleted (was ${before})`);
       }
+    }
+    for (const dep of cascaded) {
+      const rows = (cat as unknown as Record<string, unknown[]>)[dep] ?? [];
+      cat.seedRemovals = { ...cat.seedRemovals, [dep]: removalsForSection(readSeedCatalog(), dep, rows) };
     }
 
     writeCatalog(cat);

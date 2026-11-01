@@ -39,6 +39,8 @@ export interface CalendarDate {
 }
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+/** rows shown before (and added by each) "Show more" */
+const PAGE = 4;
 const MONTH_LABEL = (ym: string) =>
   new Date(`${ym}-01T00:00:00`).toLocaleDateString("en-IN", { month: "long", year: "numeric" });
 
@@ -84,6 +86,22 @@ export default function CreatorCalendar({ dates }: { dates: CalendarDate[] }) {
     return m;
   }, [monthDates]);
   const listed = day ? monthDates.filter((d) => d.date === day) : monthDates;
+
+  /* One row per creator: their earliest date leads, the rest ride along as
+     chips. Once a single creator is picked, every date gets its own row —
+     that is the drill-in. */
+  const rows = useMemo(() => {
+    if (creator !== "all") return listed.map((d) => ({ lead: d, rest: [] as CalendarDate[] }));
+    const m = new Map<string, CalendarDate[]>();
+    listed.forEach((d) => m.set(d.creatorSlug, [...(m.get(d.creatorSlug) ?? []), d]));
+    return [...m.values()].map(([lead, ...rest]) => ({ lead, rest }));
+  }, [listed, creator]);
+  /* the count belongs to one view — any filter, day or month change starts
+     the list short again */
+  const view = `${ym}|${pkg}|${creator}|${day}`;
+  const [more, setMore] = useState({ view, n: PAGE });
+  const shown = more.view === view ? more.n : PAGE;
+  const visible = rows.slice(0, shown);
 
   const goMonth = (delta: number) => {
     setMonthIdx((i) => Math.min(months.length - 1, Math.max(0, i + delta)));
@@ -198,7 +216,21 @@ export default function CreatorCalendar({ dates }: { dates: CalendarDate[] }) {
 
         {/* ---------- the list ---------- */}
         <div className="space-y-3">
-          {listed.map((d) => <DateRow key={`${d.creatorSlug}-${d.date}-${d.packageSlug}`} d={d} />)}
+          {visible.map(({ lead, rest }) => (
+            <DateRow key={`${lead.creatorSlug}-${lead.date}-${lead.packageSlug}`} d={lead} rest={rest} />
+          ))}
+          {rows.length > shown && (
+            <button
+              type="button"
+              onClick={() => setMore({ view, n: shown + PAGE })}
+              className="flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-white/15 text-xs font-extrabold uppercase tracking-[0.2em] text-white/75 transition-colors hover:border-gold hover:text-gold"
+            >
+              Show more
+              <span className="font-mono text-[0.6rem] font-normal tracking-widest text-white/50">
+                {rows.length - shown} {creator === "all" ? (rows.length - shown === 1 ? "creator" : "creators") : rows.length - shown === 1 ? "date" : "dates"}
+              </span>
+            </button>
+          )}
           {listed.length === 0 && (
             <div className="rounded-2xl border border-dashed border-white/15 px-6 py-14 text-center">
               <p className="text-sm text-white/55">Nothing on this filter in {MONTH_LABEL(ym)}.</p>
@@ -247,7 +279,7 @@ function NavBtn({ onClick, disabled, label, children }: { onClick: () => void; d
   );
 }
 
-function DateRow({ d }: { d: CalendarDate }) {
+function DateRow({ d, rest = [] }: { d: CalendarDate; rest?: CalendarDate[] }) {
   const dt = new Date(`${d.date}T00:00:00`);
   const soldOut = d.seatsLeft <= 0;
   const filled = d.seats > 0 ? Math.min(1, (d.seats - d.seatsLeft) / d.seats) : 0;
@@ -278,7 +310,25 @@ function DateRow({ d }: { d: CalendarDate }) {
             <span className="ml-2 font-mono text-[0.6rem] font-normal tracking-wide text-white/55">{d.creatorHandle}</span>
           </Link>
           <p className="mt-0.5 truncate text-sm text-white/60">{d.packageName}</p>
-          {d.hook && <p className="mt-1 hidden truncate font-script text-base text-gold/80 sm:block">&ldquo;{d.hook}&rdquo;</p>}
+          {d.hook && rest.length === 0 && <p className="mt-1 hidden truncate font-script text-base text-gold/80 sm:block">&ldquo;{d.hook}&rdquo;</p>}
+          {rest.length > 0 && (
+            <p className="mt-1.5 flex flex-wrap items-center gap-1.5">
+              <span className="font-mono text-[0.5rem] uppercase tracking-widest text-white/50">also</span>
+              {rest.slice(0, 3).map((r) => (
+                <Link
+                  key={`${r.date}-${r.packageSlug}`}
+                  href={r.href}
+                  title={r.packageName}
+                  className="rounded-full border border-white/15 px-2 py-0.5 font-mono text-[0.56rem] uppercase tracking-wider text-white/70 transition-colors hover:border-gold hover:text-gold"
+                >
+                  {new Date(`${r.date}T00:00:00`).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                </Link>
+              ))}
+              {rest.length > 3 && (
+                <span className="font-mono text-[0.56rem] uppercase tracking-wider text-white/50">+{rest.length - 3}</span>
+              )}
+            </p>
+          )}
         </div>
 
         {/* seats + price */}

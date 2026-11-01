@@ -7,6 +7,8 @@ import SiteChrome from "@/components/site/SiteChrome";
 import VideoAutoPause from "@/components/site/VideoAutoPause";
 import Analytics from "@/components/site/Analytics";
 import { SearchProvider, type SearchItem } from "@/components/site/SearchProvider";
+import { NavMenuProvider, type NavMenu } from "@/components/site/NavMenuProvider";
+import { DESTINATIONS, destinationsFor } from "@/lib/destinations";
 import {
   getSettings,
   getLivePackages,
@@ -173,6 +175,37 @@ export default function RootLayout({
       date: t.date,
       priceFrom: t.priceFrom,
     }));
+  // navbar dropdowns — only destinations and months that really have trips
+  const upcoming = upcomingDepartures({ limit: 500 });
+  const monthCounts = new Map<string, number>();
+  upcoming.forEach((d) => monthCounts.set(d.date.slice(0, 7), (monthCounts.get(d.date.slice(0, 7)) ?? 0) + 1));
+  const soonest = bookingTrips.find((t) => t.date);
+  const navMenu: NavMenu = {
+    destinations: DESTINATIONS.map((d) => ({
+      slug: d.slug,
+      name: d.name,
+      state: d.state,
+      trips: live.filter((p) => destinationsFor(p).some((x) => x.slug === d.slug)).length,
+    })).filter((d) => d.trips > 0),
+    months: [...monthCounts]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .slice(0, 6)
+      .map(([ym, n]) => ({
+        ym,
+        label: new Date(`${ym}-01T00:00:00`).toLocaleDateString("en-IN", { month: "long", year: "numeric" }),
+        departures: n,
+      })),
+    next: soonest
+      ? {
+          slug: soonest.slug,
+          name: soonest.name,
+          dateLabel: soonest.dateLabel,
+          priceFrom: soonest.priceFrom || undefined,
+          media: searchItems.find((s) => s.slug === soonest.slug)?.media,
+        }
+      : undefined,
+  };
+
   return (
     /* --ann-h is declared here, on the server, so the navbar is positioned
        correctly in the very first paint. SiteChrome used to set it in an
@@ -206,15 +239,17 @@ export default function RootLayout({
         <VideoAutoPause />
         <SmoothScroll>
           <SearchProvider items={searchItems}>
-            <BookingProvider
-              trips={bookingTrips}
-              whatsapp={settings.whatsapp}
-              rates={holdRates()}
-              defaultCity={settings.defaultCity}
-              payEnabled={phonepeConfigured()}
-            >
-              {children}
-            </BookingProvider>
+            <NavMenuProvider menu={navMenu}>
+              <BookingProvider
+                trips={bookingTrips}
+                whatsapp={settings.whatsapp}
+                rates={holdRates()}
+                defaultCity={settings.defaultCity}
+                payEnabled={phonepeConfigured()}
+              >
+                {children}
+              </BookingProvider>
+            </NavMenuProvider>
           </SearchProvider>
         </SmoothScroll>
       </body>

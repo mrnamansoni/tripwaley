@@ -4,7 +4,7 @@
    gallery (picked from the media library). */
 
 import { useState } from "react";
-import { useAdmin, Field, Area, Btn, Head, input, label, linesToArr, arrToLines } from "./ui";
+import { useAdmin, Field, Area, Btn, Head, input, label, linesToArr, arrToLines, count } from "./ui";
 import MediaPicker from "./MediaPicker";
 import type { Package, ItineraryDay, TripCategory } from "@/lib/types";
 import { CATEGORY_DEFS, packageCategories } from "@/lib/types";
@@ -31,6 +31,28 @@ export default function PackagesEditor() {
       ...all,
     ]);
     setOpenSlug(slug);
+  };
+
+  /* Deleting saves straight away, from the SAVED list minus this row — so any
+     other unsaved edits stay pending rather than going out with it. The
+     server drops the package's prices, departures and creator trips. */
+  const remove = async (p: Package) => {
+    const cat = data.catalog;
+    if (cat.packages.some((x) => x.slug === p.slug)) {
+      const also = [
+        count(cat.prices.filter((r) => r.packageSlug === p.slug).length, "price rule"),
+        count(cat.departures.filter((d) => d.packageSlug === p.slug).length, "departure"),
+        count((cat.creators ?? []).filter((c) => c.trips.some((t) => t.packageSlug === p.slug)).length, "creator trip"),
+      ].filter(Boolean);
+      const msg =
+        `Delete "${p.name}" for good?` +
+        (also.length ? `\n\nThis also removes its ${also.join(", ")}.` : "") +
+        `\n\nTo just hide it from the site, set it to draft instead.`;
+      if (!confirm(msg)) return;
+      if (!(await save("packages", cat.packages.filter((x) => x.slug !== p.slug)))) return;
+    } else if (!confirm(`Discard the unsaved package "${p.name}"?`)) return;
+    setPkgs((all) => all.filter((x) => x.slug !== p.slug));
+    setOpenSlug(null);
   };
 
   /* ---------------- list view ---------------- */
@@ -64,6 +86,7 @@ export default function PackagesEditor() {
                 {p.status}
               </button>
               <Btn tone="ghost" onClick={() => setOpenSlug(p.slug)}>edit →</Btn>
+              <Btn tone="danger" onClick={() => remove(p)}>Delete</Btn>
             </div>
           ))}
         </div>
@@ -82,6 +105,7 @@ export default function PackagesEditor() {
     <>
       <Head title={open.name} sub={`${open.code} · /trips/${open.slug}`}>
         <Btn tone="ghost" onClick={() => setOpenSlug(null)}>← Back to list</Btn>
+        <Btn tone="danger" onClick={() => remove(open)}>Delete package</Btn>
         <Btn onClick={async () => { if (await save("packages", pkgs)) setOpenSlug(null); }}>Save all packages</Btn>
       </Head>
 

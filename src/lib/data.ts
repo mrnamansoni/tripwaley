@@ -370,16 +370,26 @@ export const stats = [
   { value: 98, suffix: "%", label: "Would travel with us again" },
 ];
 
-export const navLinks = [
-  { href: "/trips", label: "Trips" },
-  { href: "/group-departures", label: "Group" },
-  { href: "/honeymoon", label: "Honeymoon" },
-  { href: "/solo", label: "Solo" },
-  { href: "/college-trips", label: "College" },
+/* The main navigation: two category menus (Trips, Destinations — the
+   destination list comes from the live catalog, see NavMenuProvider), two
+   plain links, and the Paltan menu for everything about us. */
+export const navTripKinds = [
+  { href: "/group-departures", label: "Group departures", hint: "fixed dates, open batches" },
+  { href: "/honeymoon", label: "Honeymoon", hint: "trips for two" },
+  { href: "/solo", label: "Solo", hint: "join a group on your own" },
+  { href: "/college-trips", label: "College trips", hint: "one quote for the whole batch" },
+  { href: "/travel-with-creator", label: "Travel with a creator", hint: "trips hosted by creators" },
+  { href: "/corporate-trips", label: "Corporate trips", hint: "offsites and team outings" },
+];
+export const navPlain = [
   { href: "/travel-with-creator", label: "Creators" },
-  { href: "/destinations", label: "Destinations" },
-  { href: "/stories", label: "Stories" },
-  { href: "/#reviews", label: "Reviews" },
+  { href: "/corporate-trips", label: "Corporate" },
+];
+export const navPaltan = [
+  { href: "/team", label: "Meet the Paltan", hint: "the people who run your trip" },
+  { href: "/stories", label: "Stories", hint: "guides, costs and trip reports" },
+  { href: "/#reviews", label: "Reviews", hint: "what travellers said" },
+  { href: "/contact", label: "Contact", hint: "call, WhatsApp or drop by" },
 ];
 
 /** Next flagship departure the CTA-band countdown targets (IST) */
