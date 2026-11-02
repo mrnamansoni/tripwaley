@@ -15,7 +15,8 @@ import { SLOT_DEFS, CONTENT_DEFS, resolveSlot, PAGE_SECTION_DEFS, isValidMediaRe
 import { applyCityDeletions, applyPackageDeletions, applySlugRenames, detectDeletions, detectSlugRenames } from "@/lib/slugCascade";
 import { applyStoryRenames, detectStoryRenames, dropAliasesOwnedByLiveStories } from "@/lib/storyCascade";
 import { DESTINATIONS } from "@/lib/destinations";
-import type { BlogPost, Captain, CollegeTrip, Coupon, Catalog, City, Creator, Departure, Faq, Package, PriceRule, Reel, Review, WireEntry } from "@/lib/types";
+import type { BlogPost, Captain, CollegeTrip, Coupon, Catalog, City, Creator, Departure, Faq, Package, PriceRule, Reel, Review, TeamMember, WireEntry } from "@/lib/types";
+import { teamError } from "@/lib/team";
 
 export async function GET() {
   const cat = readCatalog();
@@ -190,6 +191,13 @@ function validate(section: string, data: unknown): string | null {
         if (slug) seen.add(slug);
       }
       return null;
+    }
+    case "team": {
+      const rows = data as TeamMember[];
+      if (rows.some((m) => !m || typeof m !== "object")) return "invalid team row";
+      const bad = rows.find((m) => !okMedia(m.photo));
+      if (bad) return `${bad.name || bad.id}: invalid photo`;
+      return teamError(rows);
     }
     case "reels": {
       const seen = new Set<string>();
@@ -412,6 +420,16 @@ export async function PUT(req: Request) {
     if (section === "wire") cat.wire = data as WireEntry[];
     if (section === "creators") cat.creators = data as Creator[];
     if (section === "colleges") cat.colleges = data as CollegeTrip[];
+    if (section === "team")
+      cat.team = (data as TeamMember[]).map((m) => ({
+        ...m,
+        name: m.name.trim(),
+        role: m.role.trim(),
+        punchline: m.punchline.trim(),
+        about: m.about?.trim() || undefined,
+        runsOn: m.runsOn?.trim() || undefined,
+        reportsTo: m.reportsTo || undefined,
+      }));
     if (section === "reels") cat.reels = (data as Reel[]).map((r) => ({ ...r, title: r.title.trim().slice(0, 120) }));
     // a blank slug would collide on the next save; derive one from the name
     if (section === "captains")

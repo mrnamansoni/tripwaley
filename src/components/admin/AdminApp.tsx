@@ -19,11 +19,12 @@ import WebhookPanel from "./WebhookPanel";
 import CollegesEditor from "./CollegesEditor";
 import CouponsEditor from "./CouponsEditor";
 import ReelsEditor from "./ReelsEditor";
+import TeamEditor from "./TeamEditor";
 import SettingsEditor from "./SettingsEditor";
 import { inr, shortDate } from "@/lib/types";
 import type { City, Departure, PriceRule, Review } from "@/lib/types";
 
-const TABS = ["Dashboard", "Content", "Pages", "Packages", "Creators", "Captains", "Colleges", "Coupons", "Reels", "Prices", "Departures", "Cities", "Media", "Reviews", "FAQ", "Stories", "Settings", "Payments", "Bookings"] as const;
+const TABS = ["Dashboard", "Content", "Pages", "Packages", "Creators", "Team", "Captains", "Colleges", "Coupons", "Reels", "Prices", "Departures", "Cities", "Media", "Reviews", "FAQ", "Stories", "Settings", "Payments", "Bookings"] as const;
 type Tab = (typeof TABS)[number];
 
 export default function AdminApp() {
@@ -72,6 +73,7 @@ function Shell() {
         {tab === "Pages" && <PagesEditor />}
         {tab === "Packages" && <PackagesEditor />}
         {tab === "Creators" && <CreatorsEditor />}
+        {tab === "Team" && <TeamEditor />}
         {tab === "Captains" && <CaptainsEditor />}
         {tab === "Colleges" && <CollegesEditor />}
         {tab === "Coupons" && <CouponsEditor />}

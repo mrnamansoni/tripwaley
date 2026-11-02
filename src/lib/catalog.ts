@@ -23,6 +23,7 @@ const readReviews = cache(readReviewsRaw);
 import type { BlogPost, Captain, City, CollegeTrip, Coupon, Creator, CreatorPose, CreatorTrip, CreatorTripDate, Departure, Faq, Package, PriceRule, Review, Settings, TripCategory, VideoTestimonial, WireEntry } from "./types";
 import { DEFAULT_BANK, DEFAULT_CAPTAINS, DEFAULT_HOLD_PERCENT, DEFAULT_GST_PERCENT, normalizeCaptain, normalizeCollegeTrip, normalizeCouponCode, resolveSlot as resolveSlotPure, resolveContent as resolveContentPure, resolvePageSection, inCategory, normalizeCreator, packageImages, resolveFigure, DEFAULT_FAQS, DEFAULT_VIDEO_TESTIMONIAL, isVideoMedia, normalizeMediaUrl } from "./types";
 import { lowestFare } from "./fares";
+import { buildTeamTree, type TeamTree } from "./team";
 import {
   collections as collectionDefaults,
   galleryPhotos as galleryDefaults,
@@ -244,6 +245,10 @@ export function getReels(): ReelView[] {
       href: r.packageSlug && live.has(r.packageSlug) ? `/trips/${r.packageSlug}` : undefined,
     }));
 }
+
+/** The /team orbit chart from the live team rows, or null until someone is live. */
+export const getTeam = (): TeamTree | null =>
+  buildTeamTree((readCatalog().team ?? []).map((m) => ({ ...m, photo: m.photo ? normalizeMediaUrl(m.photo) : "" })));
 
 export const getCaptains = (): Captain[] => {
   const rows = (readCatalog().captains ?? []).map(normalizeCaptain).filter((c) => c.published);

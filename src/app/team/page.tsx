@@ -4,22 +4,27 @@ import Navbar from "@/components/sections/Navbar";
 import CityProvider from "@/components/site/CityProvider";
 import SiteFooter from "@/components/site/SiteFooter";
 import { SafetyBand, CtaBand } from "@/components/site/PageExtras";
-import { getCaptains, getCities, getSettings, getLivePackages, getPricedCities, getFaqs, slotOne, holdRates } from "@/lib/catalog";
+import PaltanCase from "@/components/site/paltan/PaltanCase";
+import { getCaptains, getCities, getSettings, getLivePackages, getPricedCities, getFaqs, getTeam, slotOne, holdRates } from "@/lib/catalog";
 import { canonical } from "@/lib/seo";
+import { jsonLdScript } from "@/lib/schema";
 
 /* THE PALTAN — who we are and who runs your trip, on one page.
    Replaces /about (which now redirects here) and absorbs the captains band.
-   Three ideas carry it, each from the world of a group trip:
+   Four ideas carry it, each from the world of a group trip:
      · the word itself, set as a dictionary entry
+     · the core team as a case file, "kaun hain ye log?" — polaroids on an
+       evidence board, red thread from the founder to each head, the camera
+       following it (admin → Team; hidden until someone is live)
      · the origin story told as the group chat every friend group has
      · the captains as a school-trip roll call on ruled notebook paper
    Every number on the page is counted from the catalog — nothing typed in. */
 
 export const metadata: Metadata = {
   ...canonical("/team"),
-  title: "Meet the Paltan — the crew behind Tripwaley",
+  title: "Meet the Paltan — the team behind Tripwaley",
   description:
-    "Who runs Tripwaley: the trip captains who lead every batch, how a batch works, how we keep you safe, and the answers to the questions people ask at 2 AM.",
+    "Who runs Tripwaley: the team behind it, the trip captains who lead every batch, how a batch works, how we keep you safe, and the answers to the questions people ask at 2 AM.",
 };
 
 /* the chat that never becomes a trip — illustrative, not a real group */
@@ -36,6 +41,8 @@ export default function TeamPage() {
   const settings = getSettings();
   const faqs = getFaqs();
   const captains = getCaptains();
+  const team = getTeam();
+  const people = team ? [team.lead, ...team.branches.flatMap((b) => [b.member, ...b.crew])] : [];
   const tripsLed = captains.reduce((n, c) => n + c.trips, 0);
   const summary = [
     { n: captains.length, l: captains.length === 1 ? "captain on the roll" : "captains on the roll" },
@@ -48,6 +55,25 @@ export default function TeamPage() {
     <CityProvider cities={getCities()} defaultCity={settings.defaultCity}>
       <Navbar overDarkHero />
       <main id="main" className="bg-cream">
+        {people.length > 0 && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: jsonLdScript([
+                {
+                  "@context": "https://schema.org",
+                  "@type": "AboutPage",
+                  name: "Meet the Paltan",
+                  mainEntity: {
+                    "@type": "Organization",
+                    name: settings.brand,
+                    employee: people.map((p) => ({ "@type": "Person", name: p.name, jobTitle: p.role })),
+                  },
+                },
+              ]),
+            }}
+          />
+        )}
         {/* ---------- the word ---------- */}
         <section className="relative overflow-hidden bg-ink px-5 pb-20 pt-36 sm:px-8 sm:pb-24">
           <div className="mx-auto grid w-full max-w-6xl items-center gap-12 lg:grid-cols-[1.4fr_1fr]">
@@ -88,8 +114,11 @@ export default function TeamPage() {
           </div>
         </section>
 
+        {/* ---------- the core team, as a case file ---------- */}
+        {team && <PaltanCase tree={team} />}
+
         {/* ---------- the origin story, as the chat it came from ---------- */}
-        <section className="mx-auto grid w-full max-w-6xl items-center gap-12 px-5 py-20 sm:px-8 lg:grid-cols-2">
+        <section id="after-paltan" className="mx-auto grid w-full max-w-6xl scroll-mt-24 items-center gap-12 px-5 py-20 sm:px-8 lg:grid-cols-2">
           <div className="order-2 lg:order-1">
             <div className="mx-auto max-w-sm overflow-hidden rounded-[1.75rem] border border-line bg-[#efe7dd] shadow-card-lg" aria-label="An example group chat">
               <div className="flex items-center gap-3 bg-[#1f3b35] px-4 py-3 text-white">

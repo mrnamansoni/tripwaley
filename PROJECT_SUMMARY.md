@@ -39,7 +39,33 @@ Tripwaley is a production-grade travel booking website for a premium, group-depa
 
 ## Recent Changes
 
-### 2026-11-01 — Nine-item change round (local only, NOT committed or pushed)
+### 2026-11-02 — Paltan page: the core team as a case file, "Kaun hain ye log?" (local only, NOT committed or pushed)
+- Owner asked for `/team` to show the core team (founder, co-founder, Tech/Sales/HR heads, team lead…), each with a photo, a catchy line and a "the person who…" line, as a cinematic, animated page. A first take (an orbit chart) was rejected as looking AI-made; Coffee and Creative's PALTAN page was a mood reference only, not copied.
+- **Data:**
+  - `TeamMember` type and `Catalog.team`: id, name, role, photo, punchline (180 characters max), optional `about` (200 characters max), runsOn, reportsTo, published.
+  - Never seeded, so no people are invented. The case file is hidden until someone is live.
+- **Logic (`src/lib/team.ts`):**
+  - `buildTeamTree` turns the flat list into a lead, heads and their crew.
+  - `teamError` validates saves.
+  - `roleLine` / `aboutFor` give each role a default "the person who…" line. Founder, co-founder and tech use the owner's wording; the rest (HR, sales, ops, marketing, finance, content, support, captain, lead) are written in the same voice. The admin's own `about` line replaces the default.
+  - Tested by `scripts/test-team-tree.mjs` (24 checks). `getTeam()` lives in `catalog.ts`.
+- **Admin:**
+  - The **Team** tab (`TeamEditor.tsx`) has photo, name, role, catchy line, "who they are" (showing the role default when blank), runs on, reports-to, status, order and delete.
+  - "Add the usual chairs" inserts hidden blank rows: Founder, Co-founder, Tech Head, Sales Head, HR Head and Team Lead.
+  - Deleting a person moves their reports up a level. The catalog PUT validates the `team` section.
+- **Page (`src/components/site/paltan/`):**
+  - `PaltanCase.tsx` renders both versions below; CSS picks one.
+  - **`CaseBoard.tsx`** (lg+ with motion allowed):
+    - A pinned, scroll-scrubbed GSAP "camera" over a dark evidence board.
+    - It opens wide on grey, unidentified polaroids. It pushes in on the founder, then for each head pulls back to watch a red thread draw out from the founder and pushes in along it.
+    - As the camera arrives, each face turns to colour, a gold marker loop is drawn round them and their case note slides in. The note shows the name, role, the highlighted "the person who…" line, the catchy line on a sticky note, and their crew as "known associates".
+    - It ends wide on "That's the paltan." with a CASE CLOSED stamp. It has a skip link to `#after-paltan`.
+  - **`CaseList.tsx`** (phones, tablets, reduced motion): the same file as stacked pages on one red thread. The highlighter is swept by a CSS scroll-driven animation where supported.
+  - `caseBits.tsx` holds the shared polaroid, pin, label-maker name tape, sticky note, case note and stamp.
+  - The case-file CSS is in `globals.css` and replaces the orbit CSS. `PaltanOrbit.tsx` was deleted.
+  - The page also adds AboutPage/Organization JSON-LD with employees. The rest of `/team` is unchanged.
+
+### 2026-11-01 — Nine-item change round (pushed as 4566e1b)
 
 1. **Hero "Scene" glitch** (`OpeningShot.tsx`) — removed `will-change-transform` from the zoom
    wrappers; Chrome froze the layer's raster scale and left the word unpainted on scroll-back.

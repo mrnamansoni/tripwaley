@@ -476,3 +476,151 @@ body {
     stroke-dashoffset: 0;
   }
 }
+
+/* /team — the paltan case file. The board (pinned, scroll-driven camera)
+   runs only on lg screens with motion allowed; everyone else reads the same
+   file as a stack of pages (.case-list). */
+.case-board {
+  display: none;
+  /* board unit: everything on the board scales with the screen, not the text */
+  --cu: min(1vh, 0.62vw);
+}
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  .case-board {
+    display: block;
+  }
+  .case-list {
+    display: none;
+  }
+}
+/* faces start unidentified; the camera colours each one in as it arrives */
+.case-board [data-face] {
+  filter: grayscale(1) brightness(0.65);
+}
+/* dark cork under one desk lamp */
+.case-felt {
+  background:
+    radial-gradient(ellipse 55% 50% at 50% 46%, rgba(245, 163, 26, 0.09), transparent 72%),
+    radial-gradient(ellipse at 50% 46%, #2a211c, var(--color-ink) 78%);
+}
+.case-thread {
+  stroke: var(--color-brand-bright);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  filter: drop-shadow(0 3px 2px rgba(10, 6, 4, 0.6));
+}
+.case-loop {
+  stroke: var(--color-gold);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pushpin {
+  display: block;
+  z-index: 2;
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 34% 30%, var(--color-brand-soft), var(--color-brand) 48%, #6e0d10);
+  box-shadow: 1px 4px 4px rgba(20, 10, 6, 0.55);
+}
+/* hangs from its pin, so any tilt pivots on the top edge */
+.polaroid {
+  display: block;
+  padding: 6% 6% 19%;
+  background: #f4efe4;
+  transform-origin: 50% 0;
+  box-shadow:
+    0 2px 4px rgba(20, 10, 6, 0.35),
+    0 20px 34px -14px rgba(20, 10, 6, 0.75);
+}
+/* label-maker tape: letters punched into red plastic */
+.dymo {
+  position: relative;
+  z-index: 3;
+  display: inline-block;
+  padding: 0.38em 0.75em 0.32em;
+  border-radius: 3px;
+  background: var(--color-brand);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.28),
+    0 -1px 0 rgba(60, 4, 6, 0.5);
+  box-shadow: 0 5px 9px -4px rgba(20, 10, 6, 0.6);
+  rotate: -1.5deg;
+}
+.sticky-note {
+  position: relative;
+  padding: 1.15rem 1.2rem 1rem;
+  border-radius: 2px;
+  background: var(--color-gold);
+  box-shadow: 0 16px 24px -16px rgba(60, 30, 0, 0.6);
+}
+/* a strip of tape holding it on */
+.sticky-note::before {
+  content: "";
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  width: 70px;
+  height: 18px;
+  translate: -50% 0;
+  rotate: -3deg;
+  background: rgba(244, 239, 228, 0.72);
+  box-shadow: 0 1px 2px rgba(20, 10, 6, 0.18);
+}
+.case-paper {
+  position: relative;
+  padding: clamp(1.4rem, 2.4vw, 2.1rem);
+  border-radius: 14px;
+  background: #f4efe4;
+  color: var(--color-ink);
+  box-shadow:
+    0 2px 6px rgba(20, 10, 6, 0.3),
+    0 32px 60px -28px rgba(20, 10, 6, 0.85);
+}
+/* highlighter pen across "the person who…"; one gradient, sliced across
+   lines, so the sweep runs line by line like a real pen */
+.hl {
+  padding: 0 0.08em;
+  background-image: linear-gradient(rgba(245, 163, 26, 0.5), rgba(245, 163, 26, 0.5));
+  background-repeat: no-repeat;
+  background-position: 0 88%;
+  background-size: 100% 0.5em;
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .case-list .hl {
+      animation: hlSweep linear both;
+      animation-timeline: view();
+      animation-range: entry 60% cover 50%;
+    }
+  }
+}
+@keyframes hlSweep {
+  from {
+    background-size: 0% 0.5em;
+  }
+}
+.case-stamp {
+  display: inline-block;
+  padding: 0.45em 0.85em 0.4em;
+  border: 2.5px solid var(--color-brand-soft);
+  border-radius: 6px;
+  color: var(--color-brand-soft);
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  rotate: -6deg;
+}

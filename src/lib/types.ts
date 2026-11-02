@@ -341,6 +341,8 @@ export interface Catalog {
   colleges?: CollegeTrip[];
   /** trip captains (About, Vibe Check, and the trip-page feed) */
   captains?: Captain[];
+  /** the company team — the orbit chart on /team */
+  team?: TeamMember[];
   /** discount codes applied at booking (admin Coupons tab) */
   coupons?: Coupon[];
   /** short vertical videos for the homepage reel stage (admin Reels tab) */
@@ -999,6 +1001,30 @@ export interface Reel {
   credit?: string;
   /** optional live package the "see this trip" link opens */
   packageSlug?: string;
+  published: boolean;
+}
+
+/* ------------------------------------------------ the paltan (team)
+
+   The people behind the company — founder, co-founder, department heads and
+   their teams — drawn as an orbit chart on /team. A flat list with an
+   optional "reports to"; src/lib/team.ts turns it into the chart. Never
+   seeded: nobody is invented, and the chart stays hidden until someone is live. */
+export interface TeamMember {
+  id: string;
+  name: string;
+  /** e.g. "Founder", "Sales Head" */
+  role: string;
+  /** media ref; blank renders their initials */
+  photo: string;
+  /** the catchy line, casual and short */
+  punchline: string;
+  /** "the person who…" — what they do here; blank uses their role's line */
+  about?: string;
+  /** a small fun tag, e.g. "3 cutting chais a day" */
+  runsOn?: string;
+  /** id of the person they report to; blank = the centre of the chart */
+  reportsTo?: string;
   published: boolean;
 }
 
