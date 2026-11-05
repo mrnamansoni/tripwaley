@@ -12,6 +12,7 @@ import AlbumWall from "@/components/site/AlbumWall";
 import { getCities, getSettings, getLivePackages, getVideoTestimonial, sectionOn, slotOne, text, fromPrice, inr, nightsLabel, slot } from "@/lib/catalog";
 import { canonical } from "@/lib/seo";
 import { DESTINATIONS, destinationsFor } from "@/lib/destinations";
+import { destinationPages } from "@/lib/destinationPages";
 
 export const metadata: Metadata = {
   ...canonical("/destinations"),
@@ -44,6 +45,8 @@ export default function DestinationsPage() {
     DESTINATIONS.filter((d) => live.some((p) => destinationsFor(p).some((x) => x.slug === d.slug))).map((d) => d.slug)
   );
   const allDestPages = DESTINATIONS.filter((d) => liveDestSlugs.has(d.slug));
+  /* places we have written about but run no batch to yet */
+  const guidePages = destinationPages().filter((x) => x.kind === "guide").map((x) => x.dest);
 
   const groups = REGIONS.map((r, i) => ({
     ...r,
@@ -181,6 +184,18 @@ export default function DestinationsPage() {
                 </li>
               ))}
             </ul>
+            {guidePages.length > 0 && (
+              <p className="mt-8 text-sm leading-relaxed text-ink/70">
+                No batch yet, but we have written about{" "}
+                {guidePages.map((d, i) => (
+                  <span key={d.slug}>
+                    {i > 0 && (i === guidePages.length - 1 ? " and " : ", ")}
+                    <Link href={`/destinations/${d.slug}`} className="font-bold text-brand underline-offset-2 hover:underline">{d.name}</Link>
+                  </span>
+                ))}
+                .
+              </p>
+            )}
           </section>
         )}
       </main>

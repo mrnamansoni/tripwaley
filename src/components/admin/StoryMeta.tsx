@@ -7,6 +7,7 @@
 import type { BlogPost } from "@/lib/types";
 import { STORY_KINDS, duplicateKeywords } from "@/lib/stories";
 import { DESTINATIONS } from "@/lib/destinations";
+import { storyPlainText } from "@/lib/storyMarkdown";
 import { Field, Area, input, label } from "./ui";
 
 export default function StoryMeta({
@@ -27,7 +28,7 @@ export default function StoryMeta({
   const clash = duplicateKeywords(all).get((post.keyword ?? "").trim().toLowerCase().replace(/\s+/g, " "));
   const others = (clash ?? []).filter((s) => s !== post.slug);
 
-  const words = (post.body ?? "").trim().split(/\s+/).filter(Boolean).length;
+  const words = storyPlainText(post.body ?? "").split(/\s+/).filter(Boolean).length;
 
   return (
     <>

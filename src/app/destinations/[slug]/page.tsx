@@ -8,11 +8,11 @@ import SiteMedia from "@/components/site/SiteMedia";
 import ReadMore from "@/components/site/ReadMore";
 import { canonical } from "@/lib/seo";
 import { breadcrumbJsonLd, faqJsonLd, itemListJsonLd, jsonLdScript } from "@/lib/schema";
-import { DESTINATIONS, getDestination, destinationsFor } from "@/lib/destinations";
+import { getDestination } from "@/lib/destinations";
+import { destinationPageKind, destinationPages, destinationStories, destinationTrips } from "@/lib/destinationPages";
 import {
   getCities,
   getSettings,
-  getLivePackages,
   getPricedCities,
   upcomingDepartures,
   fromPrice,
@@ -21,9 +21,8 @@ import {
   inr,
   shortDate,
   weekday,
-  getAllPosts,
 } from "@/lib/catalog";
-import { storiesForDestination, readingMinutes } from "@/lib/stories";
+import { readingMinutes } from "@/lib/stories";
 
 /* DESTINATION LANDING PAGES — /destinations/spiti, /destinations/kashmir, …
  *
@@ -37,31 +36,36 @@ import { storiesForDestination, readingMinutes } from "@/lib/stories";
  * editorial half — season, access, the thing people get wrong — lives in
  * lib/destinations.ts, because it is the part a listing cannot generate and the
  * only reason a page like this deserves to be indexed.
+ *
+ * A destination with stories but no live trip renders as a GUIDE: the stories
+ * first, the planning notes, and a plain "no batch on the board yet" — never
+ * a price or a departure it does not have (see lib/destinationPages).
  */
 
-/** every destination that has at least one live trip — never an empty page */
-function livePackagesFor(slug: string) {
-  const dest = getDestination(slug);
-  if (!dest) return [];
-  return getLivePackages().filter((p) => destinationsFor(p).some((d) => d.slug === slug));
-}
-
 export function generateStaticParams() {
-  return DESTINATIONS.filter((d) => livePackagesFor(d.slug).length > 0).map((d) => ({ slug: d.slug }));
+  return destinationPages().map(({ dest }) => ({ slug: dest.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const dest = getDestination(slug);
-  if (!dest) return {};
-  const trips = livePackagesFor(slug);
-  const title = `${dest.name} Tour Packages — Group Trips | Tripwaley`;
+  const kind = destinationPageKind(slug);
+  if (!dest || !kind) return {};
+  const trips = destinationTrips(slug);
+  const stories = destinationStories(slug);
+  const title =
+    kind === "trips"
+      ? `${dest.name} Tour Packages — Group Trips | Tripwaley`
+      : `${dest.name} Travel Guide — Best Time & Route | Tripwaley`;
   const description =
-    `${trips.length} fixed-date group ${trips.length === 1 ? "departure" : "departures"} to ${dest.name}, ` +
-    `${dest.state}. Stays, transport and a trip captain included, priced from your city. ${dest.tagline}.`;
+    kind === "trips"
+      ? `${trips.length} fixed-date group ${trips.length === 1 ? "departure" : "departures"} to ${dest.name}, ` +
+        `${dest.state}. Stays, transport and a trip captain included, priced from your city. ${dest.tagline}.`
+      : `${dest.name}, ${dest.state}: the best time to go, how to get there and what people get wrong, ` +
+        `with ${stories.length === 1 ? "our story" : `our ${stories.length} stories`} on it. ${dest.tagline}.`;
   return {
     ...canonical(`/destinations/${dest.slug}`),
-    title: title.length > 60 ? `${dest.name} Tour Packages | Tripwaley` : title,
+    title: title.length > 60 ? `${dest.name} ${kind === "trips" ? "Tour Packages" : "Travel Guide"} | Tripwaley` : title,
     description: description.slice(0, 158),
     openGraph: {
       title,
@@ -79,12 +83,18 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
   const dest = getDestination(slug);
   if (!dest) notFound();
 
-  const trips = livePackagesFor(slug);
-  // a destination with nothing running is a thin page and a dead end for a
+  // nothing running and nothing written: a thin page and a dead end for a
   // visitor — it stays out of the index rather than being published empty
-  if (!trips.length) notFound();
+  const kind = destinationPageKind(slug);
+  if (!kind) notFound();
+  const isGuide = kind === "guide";
 
-  const guides = storiesForDestination(dest.slug, getAllPosts());
+  const trips = destinationTrips(slug);
+  const guides = destinationStories(dest.slug);
+  /* a guide page leads with the place as our own stories photographed it;
+     the stock destination image is only a fallback */
+  const heroImage = isGuide && guides[0]?.cover ? guides[0].cover : dest.image;
+  const heroAlt = isGuide && guides[0]?.cover ? guides[0].coverAlt?.trim() || guides[0].title : `${dest.name}, ${dest.state}`;
 
   const settings = getSettings();
   const cities = getCities();
@@ -116,7 +126,8 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
       q: `How do I reach ${dest.name}?`,
       a: dest.gettingThere,
     },
-    {
+    /* no price or booking answers on a guide page: there is no trip to price */
+    ...(isGuide ? [] : [{
       q: `How much does a ${dest.name} trip cost?`,
       a: cheapest
         ? `Our ${dest.name} group departures start at ${inr(cheapest)} per seat${cityRates.length > 1 ? `, depending on which of our ${cityRates.length} boarding cities you travel from` : ""}. That covers stays, transport from the boarding city, and a trip captain for the whole batch. Flights and lunches are not included.`
@@ -125,7 +136,7 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
     {
       q: `Can I book a ${dest.name} trip as a solo traveller?`,
       a: `Yes. Every batch is a fixed-date group departure, so you book one seat rather than a private tour. Solo travellers are matched into a twin-share room with someone of the same age group and gender — there is no single supplement.`,
-    },
+    }]),
     {
       q: `What should I know before booking ${dest.name}?`,
       a: dest.know,
@@ -156,7 +167,7 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
         {/* ---------------- hero ---------------- */}
         <section className="relative overflow-hidden bg-ink px-5 pb-16 pt-36 sm:px-8">
           <div className="absolute inset-0 opacity-25">
-            <SiteMedia src={dest.image} alt="" fill priority sizes="100vw" className="object-cover" />
+            <SiteMedia src={heroImage} alt={heroAlt} fill priority sizes="100vw" className="object-cover" />
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/80 to-ink/50" aria-hidden="true" />
           <div className="relative mx-auto w-full max-w-6xl">
@@ -168,15 +179,15 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
             <h1 className="mt-4 font-display text-5xl font-extrabold leading-[0.98] tracking-tight text-white sm:text-7xl">
               {dest.name}
               <br />
-              <span className="text-gold">group trips.</span>
+              <span className="text-gold">{isGuide ? "travel guide." : "group trips."}</span>
             </h1>
             <p className="mt-4 font-script text-2xl text-gold/90 sm:text-3xl">{dest.tagline}</p>
             <p className="mt-6 max-w-2xl text-base leading-relaxed text-white/70">{dest.intro}</p>
 
             <dl className="mt-9 flex flex-wrap gap-x-10 gap-y-5">
               <div>
-                <dt className="font-mono text-[0.55rem] uppercase tracking-[0.25em] text-white/55">trips running</dt>
-                <dd className="mt-1 font-display text-2xl font-extrabold text-white">{trips.length}</dd>
+                <dt className="font-mono text-[0.55rem] uppercase tracking-[0.25em] text-white/55">{isGuide ? "stories" : "trips running"}</dt>
+                <dd className="mt-1 font-display text-2xl font-extrabold text-white">{isGuide ? guides.length : trips.length}</dd>
               </div>
               {deps.length > 0 && (
                 <div>
@@ -202,7 +213,40 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
           </div>
         </section>
 
+        {/* ---------------- guide page: the stories, then an honest no-batch note ---------------- */}
+        {isGuide && (
+          <section className="mx-auto w-full max-w-5xl px-5 py-14 sm:px-8">
+            <h2 className="font-display text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
+              What we have written about <span className="text-brand">{dest.name}.</span>
+            </h2>
+            <StoryList posts={guides} />
+            <div className="mt-10 rounded-3xl border border-line bg-card p-6 shadow-sm sm:p-8">
+              <p className="font-display text-xl font-extrabold text-ink">No {dest.name} batch on the board yet.</p>
+              <p className="mt-2 max-w-xl text-[1rem] leading-relaxed text-ink/70">
+                We don&apos;t have a fixed-date {dest.name} departure running right now. Ask us on WhatsApp and we&apos;ll tell you
+                if one is coming up, or see the trips that are running.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-3">
+                {settings.whatsappLink && (
+                  <a
+                    href={settings.whatsappLink}
+                    target="_blank"
+                    rel="noopener"
+                    className="inline-flex min-h-11 items-center rounded-full bg-brand px-5 text-sm font-bold text-white transition-colors hover:bg-brand-bright"
+                  >
+                    Ask about {dest.name} on WhatsApp
+                  </a>
+                )}
+                <Link href="/trips" className="inline-flex min-h-11 items-center rounded-full border border-ink/15 bg-white px-5 text-sm font-bold text-ink transition-colors hover:border-brand hover:text-brand">
+                  See running trips
+                </Link>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* ---------------- the trips ---------------- */}
+        {!isGuide && (
         <section className="mx-auto w-full max-w-6xl px-5 py-14 sm:px-8">
           <h2 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
             {trips.length === 1 ? "The trip" : `${trips.length} trips`} to <span className="text-brand">{dest.name}.</span>
@@ -241,6 +285,7 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
             })}
           </div>
         </section>
+        )}
 
         {/* ---------------- dated batches ---------------- */}
         {deps.length > 0 && (
@@ -353,7 +398,7 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
         <section className="mx-auto w-full max-w-6xl px-5 pb-20 sm:px-8">
           <h2 className="font-mono text-[0.6rem] uppercase tracking-[0.3em] text-ink/65">where else we go</h2>
           <ul className="mt-5 flex flex-wrap gap-2.5">
-            {DESTINATIONS.filter((d) => d.slug !== dest.slug && livePackagesFor(d.slug).length > 0).map((d) => (
+            {destinationPages().filter(({ dest: d, kind: k }) => d.slug !== dest.slug && k === "trips").map(({ dest: d }) => (
               <li key={d.slug}>
                 <Link
                   href={`/destinations/${d.slug}`}
@@ -366,29 +411,35 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
           </ul>
         </section>
 
-        {guides.length > 0 && (
+        {!isGuide && guides.length > 0 && (
           <section className="mx-auto w-full max-w-5xl px-5 pb-20 sm:px-8">
             <p className="font-script text-2xl text-brand">read first</p>
             <h2 className="mt-1 font-display text-3xl font-extrabold tracking-tight text-ink">
               Everything we have written about {dest.name}
             </h2>
-            <ul className="mt-6 divide-y divide-line">
-              {guides.map((p) => (
-                <li key={p.slug}>
-                  <Link href={`/stories/${p.slug}`} className="group flex items-baseline justify-between gap-4 py-3.5">
-                    <span>
-                      <span className="font-display text-lg font-extrabold leading-tight text-ink group-hover:text-brand">{p.title}</span>
-                      {p.summary && <span className="mt-0.5 block text-sm text-ink/65">{p.summary}</span>}
-                    </span>
-                    <span className="shrink-0 text-[0.68rem] font-bold uppercase tracking-wider text-ink/65">{readingMinutes(p.body)} min</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <StoryList posts={guides} />
           </section>
         )}
       </main>
       <SiteFooter whatsappLink={settings.whatsappLink} whatsapp={settings.whatsapp} announcement={settings.announcement} />
     </CityProvider>
+  );
+}
+
+function StoryList({ posts }: { posts: ReturnType<typeof destinationStories> }) {
+  return (
+    <ul className="mt-6 divide-y divide-line">
+      {posts.map((p) => (
+        <li key={p.slug}>
+          <Link href={`/stories/${p.slug}`} className="group flex items-baseline justify-between gap-4 py-3.5">
+            <span>
+              <span className="font-display text-lg font-extrabold leading-tight text-ink group-hover:text-brand">{p.title}</span>
+              {(p.summary || p.excerpt) && <span className="mt-0.5 block text-sm text-ink/65">{p.summary || p.excerpt}</span>}
+            </span>
+            <span className="shrink-0 text-[0.68rem] font-bold uppercase tracking-wider text-ink/65">{readingMinutes(p.body)} min</span>
+          </Link>
+        </li>
+      ))}
+    </ul>
   );
 }

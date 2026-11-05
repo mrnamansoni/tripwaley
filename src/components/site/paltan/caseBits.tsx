@@ -85,7 +85,7 @@ export function Polaroid({
     <span className={`polaroid ${className}`} style={{ rotate: `${tilt(s.id)}deg` }}>
       <span className="relative block aspect-[4/5] overflow-hidden bg-ink" {...faceProps}>
         {s.photo ? (
-          <SiteMedia src={s.photo} alt="" fill sizes={sizes} className="object-cover" />
+          <SiteMedia src={s.photo} alt={`${s.name}, ${s.role}`} fill sizes={sizes} className="object-cover" />
         ) : (
           <span className="flex h-full w-full items-center justify-center font-display text-[2.5em] font-extrabold text-gold">
             {initials(s.name)}
@@ -122,7 +122,7 @@ export function Associates({ crew }: { crew: CaseAssociate[] }) {
           <li key={c.id} className="flex items-start gap-3">
             <span className="relative mt-0.5 block h-11 w-11 shrink-0 overflow-hidden rounded-full bg-ink">
               {c.photo ? (
-                <SiteMedia src={c.photo} alt="" fill sizes="44px" className="object-cover" />
+                <SiteMedia src={c.photo} alt={c.name} fill sizes="44px" className="object-cover" />
               ) : (
                 <span className="flex h-full w-full items-center justify-center text-xs font-extrabold text-gold">{initials(c.name)}</span>
               )}

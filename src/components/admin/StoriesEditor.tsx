@@ -1,14 +1,15 @@
 "use client";
 
 /* Blog / stories editor. Posts live in catalog.posts and render at
-   /stories and /stories/[slug]. Body is plain text — blank lines split
-   paragraphs on the site. */
+   /stories and /stories/[slug]. Body is plain text with light formatting
+   (headings, bold, links, photos) written by StoryBodyEditor's toolbar. */
 
 import { useState } from "react";
 import { useAdmin, Btn, Head, Field, Area, input, label } from "./ui";
 import MediaPicker from "./MediaPicker";
 import StoryMeta from "./StoryMeta";
 import StoryFaqs from "./StoryFaqs";
+import StoryBodyEditor from "./StoryBodyEditor";
 import { isStoryLive } from "@/lib/stories";
 import type { BlogPost } from "@/lib/types";
 
@@ -137,10 +138,15 @@ export default function StoriesEditor() {
         <StoryFaqs faqs={open.faqs ?? []} onChange={(faqs) => upd({ faqs })} />
         <div className="sm:col-span-2"><Area l="excerpt (card + preview)" v={open.excerpt} on={(v) => upd({ excerpt: v })} rows={2} /></div>
         <div className="sm:col-span-2">
-          <MediaPicker label="cover photo" value={open.cover} onChange={(p) => upd({ cover: p })} aspect="aspect-[16/9]" />
+          <MediaPicker label="cover photo" value={open.cover} onChange={(p) => upd({ cover: p })} aspect="aspect-[16/9]" allowVideo={false} />
+          <p className="mt-1.5 text-xs text-white/40">A Google Drive link is copied onto tripwaley.com when you save.</p>
         </div>
         <div className="sm:col-span-2">
-          <Area l="body (blank line = new paragraph)" v={open.body ?? ""} on={(v) => upd({ body: v })} rows={14} />
+          <Field l="cover alt text — what the photo shows" v={open.coverAlt ?? ""} on={(v) => upd({ coverAlt: v })} />
+          {!open.coverAlt?.trim() && <p className="mt-1 text-xs text-white/40">Empty = the title is used. A real description helps Google Images and screen readers.</p>}
+        </div>
+        <div className="sm:col-span-2">
+          <StoryBodyEditor value={open.body ?? ""} onChange={(v) => upd({ body: v })} />
         </div>
       </div>
     </>

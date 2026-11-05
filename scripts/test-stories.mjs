@@ -13,7 +13,7 @@ import assert from "node:assert/strict";
 import {
   storyKind, isStoryLive, liveStories, storiesForDestination,
   storiesForPackage, groupByKind, readingMinutes, duplicateKeywords, STORY_KINDS,
-  kindsWithStories,
+  kindsWithStories, storyDestinations, relatedStories,
 } from "../src/lib/stories.ts";
 
 let n = 0;
@@ -66,6 +66,34 @@ console.log("\nby destination and by package");
   const pkg = { name: "Kedarkantha — Solo Winter Trek", destination: "Sankri · Kedarkantha summit", route: "" };
   assert.deepEqual(storiesForPackage(pkg, all).map((p) => p.slug), ["kk-cost"]);
   ok("a trip inherits the stories of the destinations it goes to");
+}
+
+console.log("\nwhere a story is about, when nobody said");
+{
+  assert.deepEqual(storyDestinations(post({ title: "Kasol in December: snow and cafes" })), ["kasol-parvati-valley"]);
+  ok("a story with no destinations is placed by its title");
+  assert.deepEqual(storyDestinations(post({ title: "Packing list", keyword: "spiti valley packing list" })), ["spiti"]);
+  ok("its target search wins over the title");
+  assert.deepEqual(storyDestinations(post({ title: "Kasol diary", destinations: ["manali"] })), ["manali"]);
+  ok("the admin's own picks always win");
+  assert.deepEqual(storiesForDestination("kasol-parvati-valley", [post({ slug: "k", title: "Kasol in winter" })]).map((p) => p.slug), ["k"]);
+  ok("an inferred story shows on its destination page");
+}
+
+console.log("\nrelated stories");
+{
+  const all = [
+    post({ slug: "me", kind: "guide", title: "Spiti in winter", date: "2026-09-01" }),
+    post({ slug: "spiti-cost", kind: "cost", title: "Spiti trip cost", date: "2026-08-01" }),
+    post({ slug: "kk-guide", kind: "guide", destinations: ["kedarkantha"], date: "2026-07-01" }),
+    post({ slug: "goa-new", kind: "report", destinations: ["goa"], date: "2026-10-01" }),
+    post({ slug: "goa-old", kind: "report", destinations: ["goa"], date: "2026-01-01" }),
+    post({ slug: "spiti-draft", kind: "guide", title: "Spiti draft", status: "draft" }),
+  ];
+  assert.deepEqual(relatedStories(all[0], all).map((p) => p.slug), ["spiti-cost", "kk-guide", "goa-new"]);
+  ok("same place first, then same topic, then newest; never itself or a draft");
+  assert.equal(relatedStories(all[0], all, 10).length, 4);
+  ok("no more than the other live stories that exist");
 }
 
 console.log("\ngrouping and reading time");

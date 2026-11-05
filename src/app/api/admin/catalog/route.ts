@@ -17,6 +17,7 @@ import { applyStoryRenames, detectStoryRenames, dropAliasesOwnedByLiveStories } 
 import { DESTINATIONS } from "@/lib/destinations";
 import type { BlogPost, Captain, CollegeTrip, Coupon, Catalog, City, Creator, Departure, Faq, Package, PriceRule, Reel, Review, TeamMember, WireEntry } from "@/lib/types";
 import { teamError } from "@/lib/team";
+import { hostStoryImages } from "@/lib/hostStoryImages";
 
 export async function GET() {
   const cat = readCatalog();
@@ -268,6 +269,7 @@ function validate(section: string, data: unknown): string | null {
           if (p.faqs.some((f) => !isStr(f?.q) || !isStr(f?.a))) return `${p.slug}: every FAQ needs a question and an answer`;
         }
         if (p.oldSlugs != null && (!Array.isArray(p.oldSlugs) || p.oldSlugs.some((s) => !isStr(s)))) return `${p.slug}: oldSlugs must be a list of slugs`;
+        if (p.coverAlt != null && !isStr(p.coverAlt)) return `${p.slug}: cover alt text must be text`;
       }
       return null;
     }
@@ -290,6 +292,15 @@ export async function PUT(req: Request) {
 
   const problem = validate(section, data);
   if (problem) return NextResponse.json({ error: problem }, { status: 422 });
+
+  /* Drive photos in stories are copied onto tripwaley.com before the catalog
+     is read, so the slow fetch never sits inside the read-modify-write below
+     (a save of another section meanwhile would otherwise be overwritten). */
+  let unhosted: string[] = [];
+  if (section === "posts") {
+    unhosted = await hostStoryImages(data as BlogPost[]);
+    if (unhosted.length) console.warn(`[admin] could not copy ${unhosted.length} Drive photo(s) onto the site: ${unhosted.join(", ")}`);
+  }
 
   if (section === "reviews") {
     writeReviews(data as Review[]);
@@ -462,5 +473,10 @@ export async function PUT(req: Request) {
   }
 
   revalidatePath("/", "layout"); // the whole site re-renders with fresh data
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({
+    ok: true,
+    ...(unhosted.length && {
+      warning: `${unhosted.length === 1 ? "1 Drive photo" : `${unhosted.length} Drive photos`} could not be copied to the site (check it is shared "anyone with the link"), so it still loads from Drive`,
+    }),
+  });
 }

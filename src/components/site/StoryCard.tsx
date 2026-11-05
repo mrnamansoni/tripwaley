@@ -9,7 +9,7 @@ export default function StoryCard({ post }: { post: BlogPost }) {
   return (
     <Link href={`/stories/${post.slug}`} className="group flex flex-col overflow-hidden rounded-3xl border border-line bg-card shadow-card transition-transform hover:-translate-y-1">
       <div className="relative aspect-[16/10] overflow-hidden">
-        <SiteMedia src={post.cover} alt="" fill sizes="(max-width:640px) 92vw, (max-width:1280px) 30vw, 22vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
+        <SiteMedia src={post.cover} alt={post.coverAlt?.trim() || post.title} fill sizes="(max-width:640px) 92vw, (max-width:1280px) 30vw, 22vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
       </div>
       <div className="flex flex-1 flex-col p-5">
         <p className="mb-2 text-[0.58rem] font-bold uppercase tracking-[0.25em] text-brand">{label}</p>

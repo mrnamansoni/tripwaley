@@ -109,9 +109,23 @@ function Dashboard({ go }: { go: (t: Tab) => void }) {
     ["Leads captured", bookings.length, "Bookings"],
     ["Photos in library", data.media.length, "Media"],
   ];
+  /* a live trip with no fare shows "price on request" everywhere, and cost
+     searches are among the best-converting a travel site gets */
+  const unpriced = catalog.packages.filter(
+    (p) => p.status === "live" && !catalog.prices.some((r) => r.packageSlug === p.slug && [r.triple, r.double, r.quad].some((v) => typeof v === "number" && v > 0))
+  );
   return (
     <>
       <Head title="Dashboard" sub="Everything here edits the live site — saves apply in seconds." />
+      {unpriced.length > 0 && (
+        <div className="mb-6 rounded-2xl border border-brand/50 bg-brand/10 p-5">
+          <p className="font-bold text-white">
+            {unpriced.length === 1 ? "1 live trip has" : `${unpriced.length} live trips have`} no price, so the site says &ldquo;price on request&rdquo;
+          </p>
+          <p className="mt-1 text-sm text-white/65">{unpriced.map((p) => p.name).join(" · ")}</p>
+          <div className="mt-3"><Btn tone="ghost" onClick={() => go("Prices")}>Add prices →</Btn></div>
+        </div>
+      )}
       <div className="grid gap-4 sm:grid-cols-3">
         {stats.map(([l, v, t]) => (
           <button key={l} type="button" onClick={() => go(t)} className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 text-left transition-colors hover:border-gold/50">
@@ -178,7 +192,12 @@ function PricesEditor() {
           <tbody>
             {pkgs.map((p) => (
               <tr key={p.slug} className="border-t border-white/8">
-                <td className="sticky left-0 max-w-44 truncate bg-[#181512] px-4 py-2 font-bold text-white">{p.name}</td>
+                <td className="sticky left-0 max-w-44 truncate bg-[#181512] px-4 py-2 font-bold text-white">
+                  {p.name}
+                  {p.status === "live" && !rules.some((r) => r.packageSlug === p.slug && (r.triple || r.double || r.quad)) && (
+                    <span className="block text-[0.58rem] font-bold uppercase tracking-wider text-brand-bright">live · no price yet</span>
+                  )}
+                </td>
                 {cities.map((c) => {
                   const r = get(p.slug, c.slug);
                   return (

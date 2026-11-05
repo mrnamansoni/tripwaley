@@ -17,6 +17,11 @@
  * PNG, a hardcoded .jpg would have 404'd every one of them.
  */
 export const LOCAL_DRIVE_IMAGES: Readonly<Record<string, string>> = {
+  "13C0Neu818sgT0mg_9eOyxBl7dTmY4E6I": "/images/library/13C0Neu818sgT0mg_9eOyxBl7dTmY4E6I.jpg",
+  "1ahsQwh9lPHFasdklvCQCOgQGCwvmjq5L": "/images/library/1ahsQwh9lPHFasdklvCQCOgQGCwvmjq5L.jpg",
+  "1nd6BK6yck-eYTJ5vec2b5UAFxWp0XoWC": "/images/library/1nd6BK6yck-eYTJ5vec2b5UAFxWp0XoWC.jpg",
+  "1oXQIUvo6ewdyt2gH_rv3_rrCHnqqOJBz": "/images/library/1oXQIUvo6ewdyt2gH_rv3_rrCHnqqOJBz.jpg",
+  "1tPbcCHpcavSDNu9Qk7EibojdjN0rbz7Y": "/images/library/1tPbcCHpcavSDNu9Qk7EibojdjN0rbz7Y.jpg",
   "1_N5r8_ACD_QbeQFYD-lVoVqSB1xDjyg3": "/images/library/1_N5r8_ACD_QbeQFYD-lVoVqSB1xDjyg3.jpg",
   "1_Owj-M44EcWnCp2iJzMhVK9ONTxX64tl": "/images/library/1_Owj-M44EcWnCp2iJzMhVK9ONTxX64tl.jpg",
   "1-encH2kWNMQnDO8JfT5XQmYwJF3J1297": "/images/library/1-encH2kWNMQnDO8JfT5XQmYwJF3J1297.jpg",

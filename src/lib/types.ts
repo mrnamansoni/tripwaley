@@ -186,7 +186,12 @@ export interface BlogPost {
   title: string;
   excerpt: string;
   cover: string;
-  body: string; // paragraphs separated by blank lines
+  /** what the cover photo shows, for screen readers and image search;
+   *  missing = the story title */
+  coverAlt?: string;
+  /** blank line = new paragraph; ## headings, **bold**, *italic*,
+   *  [links](/x), lists and ![photos](/x.jpg) — see storyMarkdown */
+  body: string;
   author: string;
   date: string; // ISO yyyy-mm-dd
   tags: string[];
@@ -379,7 +384,7 @@ export function isVideoMedia(src: string): boolean {
 export const isImageMedia = (src: string): boolean => !!src && !isVideoMedia(src);
 
 /** pull the file id out of any Google Drive share URL shape */
-function driveId(url: string): string | null {
+export function driveId(url: string): string | null {
   const u = url.trim();
   /* lh3.googleusercontent.com is included because normalizeMediaUrl() has been
      rewriting share links into that form for a long time, so the catalog now

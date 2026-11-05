@@ -238,7 +238,7 @@ export default function ItineraryRibbon({
                       gallery is only the fallback when a day has none */}
                   <SiteMedia
                     src={day.image || images[i % images.length]}
-                    alt=""
+                    alt={day.title ? `Day ${day.day}: ${day.title}` : `Day ${day.day}`}
                     fill
                     sizes="(max-width:640px) 90vw, 32rem"
                     className="object-cover transition-transform duration-700 group-hover:scale-[1.07]"

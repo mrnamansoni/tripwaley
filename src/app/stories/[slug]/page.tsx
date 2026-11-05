@@ -5,9 +5,10 @@ import { notFound, permanentRedirect } from "next/navigation";
 import Navbar from "@/components/sections/Navbar";
 import SiteFooter from "@/components/site/SiteFooter";
 import { getAllPosts, getSettings, shortDate, normalizeMediaUrl, getLivePackages, nightsLabel, fromPrice, inr } from "@/lib/catalog";
-import { isStoryLive, storyKind, readingMinutes, STORY_KINDS, storiesForDestination, resolveStoryAlias } from "@/lib/stories";
-import { destinationsFor } from "@/lib/destinations";
+import { isStoryLive, storyKind, readingMinutes, STORY_KINDS, storyDestinations, relatedStories, resolveStoryAlias } from "@/lib/stories";
+import { destinationsFor, getDestination } from "@/lib/destinations";
 import StoryBody from "@/components/site/StoryBody";
+import { storyPlainText } from "@/lib/storyMarkdown";
 import { canonical } from "@/lib/seo";
 import { articleJsonLd, breadcrumbJsonLd, faqJsonLd, jsonLdScript } from "@/lib/schema";
 
@@ -16,7 +17,7 @@ const liveStory = (slug: string) => getAllPosts().filter(isStoryLive).find((p) =
 
 /** first ~155 characters of real prose, cut on a word boundary */
 function summarise(body: string): string {
-  const flat = (body ?? "").replace(/\s+/g, " ").trim();
+  const flat = storyPlainText(body).replace(/\s+/g, " ").trim();
   if (flat.length <= 155) return flat;
   return flat.slice(0, 152).replace(/\s+\S*$/, "") + "…";
 }
@@ -35,7 +36,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     ...canonical(`/stories/${post.slug}`),
     title: `${post.title} | Tripwaley Stories`,
     description,
-    openGraph: { title: post.title, description, images: [{ url: normalizeMediaUrl(post.cover) }], type: "article" },
+    openGraph: { title: post.title, description, images: [{ url: normalizeMediaUrl(post.cover), alt: post.coverAlt?.trim() || post.title }], type: "article" },
   };
 }
 
@@ -52,27 +53,19 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
   const kind = storyKind(post);
   const summaryLine = post.summary?.trim() || post.excerpt?.trim() || "";
   const faqs = post.faqs ?? [];
-  const destinationSlugs = post.destinations ?? [];
+  /* where the story is about — the admin's picks, or read from its title */
+  const destinationSlugs = storyDestinations(post);
+  const places = destinationSlugs.map(getDestination).filter((d) => d != null);
   /* the live trips that go where this story is about — the whole point of an
      informational page is that it hands the reader a real batch at the end */
   const trips = getLivePackages()
     .filter((p) => destinationsFor(p).some((d) => destinationSlugs.includes(d.slug)))
     .slice(0, 4)
     .map((p) => ({ slug: p.slug, name: p.name, nights: nightsLabel(p), price: fromPrice(p.slug) }));
-  /* related by place, not by date: someone reading about Kedarkantha wants the
-     other Kedarkantha pages, not last week's Goa story. But the six stories
-     live in production today carry no `destinations` at all, so that list is
-     always empty for them — fall back to the most recent other live stories
-     so the internal-link block never disappears from an indexed page. */
-  const related = destinationSlugs.flatMap((d) => storiesForDestination(d, getAllPosts()));
-  const byDestination = [...new Map(related.filter((p) => p.slug !== post.slug).map((p) => [p.slug, p])).values()].slice(0, 3);
-  const more = byDestination.length > 0
-    ? byDestination
-    : getAllPosts()
-        .filter(isStoryLive)
-        .filter((p) => p.slug !== post.slug)
-        .sort((a, b) => b.date.localeCompare(a.date))
-        .slice(0, 3);
+  /* related by place first, then topic, then date — always three cards, so
+     every story passes link equity to its neighbours without anyone curating */
+  const more = relatedStories(post, getAllPosts());
+  const coverAlt = post.coverAlt?.trim() || post.title;
   const faqSchema = faqJsonLd(faqs);
 
   return (
@@ -86,7 +79,7 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
               title: post.title,
               description: post.summary?.trim() || post.excerpt?.trim() || summarise(post.body),
               slug: post.slug,
-              image: post.cover,
+              image: normalizeMediaUrl(post.cover),
               published: post.date,
               author: post.author,
             }),
@@ -101,7 +94,7 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
         {/* cover */}
         {/* min-h keeps a long title clear of the fixed announcement bar + navbar */}
         <section className="relative h-[52vh] min-h-[30rem] w-full overflow-hidden">
-          <SiteMedia src={post.cover} alt={post.title} fill priority sizes="100vw" className="object-cover" />
+          <SiteMedia src={post.cover} alt={coverAlt} fill priority sizes="100vw" className="object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-ink/20" aria-hidden="true" />
           <div className="absolute inset-x-0 bottom-0 mx-auto w-full max-w-3xl px-5 pb-10 sm:px-8">
             <div className="mb-3 flex flex-wrap gap-2">
@@ -126,7 +119,7 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
             </p>
           )}
 
-          <StoryBody body={post.body} />
+          <StoryBody body={post.body} fallbackAlt={post.title} />
 
           {faqs.length > 0 && (
             <section className="mt-12 border-t border-line pt-8">
@@ -165,18 +158,32 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
           </div>
         </article>
 
-        {/* more */}
+        {/* related */}
         {more.length > 0 && (
-          <section className="mx-auto w-full max-w-6xl px-5 pb-20 sm:px-8">
-            <h2 className="mb-6 text-[0.62rem] font-bold uppercase tracking-[0.35em] text-ink/65">keep reading</h2>
+          <section aria-labelledby="related-stories" className="mx-auto w-full max-w-6xl px-5 pb-20 sm:px-8">
+            <div className="mb-6 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+              <h2 id="related-stories" className="font-display text-2xl font-extrabold tracking-tight text-ink">Related stories</h2>
+              {places.length > 0 && (
+                <p className="text-sm text-ink/70">
+                  Everything on{" "}
+                  {places.map((d, i) => (
+                    <span key={d.slug}>
+                      {i > 0 && (i === places.length - 1 ? " and " : ", ")}
+                      <Link href={`/destinations/${d.slug}`} className="font-bold text-brand underline-offset-2 hover:underline">{d.name}</Link>
+                    </span>
+                  ))}
+                </p>
+              )}
+            </div>
             <div className="grid gap-6 sm:grid-cols-3">
               {more.map((p) => (
                 <Link key={p.slug} href={`/stories/${p.slug}`} className="group overflow-hidden rounded-2xl border border-line bg-card shadow-card transition-transform hover:-translate-y-1">
                   <div className="relative aspect-[16/10] overflow-hidden">
-                    <SiteMedia src={p.cover} alt="" fill sizes="30vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                    <SiteMedia src={p.cover} alt={p.coverAlt?.trim() || p.title} fill sizes="(max-width:640px) 92vw, 30vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
                   </div>
                   <div className="p-4">
                     <h3 className="font-display text-base font-extrabold leading-tight text-ink group-hover:text-brand">{p.title}</h3>
+                    <p className="mt-1.5 text-xs font-bold text-ink/60">{readingMinutes(p.body)} min read</p>
                   </div>
                 </Link>
               ))}

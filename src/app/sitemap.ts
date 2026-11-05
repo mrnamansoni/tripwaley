@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { SITE_ORIGIN } from "./robots.txt/route";
-import { DESTINATIONS, destinationsFor } from "@/lib/destinations";
+import { destinationPages } from "@/lib/destinationPages";
 import {
   getLivePackages,
   getPricedCities,
@@ -91,17 +91,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
   for (const k of kindsWithStories(getAllPosts())) {
     entries.push({ url: url(`/stories/topic/${k.kind}`), lastModified: now, changeFrequency: "weekly", priority: 0.5 });
   }
-  /* Destination landing pages, but only where a live trip actually exists —
-     generateStaticParams applies the same rule, so the sitemap can never offer
-     Google a page the route will 404. */
-  const liveNow = getLivePackages();
-  for (const d of DESTINATIONS) {
-    if (!liveNow.some((p) => destinationsFor(p).some((x) => x.slug === d.slug))) continue;
+  /* Destination pages: a landing page where a live trip exists, a guide page
+     where only stories do. lib/destinationPages is the rule generateStaticParams
+     uses too, so the sitemap can never offer Google a page the route will 404. */
+  for (const { dest: d, kind } of destinationPages()) {
     entries.push({
       url: url(`/destinations/${d.slug}`),
       lastModified: now,
       changeFrequency: "weekly",
-      priority: 0.8,
+      priority: kind === "trips" ? 0.8 : 0.6,
     });
   }
 

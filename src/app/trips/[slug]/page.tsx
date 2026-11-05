@@ -21,6 +21,7 @@ import { retiredTripTarget } from "@/lib/retiredUrls";
 import ExploreLinks from "@/components/site/ExploreLinks";
 import BeforeYouGo from "@/components/site/BeforeYouGo";
 import TripFaq from "@/components/site/TripFaq";
+import FareChip from "@/components/site/FareChip";
 import {
   getCities,
   getSettings,
@@ -147,6 +148,14 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
   const barDeps: BarDeparture[] = deps.map((d) => ({ date: d.date, citySlugs: d.cities.map((c) => c.slug) }));
   const barPrices: BarPrices = Object.fromEntries(priced.map(({ city, rule }) => [city.slug, { triple: rule.triple, double: rule.double }]));
   const barCityNames = Object.fromEntries(priced.map(({ city }) => [city.slug, city.name]));
+  /* the per-city fare the category lists show: a honeymoon is sold per couple
+     at the double rate, everything else at its cheapest seat */
+  const isHoneymoon = inCategory(pkg, "honeymoon");
+  const chipPrices: Record<string, number> = {};
+  for (const { city, rule } of priced) {
+    const v = isHoneymoon ? rule.double : minRate(rule.triple, rule.double, rule.quad);
+    if (v != null) chipPrices[city.slug] = v;
+  }
 
   return (
     <CityProvider cities={cities} defaultCity={settings.defaultCity}>
@@ -168,16 +177,12 @@ export default async function PackagePage({ params }: { params: Promise<{ slug: 
             </h1>
             {pkg.destination && <p className="mt-3 max-w-xl text-sm font-semibold text-white/70">{pkg.destination}</p>}
             <div className="mt-6 flex flex-wrap items-center gap-3">
-              {[nightsLabel(pkg), pkg.transport || "AC Volvo / Traveller", `${priced.length} boarding cities`].map((chip) => (
+              {[nightsLabel(pkg), pkg.transport || "AC Volvo / Traveller", priced.length ? `${priced.length} boarding ${priced.length === 1 ? "city" : "cities"}` : ""].filter(Boolean).map((chip) => (
                 <span key={chip} className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[0.66rem] font-bold uppercase tracking-wider text-white backdrop-blur-md">
                   {chip}
                 </span>
               ))}
-              {minPrice != null && (
-                <span className="rounded-full bg-gold px-4 py-2 text-[0.66rem] font-extrabold uppercase tracking-wider text-ink">
-                  from {inr(minPrice)}
-                </span>
-              )}
+              <FareChip prices={chipPrices} cityNames={barCityNames} unit={isHoneymoon ? "per couple" : "per person"} />
             </div>
             {pkg.itineraryPdf && (
               <div className="mt-6">

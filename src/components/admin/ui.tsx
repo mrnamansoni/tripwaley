@@ -41,9 +41,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     return () => clearTimeout(t);
   }, [reload]);
 
-  const flash = (msg: string) => {
+  const flash = (msg: string, ms = 2600) => {
     setToast(msg);
-    setTimeout(() => setToast(""), 2600);
+    setTimeout(() => setToast(""), ms);
   };
 
   const save = useCallback(async (section: string, payload: unknown) => {
@@ -53,7 +53,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       body: JSON.stringify({ section, data: payload }),
     });
     if (res.ok) {
-      flash(`✓ ${section} saved — site updated`);
+      const j = await res.json().catch(() => ({}));
+      if (j.warning) flash(`✓ ${section} saved — ${j.warning}`, 6000);
+      else flash(`✓ ${section} saved — site updated`);
       await reload();
       return true;
     }

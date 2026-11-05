@@ -205,7 +205,7 @@ export function MediaBand({
               i % 2 ? "sm:translate-y-5" : ""
             }`}
           >
-            <SiteMedia src={src} alt="" fill sizes="(max-width:640px) 60vw, 18rem" className="object-cover" />
+            <SiteMedia src={src} alt={`${headline} ${accent}, photo ${i + 1}`.trim()} fill sizes="(max-width:640px) 60vw, 18rem" className="object-cover" />
           </figure>
         ))}
       </div>
@@ -259,7 +259,7 @@ export function ArchGallery({
               >
                 <SiteMedia
                   src={src}
-                  alt=""
+                  alt={`${headline} ${accent}, photo ${i + 1}`.trim()}
                   fill
                   sizes="(max-width:640px) 44vw, (max-width:1024px) 30vw, 22vw"
                   className="object-cover transition-transform duration-[1.4s] group-hover:scale-105"
@@ -340,7 +340,7 @@ export function FeatureBlock({
     <section className={`py-[9vh] ${theme.section}`}>
       <div className="mx-auto grid w-full max-w-6xl items-center gap-8 px-5 sm:px-8 lg:grid-cols-2">
         <div className={`relative aspect-[4/3] overflow-hidden rounded-[2rem] shadow-card-lg ${flip ? "lg:order-2" : ""}`}>
-          <SiteMedia src={media} alt="" fill sizes="(max-width:1024px) 92vw, 44vw" className="object-cover" />
+          <SiteMedia src={media} alt={title} fill sizes="(max-width:1024px) 92vw, 44vw" className="object-cover" />
         </div>
         <div className={flip ? "lg:order-1" : ""}>
           <h2 className={`font-display text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl ${theme.heading}`}>
