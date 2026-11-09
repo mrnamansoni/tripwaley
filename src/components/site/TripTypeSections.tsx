@@ -80,7 +80,7 @@ export function TripTypeHero({
 
   return (
     <section className="relative min-h-[86vh] overflow-hidden">
-      <SiteMedia src={media} alt="" fill priority sizes="100vw" className="object-cover" />
+      <SiteMedia src={media} alt={`${headline} ${accent}`} fill priority sizes="100vw" className="object-cover" />
 
       {/* One scrim element carrying two stacked gradients: a directional one
           that is dark only where the copy sits (so the photo keeps its detail

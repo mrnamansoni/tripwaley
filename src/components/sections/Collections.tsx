@@ -98,7 +98,7 @@ export default function Collections({ items = defaultCollections }: { items?: Co
               >
                 <SiteMedia
                   src={c.image}
-                  alt=""
+                  alt={c.title}
                   fill
                   sizes="(max-width: 640px) 76vw, 24rem"
                   className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.07]"

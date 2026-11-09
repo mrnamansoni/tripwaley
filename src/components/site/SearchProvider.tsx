@@ -136,7 +136,7 @@ function SearchOverlay({ items, onClose }: { items: SearchItem[]; onClose: () =>
               className="flex items-center gap-3.5 rounded-2xl p-2.5 transition-colors hover:bg-white/[0.06]"
             >
               <span className="relative h-14 w-20 shrink-0 overflow-hidden rounded-xl bg-black/40">
-                <SiteMedia src={r.media} alt="" fill sizes="80px" className="object-cover" />
+                <SiteMedia src={r.media} alt={r.name} fill sizes="80px" className="object-cover" />
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-display text-sm font-extrabold text-white">{r.name}</span>

@@ -119,7 +119,7 @@ export default async function CreatorTripPage({
         {/* ---------------- hero: the trip, fronted by the creator ------- */}
         <section className="relative overflow-hidden bg-ink pt-28 sm:pt-32">
           <div aria-hidden="true" className="absolute inset-0 opacity-[0.62]">
-            <SiteMedia src={view.heroMedia} alt="" fill priority sizes="100vw" className="object-cover" />
+            <SiteMedia src={view.heroMedia} alt={`${view.headline} with ${view.creator.firstName}`} fill priority sizes="100vw" className="object-cover" />
           </div>
           <div
             aria-hidden="true"

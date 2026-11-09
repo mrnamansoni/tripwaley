@@ -25,7 +25,7 @@ function Strip({ images, label, reverse, dur }: { images: string[]; label: strin
                   ))}
                 </div>
                 <div className="relative h-32 w-48 overflow-hidden sm:h-40 sm:w-60">
-                  <SiteMedia src={src} alt="" fill sizes="240px" className="object-cover" />
+                  <SiteMedia src={src} alt={copy === 0 ? `Photo from a Tripwaley trip, ${(i % images.length) + 1}` : ""} fill sizes="240px" className="object-cover" />
                   <span className="absolute bottom-1 right-1.5 font-mono text-[0.5rem] font-bold tracking-widest text-gold/80">
                     {label} · {String((i % images.length) + 1).padStart(2, "0")}A
                   </span>
@@ -66,8 +66,9 @@ export default function FilmStrip({ images, code }: { images: string[]; code: st
       <p className="mb-5 text-center font-mono text-[0.62rem] font-bold uppercase tracking-[0.4em] text-white/55">
         contact sheet · roll {code} · shot by previous batches
       </p>
-      {/* pure decoration — every photo is alt="" — so the frame codes on the
-          two looping strips (110+ copies) are hidden from screen readers */}
+      {/* decoration for screen readers: the frame codes on the two looping
+          strips (110+ copies) are hidden. The first copy of each photo keeps
+          alt text for image search; the loop's duplicate stays alt="" */}
       <div className="marquee-paused -rotate-1 space-y-2" aria-hidden="true">
         <div data-fs-strip className="will-change-transform">
           <Strip images={images} label={code} dur={40} />

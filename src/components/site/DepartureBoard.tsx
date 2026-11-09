@@ -107,7 +107,7 @@ export default function DepartureBoard({
             >
               {/* photo edge */}
               <span className="relative w-[34%] shrink-0">
-                <SiteMedia src={r.image} alt="" fill sizes="160px" className="object-cover" />
+                <SiteMedia src={r.image} alt={r.packageName} fill sizes="160px" className="object-cover" />
                 <span className="absolute inset-0 bg-gradient-to-r from-transparent to-[#f7f2e4]" aria-hidden="true" />
                 <span className="absolute left-2.5 top-2.5 rounded bg-ink/60 px-2 py-0.5 font-mono text-[0.5rem] font-bold uppercase tracking-widest text-white backdrop-blur-sm">
                   {r.nightsLabel}

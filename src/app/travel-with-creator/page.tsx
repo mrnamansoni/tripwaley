@@ -61,7 +61,7 @@ export default function TravelWithCreatorPage() {
           <div className="noise absolute inset-0" aria-hidden="true" />
           {/* a wash of the road behind the type */}
           <div aria-hidden="true" className="absolute inset-0 opacity-[0.62]">
-            <SiteMedia src="/images/tw-bus-roof.jpg" alt="" fill priority sizes="100vw" className="object-cover" />
+            <SiteMedia src="/images/tw-bus-roof.jpg" alt="A Tripwaley group on the road" fill priority sizes="100vw" className="object-cover" />
           </div>
           <div
             aria-hidden="true"

@@ -501,7 +501,7 @@ function PromoCard({
     <Link href={href} className="group relative flex min-h-56 flex-col justify-end overflow-hidden rounded-2xl bg-ink p-5 text-cream">
       {media && (
         <>
-          <SiteMedia src={media} alt="" fill sizes="320px" className="object-cover opacity-70 transition-transform duration-500 group-hover:scale-105" />
+          <SiteMedia src={media} alt={title} fill sizes="320px" className="object-cover opacity-70 transition-transform duration-500 group-hover:scale-105" />
           <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-ink via-ink/50 to-transparent" />
         </>
       )}

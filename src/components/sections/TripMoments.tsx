@@ -131,7 +131,7 @@ export default function TripMoments({ moments = defaultMoments }: { moments?: Mo
               >
                 <SiteMedia
                   src={m.image}
-                  alt=""
+                  alt={m.title}
                   fill
                   sizes="(max-width: 768px) 100vw, 40vw"
                   className={`object-cover transition-all duration-700 ${

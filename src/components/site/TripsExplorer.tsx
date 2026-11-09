@@ -120,7 +120,7 @@ export default function TripsExplorer({ packages, departures, showRack = true, s
                 className="flex w-[19rem] shrink-0 snap-start overflow-hidden rounded-2xl bg-[#f4efe4] shadow-card-lg transition-transform hover:-translate-y-1"
               >
                 <div className="relative w-24 shrink-0">
-                  <SiteMedia src={s.image} alt="" fill sizes="100px" className="object-cover" />
+                  <SiteMedia src={s.image} alt={s.packageName} fill sizes="100px" className="object-cover" />
                 </div>
                 <div className="relative flex flex-col items-center justify-around border-l-2 border-dashed border-ink/20 py-2" aria-hidden="true">
                   {Array.from({ length: 5 }).map((_, i) => (

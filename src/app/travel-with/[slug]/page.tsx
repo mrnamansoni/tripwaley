@@ -83,7 +83,7 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
         {/* ---------------- the poster ---------------- */}
         <section className="relative overflow-hidden bg-ink pt-28 sm:pt-32">
           <div aria-hidden="true" className="absolute inset-0 opacity-[0.62]">
-            <SiteMedia src={creator.cover} alt="" fill priority sizes="100vw" className="object-cover" />
+            <SiteMedia src={creator.cover} alt={`${creator.name} on a Tripwaley trip`} fill priority sizes="100vw" className="object-cover" />
           </div>
           <div
             aria-hidden="true"

@@ -147,7 +147,7 @@ export default function OpeningShot({
         <div className="absolute inset-0 z-10">
           <SiteMedia
             src={heroBg}
-            alt=""
+            alt="A Tripwaley group trip"
             fill
             priority
             sizes="100vw"
@@ -224,7 +224,7 @@ export default function OpeningShot({
           <div className="relative aspect-video w-full max-w-6xl overflow-hidden bg-black">
             {film.map((f, i) => (
               <div key={`${f.src}-${i}`} data-os-frame className="absolute inset-0 opacity-0 will-change-transform">
-                <SiteMedia src={f.src} alt="" fill sizes="90vw" quality={60} className="object-cover" />
+                <SiteMedia src={f.src} alt={`Photo from a Tripwaley trip, ${i + 1}`} fill sizes="90vw" quality={60} className="object-cover" />
               </div>
             ))}
             <div className="noise absolute inset-0" aria-hidden="true" />

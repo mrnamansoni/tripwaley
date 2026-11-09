@@ -230,7 +230,7 @@ export function CreatorGallery({ creator }: { creator: Creator }) {
             >
               <SiteMedia
                 src={src}
-                alt=""
+                alt={`${creator.name} on the road, photo ${i + 1}`}
                 fill
                 sizes="(max-width:640px) 46vw, 24vw"
                 className="object-cover transition-transform duration-[1.2s] hover:scale-105"

@@ -140,7 +140,7 @@ function LeadPopup({ popup }: { popup: PopupCfg }) {
         <button type="button" aria-label="Close" onClick={close} className="absolute right-2 top-2 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-ink/10 text-ink/65 hover:bg-ink/20 hover:text-ink">✕</button>
 
         <div className="relative hidden min-h-[18rem] sm:block">
-          <SiteMedia src={popup.image} alt="" fill sizes="360px" className="object-cover" />
+          <SiteMedia src={popup.image} alt={popup.title} fill sizes="360px" className="object-cover" />
           <span className="absolute inset-0 bg-gradient-to-t from-ink/40 to-transparent" aria-hidden="true" />
         </div>
 
